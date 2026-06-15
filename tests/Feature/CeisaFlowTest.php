@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Document;
 use App\Models\User;
 use App\Services\CeisaService;
+use Database\Seeders\CeisaReferenceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
@@ -134,6 +135,26 @@ class CeisaFlowTest extends TestCase
         $this->actingAs($this->authedUser())
             ->get('/dokumen/buat')
             ->assertRedirect(route('settings.ceisa.edit'));
+    }
+
+    public function test_create_form_loads_reference_data_from_db(): void
+    {
+        $this->seed(CeisaReferenceSeeder::class);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        // Wizard memuat referensi server (negara, kantor pabean, pelabuhan) dari DB.
+        $this->actingAs($user)
+            ->get('/dokumen/buat')
+            ->assertOk()
+            ->assertSee('IN - India')
+            ->assertSee('011200 - KPPBC TMP C Kuala Tanjung')
+            ->assertSee('IDKTJ - Kuala Tanjung, Sumut');
     }
 
     public function test_submit_document_sends_to_ceisa_and_persists(): void

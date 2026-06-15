@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\CeisaException;
 use App\Http\Requests\StoreDocumentRequest;
+use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Services\CeisaService;
 use Illuminate\Http\RedirectResponse;
@@ -25,6 +26,7 @@ class DocumentController extends Controller
 
         return view('documents.create', [
             'docTypes' => config('ceisa.doc_types'),
+            'references' => CeisaReference::forWizard(),
         ]);
     }
 
