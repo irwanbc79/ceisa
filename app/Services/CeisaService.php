@@ -189,6 +189,35 @@ class CeisaService
     }
 
     /**
+     * Query status dokumen dari CEISA berdasarkan nomor aju.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws CeisaException
+     */
+    public function queryDocumentStatus(string $nomorAju): array
+    {
+        $token = $this->refreshTokenIfExpired();
+        $endpoint = config('ceisa.endpoints.status');
+
+        try {
+            $response = $this->baseRequest()
+                ->withToken($token)
+                ->get($endpoint, ['nomor_aju' => $nomorAju]);
+        } catch (\Throwable $e) {
+            throw new CeisaException(
+                'Gagal menghubungi CEISA saat query status: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+
+        $data = $this->decode($response);
+        $this->guardAgainstErrorCode($data, $response);
+
+        return $data;
+    }
+
+    /**
      * Request dasar dengan base URL, timeout, dan header umum.
      */
     protected function baseRequest(): PendingRequest

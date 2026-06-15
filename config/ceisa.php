@@ -43,13 +43,14 @@ return [
 
     /*
     | Tipe dokumen yang didukung. Kode mengikuti jenis dokumen Bea Cukai.
-    | MVP fokus ke BC 3.0 (PEB Ekspor).
-    */
+    | MVP fokus ke dokumen kepabeanan impor, ekspor, TPB, dan Rush Handling.
+    |*/
     'doc_types' => [
-        'BC20' => 'BC 2.0 — PIB (Impor)',
-        'BC23' => 'BC 2.3 — Pemasukan ke TPB',
-        'BC25' => 'BC 2.5 — Pengeluaran dari TPB',
-        'BC30' => 'BC 3.0 — PEB (Ekspor)',
+        'BC20' => 'BC 2.0 — Pemberitahuan Impor Barang',
+        'BC24' => 'BC 2.4 — Impor Barang Ditimbun di TPB',
+        'TPB'  => 'Portal TPB (BC 2.3, 2.5, 2.7, 4.0)',
+        'BC30' => 'BC 3.0 — Pemberitahuan Ekspor Barang (PEB)',
+        'RUSH' => 'Pengajuan Rush Handling',
     ],
 
     /*

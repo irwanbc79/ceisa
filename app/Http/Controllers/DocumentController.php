@@ -44,6 +44,12 @@ class DocumentController extends Controller
             'status' => Document::STATUS_DRAFT,
         ]);
 
+        if ($request->input('submit_action') === 'draft') {
+            return redirect()
+                ->route('documents.show', $document)
+                ->with('success', 'Dokumen berhasil disimpan sebagai draft.');
+        }
+
         try {
             CeisaService::forCredential($credential)->submit($document);
         } catch (CeisaException $e) {
@@ -90,6 +96,50 @@ class DocumentController extends Controller
         }
 
         return back()->with('success', 'Dokumen berhasil dikirim ulang ke CEISA.');
+    }
+
+    /**
+     * Halaman pencarian / lookup dokumen historis dari CEISA berdasarkan nomor aju.
+     */
+    public function lookup(Request $request): View|RedirectResponse
+    {
+        if (! $request->user()->ceisaCredential) {
+            return redirect()
+                ->route('settings.ceisa.edit')
+                ->with('error', 'Lengkapi kredensial CEISA terlebih dahulu.');
+        }
+
+        return view('documents.lookup');
+    }
+
+    /**
+     * Query status dokumen ke CEISA berdasarkan nomor aju yang diinput user.
+     */
+    public function lookupSearch(Request $request): View
+    {
+        $request->validate([
+            'nomor_aju' => ['required', 'string', 'max:100'],
+        ]);
+
+        $user = $request->user();
+        $credential = $user->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        $nomorAju = trim($request->input('nomor_aju'));
+        $result = null;
+        $error = null;
+        $localDoc = Document::where('nomor_aju', $nomorAju)->where('user_id', $user->id)->first();
+
+        try {
+            $service = CeisaService::forCredential($credential);
+            $result = $service->queryDocumentStatus($nomorAju);
+        } catch (CeisaException $e) {
+            $error = $e->getMessage();
+        } catch (\Throwable $e) {
+            $error = 'Gagal menghubungi server CEISA: '.$e->getMessage();
+        }
+
+        return view('documents.lookup', compact('result', 'error', 'nomorAju', 'localDoc'));
     }
 
     /**

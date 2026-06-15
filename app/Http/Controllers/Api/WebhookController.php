@@ -65,10 +65,17 @@ class WebhookController extends Controller
     {
         $nomorDaftar = data_get($payload, 'nomor_daftar') ?? data_get($payload, 'data.nomor_daftar');
 
+        // Tanpa identifier apa pun, jangan sampai mencocokkan dokumen acak.
+        if (empty($nomorAju) && empty($nomorDaftar)) {
+            return null;
+        }
+
         return Document::query()
-            ->when($nomorAju, fn ($q) => $q->orWhere('nomor_aju', $nomorAju))
-            ->when($nomorDaftar, fn ($q) => $q->orWhere('nomor_daftar', $nomorDaftar))
-            ->latest()
+            ->where(function ($q) use ($nomorAju, $nomorDaftar) {
+                $q->when($nomorAju, fn ($qq) => $qq->orWhere('nomor_aju', $nomorAju))
+                    ->when($nomorDaftar, fn ($qq) => $qq->orWhere('nomor_daftar', $nomorDaftar));
+            })
+            ->latest('id')
             ->first();
     }
 

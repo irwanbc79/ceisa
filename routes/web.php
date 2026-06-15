@@ -16,6 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dokumen CEISA
     Route::get('/dokumen/buat', [DocumentController::class, 'create'])->name('documents.create');
     Route::post('/dokumen/submit', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('/dokumen/lookup', [DocumentController::class, 'lookup'])->name('documents.lookup');
+    Route::post('/dokumen/lookup', [DocumentController::class, 'lookupSearch'])->name('documents.lookup.search');
     Route::get('/dokumen/{document}', [DocumentController::class, 'show'])->name('documents.show');
     Route::post('/dokumen/{document}/submit', [DocumentController::class, 'submit'])->name('documents.submit');
 
