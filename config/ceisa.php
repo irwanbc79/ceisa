@@ -48,6 +48,12 @@ return [
     */
     'token_refresh_margin' => env('CEISA_TOKEN_REFRESH_MARGIN', 60),
 
+    /*
+    | Umur token fallback (detik) bila response login tak menyertakan expires_in.
+    | Access Token CEISA 4.0 berumur ~5 menit.
+    */
+    'token_ttl_fallback' => env('CEISA_TOKEN_TTL_FALLBACK', 300),
+
     'timeout' => env('CEISA_HTTP_TIMEOUT', 30),
 
     /*

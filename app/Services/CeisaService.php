@@ -85,11 +85,12 @@ class CeisaService
             );
         }
 
-        // expires_in dalam detik; default 1 jam bila tidak disediakan.
+        // expires_in dalam detik. Access Token CEISA 4.0 berumur ~5 menit;
+        // pakai 300 dtk sebagai fallback bila server tak menyertakan expires_in.
         $expiresIn = (int) ($data['expires_in']
             ?? data_get($data, 'item.expires_in')
             ?? data_get($data, 'data.expires_in')
-            ?? 3600);
+            ?? config('ceisa.token_ttl_fallback', 300));
 
         $this->credential->forceFill([
             'token' => $token,
