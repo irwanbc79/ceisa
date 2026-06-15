@@ -15,9 +15,13 @@ class DocumentController extends Controller
     /**
      * Form input dokumen BC 3.0 (PEB Ekspor).
      */
-    public function create(Request $request): View
+    public function create(Request $request): View|RedirectResponse
     {
-        abort_unless($request->user()->ceisaCredential, 403, 'Lengkapi kredensial CEISA terlebih dahulu di Pengaturan.');
+        if (! $request->user()->ceisaCredential) {
+            return redirect()
+                ->route('settings.ceisa.edit')
+                ->with('error', 'Lengkapi kredensial CEISA (App ID & API Key) terlebih dahulu sebelum membuat dokumen.');
+        }
 
         return view('documents.create', [
             'docTypes' => config('ceisa.doc_types'),
