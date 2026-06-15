@@ -30,6 +30,15 @@
                 </div>
             @endif
 
+            {{-- Client-side validation banner (Alpine) --}}
+            <div x-show="formError" x-transition style="display:none"
+                 class="mb-6 rounded-xl bg-rose-50 border border-rose-200 p-4 shadow-sm text-sm text-rose-800 flex items-start gap-3">
+                <svg class="h-5 w-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                </svg>
+                <div><span class="font-semibold">Belum lengkap:</span> <span x-text="formError"></span></div>
+            </div>
+
             {{-- Stepper Progress Bar --}}
             <div class="mb-8 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
                 <div class="relative flex items-center justify-between">
@@ -68,7 +77,7 @@
                 
                 {{-- Form Section --}}
                 <div class="lg:col-span-2 space-y-6">
-                    <form method="POST" action="{{ route('documents.store') }}" id="ceisaDocForm">
+                    <form method="POST" action="{{ route('documents.store') }}" id="ceisaDocForm" novalidate>
                         @csrf
                         <input type="hidden" name="doc_type" :value="doc_type" />
                         <input type="hidden" name="submit_action" id="submit_action" value="submit" />
@@ -604,12 +613,19 @@
                                 <button type="button" @click="openDraftPreview()" x-show="step === steps.length"
                                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-100">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                                    Preview Draft
+                                    Preview
                                 </button>
-                                
+
+                                <button type="button" @click="submitForm('draft')" x-show="step === steps.length"
+                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all shadow-sm">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
+                                    Simpan Draft
+                                </button>
+
                                 <button type="button" @click="submitForm('submit')" x-show="step === steps.length"
-                                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
-                                    Simpan &amp; Kirim ke CEISA
+                                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>
+                                    Kirim ke CEISA
                                 </button>
                             </div>
                         </div>
@@ -854,6 +870,7 @@
                 doc_type: 'BC30',
                 showJson: false,
                 showDraftModal: false,
+                formError: '',
                 steps: [
                     { title: 'Portal Layanan' },
                     { title: 'Data Entitas' },
@@ -1281,27 +1298,60 @@
                     }
                 },
 
-                // Open preview modal for draft
+                // Field nilai transaksi per jenis dokumen.
+                valueField() {
+                    if (this.doc_type === 'BC30') return 'nilai_fob';
+                    if (this.doc_type === 'BC20' || this.doc_type === 'BC24') return 'nilai_cif';
+                    return 'nilai_barang';
+                },
+
+                // Validasi ringan sisi klien. Mengembalikan {step, message} bila ada
+                // yang belum lengkap, atau null bila valid. Hanya memeriksa field
+                // yang relevan dengan doc_type (field tersembunyi diabaikan).
+                firstInvalidStep() {
+                    if (!this.isStepValid(2)) {
+                        return { step: 2, message: 'Lengkapi data identitas entitas (Tahap 2) terlebih dahulu.' };
+                    }
+                    if (!this.isStepValid(3)) {
+                        return { step: 3, message: 'Lengkapi data pengangkutan & nilai transaksi (Tahap 3).' };
+                    }
+                    if (!this.formData.barang.length) {
+                        return { step: 4, message: 'Tambahkan minimal satu pos barang (Tahap 4).' };
+                    }
+                    const vf = this.valueField();
+                    for (let i = 0; i < this.formData.barang.length; i++) {
+                        const b = this.formData.barang[i];
+                        if (!b.hs_code || !b.uraian || !b.jumlah_satuan || !b.kode_satuan || !b.netto || !b[vf]) {
+                            return { step: 4, message: `Lengkapi seluruh isian pada Pos Barang #${i + 1} (Tahap 4).` };
+                        }
+                    }
+                    return null;
+                },
+
+                // Buka modal preview (read-only) — selalu merespons.
                 openDraftPreview() {
-                    const form = document.getElementById('ceisaDocForm');
-                    if (form.reportValidity()) {
-                        this.showDraftModal = true;
-                    }
+                    this.formError = '';
+                    this.showDraftModal = true;
                 },
 
-                // Actually save the draft after preview confirmation
+                // Simpan sebagai draft (dari dalam modal preview).
                 confirmSaveDraft() {
-                    document.getElementById('submit_action').value = 'draft';
-                    document.getElementById('ceisaDocForm').submit();
+                    this.submitForm('draft');
                 },
 
-                // Submit Form programmatically
+                // Submit form: validasi relevan dulu, lalu kirim ke server.
                 submitForm(action = 'submit') {
-                    const form = document.getElementById('ceisaDocForm');
-                    if (form.reportValidity()) {
-                        document.getElementById('submit_action').value = action;
-                        form.submit();
+                    const invalid = this.firstInvalidStep();
+                    if (invalid) {
+                        this.showDraftModal = false;
+                        this.step = invalid.step;
+                        this.formError = invalid.message;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
                     }
+                    this.formError = '';
+                    document.getElementById('submit_action').value = action;
+                    document.getElementById('ceisaDocForm').submit();
                 },
 
                 // Get party name for display in modal
