@@ -13,14 +13,18 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai.
+ * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai (CEISA 4.0).
+ *
+ * Auth resmi (openapi.beacukai.go.id):
+ *   - SEMUA request membawa header `beacukai-api-key: {api_key}`.
+ *   - Login: POST {host}/v1/openapi-auth/user/login dengan body username+password
+ *     -> mengembalikan access_token (Bearer).
+ *   - Layanan Pabean (kirim dokumen, dll) di {host}/v2/openapi memakai
+ *     Authorization: Bearer {access_token} + header beacukai-api-key.
  *
  * Alur:
- *   1. getToken()  -> GET ke endpoint auth dengan Basic Auth + app_id, simpan token.
- *   2. submitDocument() -> POST dokumen dengan Bearer token (auto-refresh bila perlu).
- *
- * Catatan: endpoint & bentuk payload mengikuti config/ceisa.php dan WAJIB
- * diselaraskan dengan dokumentasi H2H resmi Bea Cukai saat onboarding.
+ *   1. getToken()       -> login, simpan access_token + masa berlaku.
+ *   2. submitDocument() -> POST dokumen (auto-refresh token bila perlu).
  */
 class CeisaService
 {
@@ -46,14 +50,14 @@ class CeisaService
         $endpoint = config('ceisa.endpoints.token');
 
         try {
-            $response = $this->baseRequest()
-                ->withBasicAuth($this->credential->app_id, $this->credential->api_key)
-                ->get($endpoint, [
-                    'app_id' => $this->credential->app_id,
-                ]);
+            // Header beacukai-api-key sudah disisipkan di baseRequest().
+            $response = $this->baseRequest()->post($endpoint, [
+                'username' => $this->credential->username,
+                'password' => $this->credential->password,
+            ]);
         } catch (Throwable $e) {
             throw new CeisaException(
-                'Gagal terhubung ke server CEISA saat mengambil token: '.$e->getMessage(),
+                'Gagal terhubung ke server CEISA saat login: '.$e->getMessage(),
                 previous: $e,
             );
         }
@@ -63,24 +67,29 @@ class CeisaService
 
         if (! $response->successful()) {
             throw new CeisaException(
-                'Gagal mengambil token CEISA (HTTP '.$response->status().').',
+                'Gagal login ke CEISA (HTTP '.$response->status().').',
                 context: $data,
             );
         }
 
+        // CEISA dapat membungkus token di beberapa lokasi tergantung versi.
         $token = $data['access_token']
             ?? $data['token']
+            ?? data_get($data, 'item.access_token')
             ?? data_get($data, 'data.access_token');
 
         if (empty($token)) {
             throw new CeisaException(
-                'Response CEISA tidak mengandung access_token.',
+                'Response login CEISA tidak mengandung access_token.',
                 context: $data,
             );
         }
 
         // expires_in dalam detik; default 1 jam bila tidak disediakan.
-        $expiresIn = (int) ($data['expires_in'] ?? data_get($data, 'data.expires_in') ?? 3600);
+        $expiresIn = (int) ($data['expires_in']
+            ?? data_get($data, 'item.expires_in')
+            ?? data_get($data, 'data.expires_in')
+            ?? 3600);
 
         $this->credential->forceFill([
             'token' => $token,
@@ -118,10 +127,14 @@ class CeisaService
         $endpoint = config('ceisa.endpoints.submit');
 
         $body = [
-            'app_id' => $this->credential->app_id,
             'doc_type' => $type,
             'data' => $payload,
         ];
+
+        // app_id opsional; sebagian layanan masih memintanya pada body.
+        if (! empty($this->credential->app_id)) {
+            $body['app_id'] = $this->credential->app_id;
+        }
 
         try {
             $response = $this->baseRequest()
@@ -204,7 +217,7 @@ class CeisaService
             $response = $this->baseRequest()
                 ->withToken($token)
                 ->get($endpoint, ['nomor_aju' => $nomorAju]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal menghubungi CEISA saat query status: '.$e->getMessage(),
                 previous: $e,
@@ -224,6 +237,10 @@ class CeisaService
     {
         return Http::baseUrl(config('ceisa.base_url'))
             ->timeout((int) config('ceisa.timeout', 30))
+            ->withHeaders([
+                // Wajib pada SEMUA request CEISA 4.0 (auth maupun layanan).
+                config('ceisa.api_key_header', 'beacukai-api-key') => (string) $this->credential->api_key,
+            ])
             ->acceptJson()
             ->asJson();
     }

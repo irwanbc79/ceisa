@@ -8,12 +8,19 @@ return [
     |--------------------------------------------------------------------------
     |
     | Konfigurasi integrasi dengan CEISA 4.0 Bea Cukai Indonesia.
-    | Kredensial per-user (app_id, api_key) disimpan terenkripsi di tabel
-    | ceisa_credentials. Nilai di sini adalah fallback/default level aplikasi.
+    | Kredensial per-user (username, password, api_key) disimpan terenkripsi di
+    | tabel ceisa_credentials. Nilai di sini adalah fallback/default level aplikasi.
     |
+    | Host gateway resmi (lihat openapi.beacukai.go.id). Auth ada di /v1/openapi-auth,
+    | layanan Pabean (kirim dokumen) di /v2/openapi.
     */
-
     'base_url' => rtrim(env('CEISA_BASE_URL', 'https://apis-gw.beacukai.go.id'), '/'),
+
+    /*
+    | Header API Key wajib pada SEMUA request (auth maupun layanan): beacukai-api-key.
+    | Nilai key disimpan per-user terenkripsi di kolom api_key tabel ceisa_credentials.
+    */
+    'api_key_header' => env('CEISA_API_KEY_HEADER', 'beacukai-api-key'),
 
     'app_id' => env('CEISA_APP_ID'),
 
@@ -24,14 +31,16 @@ return [
     'webhook_secret' => env('CEISA_WEBHOOK_SECRET'),
 
     /*
-    | Endpoint relatif terhadap base_url. Sesuaikan dengan dokumentasi H2H
-    | resmi yang diberikan Bea Cukai saat onboarding (nilai di bawah adalah
-    | pola umum CEISA 4.0 dan WAJIB diverifikasi terhadap dokumen API resmi).
+    | Endpoint relatif terhadap base_url (host gateway).
+    | - token : login H2H (POST username+password, header beacukai-api-key) -> access_token.
+    |   Terverifikasi dari dokumentasi resmi: {host}/v1/openapi-auth/user/login.
+    | - submit/status : layanan Pabean di /v2/openapi (46 resource). Path resource
+    |   spesifik mengikuti Swagger JSON openapi (Pabean) — override via .env bila berbeda.
     */
     'endpoints' => [
-        'token'  => env('CEISA_TOKEN_ENDPOINT', '/openapi/auth'),
-        'submit' => env('CEISA_SUBMIT_ENDPOINT', '/openapi/document'),
-        'status' => env('CEISA_STATUS_ENDPOINT', '/openapi/document/status'),
+        'token' => env('CEISA_TOKEN_ENDPOINT', '/v1/openapi-auth/user/login'),
+        'submit' => env('CEISA_SUBMIT_ENDPOINT', '/v2/openapi/document'),
+        'status' => env('CEISA_STATUS_ENDPOINT', '/v2/openapi/document/status'),
     ],
 
     /*
@@ -48,18 +57,19 @@ return [
     'doc_types' => [
         'BC20' => 'BC 2.0 — Pemberitahuan Impor Barang',
         'BC24' => 'BC 2.4 — Impor Barang Ditimbun di TPB',
-        'TPB'  => 'Portal TPB (BC 2.3, 2.5, 2.7, 4.0)',
+        'TPB' => 'Portal TPB (BC 2.3, 2.5, 2.7, 4.0)',
         'BC30' => 'BC 3.0 — Pemberitahuan Ekspor Barang (PEB)',
         'RUSH' => 'Pengajuan Rush Handling',
     ],
 
     /*
-    | Pemetaan error code CEISA -> pesan yang dapat dibaca operator.
+    | Error Response Code resmi CEISA 4.0 (openapi.beacukai.go.id/portal/pages/error response code).
+    | Ini kode VALIDASI payload JSON, bukan error auth.
     */
     'error_codes' => [
-        '1008' => 'Token tidak valid atau sudah kadaluarsa.',
-        '1023' => 'App ID / API Key tidak dikenali atau tidak memiliki akses.',
-        '1028' => 'Format payload dokumen tidak valid.',
-        '1042' => 'Dokumen ditolak validasi CEISA (data tidak lengkap/duplikat).',
+        '1008' => 'Nilai isian harus berasal dari salah satu pilihan (enumeration di JSON Schema).',
+        '1023' => 'Nilai isian tidak sesuai pola/pattern (perhatikan karakter & jumlah karakter).',
+        '1028' => 'Elemen mandatory wajib ada pada data JSON yang dikirim.',
+        '1042' => 'Nilai isian harus sama dengan CONSTANT yang ditetapkan sesuai urutannya.',
     ],
 ];

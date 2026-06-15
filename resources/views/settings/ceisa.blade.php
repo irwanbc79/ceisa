@@ -10,27 +10,42 @@
             <x-flash />
 
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-medium text-gray-900">Kredensial Host-to-Host</h3>
+                <h3 class="text-lg font-medium text-gray-900">Kredensial Host-to-Host (CEISA 4.0)</h3>
                 <p class="mt-1 text-sm text-gray-500">
-                    Masukkan <strong>App ID</strong> dan <strong>API Key</strong> yang diberikan Bea Cukai saat onboarding H2H.
-                    API Key disimpan terenkripsi.
+                    Login H2H memakai <strong>Username</strong> + <strong>Password</strong> akun Portal CEISA
+                    (portal.beacukai.go.id) beserta <strong>Beacukai API Key</strong> (header <code class="text-xs">beacukai-api-key</code>).
+                    Semua kredensial disimpan terenkripsi.
                 </p>
 
                 <form method="POST" action="{{ route('settings.ceisa.update') }}" class="mt-6 space-y-4">
                     @csrf
 
                     <div>
-                        <x-input-label for="app_id" value="App ID" />
-                        <x-text-input id="app_id" name="app_id" type="text" class="mt-1 block w-full"
-                                      :value="old('app_id', $credential?->app_id)" required autofocus />
-                        <x-input-error :messages="$errors->get('app_id')" class="mt-2" />
+                        <x-input-label for="username" value="Username" />
+                        <x-text-input id="username" name="username" type="text" class="mt-1 block w-full"
+                                      :value="old('username', $credential?->username)" required autofocus autocomplete="off" />
+                        <x-input-error :messages="$errors->get('username')" class="mt-2" />
                     </div>
 
                     <div>
-                        <x-input-label for="api_key" value="API Key" />
-                        <x-text-input id="api_key" name="api_key" type="password" class="mt-1 block w-full"
+                        <x-input-label for="password" value="Password" />
+                        <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password"
+                                      placeholder="{{ $credential ? '•••••••• (biarkan kosong untuk mempertahankan)' : '' }}" />
+                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="api_key" value="Beacukai API Key" />
+                        <x-text-input id="api_key" name="api_key" type="password" class="mt-1 block w-full" autocomplete="off"
                                       placeholder="{{ $credential ? '•••••••• (biarkan kosong untuk mempertahankan)' : '' }}" />
                         <x-input-error :messages="$errors->get('api_key')" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="app_id" value="App ID (opsional)" />
+                        <x-text-input id="app_id" name="app_id" type="text" class="mt-1 block w-full"
+                                      :value="old('app_id', $credential?->app_id)" />
+                        <x-input-error :messages="$errors->get('app_id')" class="mt-2" />
                     </div>
 
                     @if ($credential)

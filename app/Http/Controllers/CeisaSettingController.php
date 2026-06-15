@@ -26,22 +26,45 @@ class CeisaSettingController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'app_id' => ['required', 'string', 'max:255'],
-            // api_key opsional saat update (kosong = pertahankan yang lama)
+            'username' => ['required', 'string', 'max:255'],
+            // password & api_key opsional saat update (kosong = pertahankan yang lama)
+            'password' => ['nullable', 'string', 'max:255'],
             'api_key' => ['nullable', 'string', 'max:1000'],
+            'app_id' => ['nullable', 'string', 'max:255'],
         ]);
 
         $credential = $request->user()->ceisaCredential;
 
-        if (! $credential && empty($data['api_key'])) {
-            return back()->withErrors(['api_key' => 'API Key wajib diisi saat pertama kali menyimpan kredensial.']);
+        // Saat pertama kali menyimpan, password & beacukai-api-key wajib diisi.
+        if (! $credential) {
+            $missing = [];
+            if (empty($data['password'])) {
+                $missing['password'] = 'Password wajib diisi saat pertama kali menyimpan kredensial.';
+            }
+            if (empty($data['api_key'])) {
+                $missing['api_key'] = 'Beacukai API Key wajib diisi saat pertama kali menyimpan kredensial.';
+            }
+            if ($missing) {
+                return back()->withErrors($missing);
+            }
         }
 
-        $attributes = ['app_id' => $data['app_id']];
+        $attributes = [
+            'username' => $data['username'],
+            'app_id' => $data['app_id'] ?? null,
+        ];
 
-        if (! empty($data['api_key'])) {
-            $attributes['api_key'] = $data['api_key'];
-            // Kredensial berubah -> token lama tidak valid lagi.
+        $secretChanged = false;
+
+        foreach (['password', 'api_key'] as $secret) {
+            if (! empty($data[$secret])) {
+                $attributes[$secret] = $data[$secret];
+                $secretChanged = true;
+            }
+        }
+
+        // Kredensial rahasia berubah -> token lama tidak valid lagi.
+        if ($secretChanged) {
             $attributes['token'] = null;
             $attributes['token_expires_at'] = null;
         }

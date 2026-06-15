@@ -9,6 +9,8 @@ class CeisaCredential extends Model
 {
     protected $fillable = [
         'user_id',
+        'username',
+        'password',
         'app_id',
         'api_key',
         'token',
@@ -16,6 +18,8 @@ class CeisaCredential extends Model
     ];
 
     protected $hidden = [
+        'username',
+        'password',
         'api_key',
         'token',
     ];
@@ -23,7 +27,9 @@ class CeisaCredential extends Model
     protected function casts(): array
     {
         return [
-            // api_key & token disimpan terenkripsi di DB (Laravel encrypted cast)
+            // Kredensial sensitif disimpan terenkripsi di DB (Laravel encrypted cast)
+            'username' => 'encrypted',
+            'password' => 'encrypted',
             'api_key' => 'encrypted',
             'token' => 'encrypted',
             'token_expires_at' => 'datetime',

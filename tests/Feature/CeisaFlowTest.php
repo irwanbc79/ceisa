@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Document;
 use App\Models\User;
+use App\Services\CeisaService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -81,8 +83,10 @@ class CeisaFlowTest extends TestCase
 
         $this->actingAs($user)
             ->post('/settings/ceisa', [
-                'app_id' => 'APP123',
+                'username' => 'm2b_user',
+                'password' => 'm2b_pass',
                 'api_key' => 'secret-key',
+                'app_id' => 'APP123',
             ])
             ->assertRedirect();
 
@@ -91,10 +95,38 @@ class CeisaFlowTest extends TestCase
             'app_id' => 'APP123',
         ]);
 
-        // api_key tersimpan terenkripsi -> tidak boleh plaintext di DB
+        // Kredensial sensitif tersimpan terenkripsi -> tidak boleh plaintext di DB
         $credential = $user->fresh()->ceisaCredential;
         $this->assertNotSame('secret-key', $credential->getRawOriginal('api_key'));
         $this->assertSame('secret-key', $credential->api_key);
+        $this->assertNotSame('m2b_pass', $credential->getRawOriginal('password'));
+        $this->assertSame('m2b_user', $credential->username);
+        $this->assertSame('m2b_pass', $credential->password);
+    }
+
+    public function test_login_uses_official_h2h_endpoint_and_headers(): void
+    {
+        Http::fake([
+            '*openapi-auth*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+        ]);
+
+        $token = CeisaService::forCredential($credential)->getToken();
+        $this->assertSame('TOK', $token);
+
+        Http::assertSent(function (Request $request) {
+            return str_contains($request->url(), '/v1/openapi-auth/user/login')
+                && $request->method() === 'POST'
+                && $request['username'] === 'm2b_user'
+                && $request['password'] === 'm2b_pass'
+                && $request->hasHeader('beacukai-api-key', 'KEY-123');
+        });
     }
 
     public function test_create_form_requires_credential(): void
@@ -107,11 +139,11 @@ class CeisaFlowTest extends TestCase
     public function test_submit_document_sends_to_ceisa_and_persists(): void
     {
         Http::fake([
-            '*/openapi/auth*' => Http::response([
+            '*openapi-auth*' => Http::response([
                 'access_token' => 'TOKEN-XYZ',
                 'expires_in' => 3600,
             ], 200),
-            '*/openapi/document*' => Http::response([
+            '*/v2/openapi/document*' => Http::response([
                 'error_code' => 0,
                 'nomor_aju' => '000001-PEB',
                 'status' => 'DITERIMA',
@@ -120,6 +152,8 @@ class CeisaFlowTest extends TestCase
 
         $user = $this->authedUser();
         $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
             'app_id' => 'APP123',
             'api_key' => 'secret-key',
         ]);
@@ -188,11 +222,11 @@ class CeisaFlowTest extends TestCase
     public function test_submit_bc20_document_sends_to_ceisa_and_persists(): void
     {
         Http::fake([
-            '*/openapi/auth*' => Http::response([
+            '*openapi-auth*' => Http::response([
                 'access_token' => 'TOKEN-XYZ',
                 'expires_in' => 3600,
             ], 200),
-            '*/openapi/document*' => Http::response([
+            '*/v2/openapi/document*' => Http::response([
                 'error_code' => 0,
                 'nomor_aju' => '000002-PIB',
                 'status' => 'DITERIMA',
@@ -201,6 +235,8 @@ class CeisaFlowTest extends TestCase
 
         $user = $this->authedUser();
         $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
             'app_id' => 'APP123',
             'api_key' => 'secret-key',
         ]);
@@ -243,6 +279,8 @@ class CeisaFlowTest extends TestCase
     {
         $user = $this->authedUser();
         $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
             'app_id' => 'APP123',
             'api_key' => 'secret-key',
         ]);
