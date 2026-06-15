@@ -654,11 +654,11 @@
 
             </div>
         </div>
-    </div>
 
-    {{-- =====================================================================
-         MODAL: PREVIEW DRAFT DOKUMEN — Bergaya Dokumen Resmi Bea Cukai
-         ===================================================================== --}}
+        {{-- =====================================================================
+             MODAL: PREVIEW DRAFT DOKUMEN — Bergaya Dokumen Resmi Bea Cukai
+             (harus berada DI DALAM scope x-data agar Alpine memprosesnya)
+             ===================================================================== --}}
     <div x-show="showDraftModal" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
@@ -843,6 +843,7 @@
             </div>
         </div>
     </div>
+    </div>{{-- /x-data documentWizard --}}
 
     @push('scripts')
 
