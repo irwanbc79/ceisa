@@ -10,6 +10,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <x-status-badge :status="$document->status" />
+                <x-jalur-badge :jalur="$document->jalur" class="px-2.5 py-1 text-xs" />
             </div>
         </div>
     </x-slot>

@@ -9,11 +9,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Document extends Model
 {
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_SUBMITTING = 'submitting';
+
     public const STATUS_SUBMITTED = 'submitted';
+
     public const STATUS_ACCEPTED = 'accepted';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_ERROR = 'error';
+
+    public const JALUR_HIJAU = 'H';
+
+    public const JALUR_KUNING = 'K';
+
+    public const JALUR_MERAH = 'M';
 
     protected $fillable = [
         'user_id',
@@ -22,6 +33,7 @@ class Document extends Model
         'nomor_daftar',
         'payload',
         'status',
+        'jalur',
         'ceisa_response',
         'error_message',
         'submitted_at',
@@ -55,6 +67,21 @@ class Document extends Model
             self::STATUS_SUBMITTED, self::STATUS_SUBMITTING => 'blue',
             self::STATUS_REJECTED, self::STATUS_ERROR => 'red',
             default => 'gray',
+        };
+    }
+
+    /**
+     * Label & warna jalur pemeriksaan pabean (Hijau/Kuning/Merah).
+     *
+     * @return array{label: string, color: string}|null
+     */
+    public function jalurInfo(): ?array
+    {
+        return match ($this->jalur) {
+            self::JALUR_HIJAU => ['label' => 'Jalur Hijau', 'color' => 'emerald'],
+            self::JALUR_KUNING => ['label' => 'Jalur Kuning', 'color' => 'amber'],
+            self::JALUR_MERAH => ['label' => 'Jalur Merah', 'color' => 'rose'],
+            default => null,
         };
     }
 }

@@ -77,7 +77,12 @@
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-50 text-slate-700 border border-slate-100">{{ $doc->doc_type }}</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3"><x-status-badge :status="$doc->status" /></td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-1.5">
+                                            <x-status-badge :status="$doc->status" />
+                                            <x-jalur-badge :jalur="$doc->jalur" />
+                                        </div>
+                                    </td>
                                     <td class="px-4 py-3 text-gray-500">{{ $doc->created_at->format('d/m/Y H:i') }}</td>
                                     <td class="px-4 py-3 text-right">
                                         <a href="{{ route('documents.show', $doc) }}" class="text-indigo-600 hover:underline">Detail</a>

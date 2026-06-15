@@ -220,6 +220,51 @@ class CeisaFlowTest extends TestCase
         $this->assertDatabaseHas('webhook_logs', ['document_id' => $doc->id, 'processed' => true]);
     }
 
+    public function test_webhook_respon_sets_status_and_jalur(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '000010-PEB',
+            'payload' => ['x' => 1],
+            'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        $this->postJson('/api/webhook/ceisa', [
+            'nomor_aju' => '000010-PEB',
+            'status' => 'DITERIMA / SPPB',
+            'jalur' => 'HIJAU',
+        ])->assertOk();
+
+        $doc->refresh();
+        $this->assertSame(Document::STATUS_ACCEPTED, $doc->status);
+        $this->assertSame(Document::JALUR_HIJAU, $doc->jalur);
+        $this->assertDatabaseHas('webhook_logs', ['notification_type' => 'Respon']);
+    }
+
+    public function test_webhook_informasi_does_not_change_document(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '000011-PEB',
+            'payload' => ['x' => 1],
+            'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        // Notifikasi Informasi tidak boleh mengubah status/jalur dokumen.
+        $this->postJson('/api/webhook/ceisa', [
+            'jenis' => 'Informasi',
+            'nomor_aju' => '000011-PEB',
+            'pesan' => 'Pengumuman pemeliharaan sistem',
+        ])->assertOk();
+
+        $doc->refresh();
+        $this->assertSame(Document::STATUS_SUBMITTED, $doc->status);
+        $this->assertNull($doc->jalur);
+        $this->assertDatabaseHas('webhook_logs', ['notification_type' => 'Informasi']);
+    }
+
     public function test_webhook_without_identifier_does_not_mutate_documents(): void
     {
         $user = $this->authedUser();

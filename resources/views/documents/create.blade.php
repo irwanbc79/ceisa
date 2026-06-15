@@ -25,7 +25,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                     </svg>
                     <div>
-                        <span class="font-semibold">Kesalahan Validasi:</span> Terdapat {{ $errors->count() }} kesalahan input. Silakan cek kembali form isian Anda.
+                        <span class="font-semibold">Kesalahan Validasi ({{ $errors->count() }}):</span> perbaiki isian berikut lalu kirim ulang.
+                        <ul class="mt-2 list-disc pl-5 space-y-0.5">
+                            @foreach ($errors->all() as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             @endif
@@ -1252,6 +1257,23 @@
                     barang: [
                         { hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: '' }
                     ]
+                },
+
+                // Repopulasi dari input lama bila submit gagal validasi server,
+                // agar data tidak hilang & user langsung melihat daftar error.
+                init() {
+                    const old = @json(old());
+                    if (old && Object.keys(old).length) {
+                        if (old.doc_type) this.doc_type = old.doc_type;
+                        for (const k in this.formData) {
+                            if (old[k] !== undefined && old[k] !== null && old[k] !== '') {
+                                this.formData[k] = old[k];
+                            }
+                        }
+                        @if ($errors->any())
+                            this.step = this.steps.length;
+                        @endif
+                    }
                 },
 
                 selectDocType(code) {
