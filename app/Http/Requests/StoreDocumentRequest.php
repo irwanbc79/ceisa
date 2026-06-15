@@ -30,23 +30,60 @@ class StoreDocumentRequest extends FormRequest
 
         if ($docType === 'BC30') {
             $rules = array_merge($rules, [
-                // Data eksportir
+                // Data Header (klasifikasi ekspor — CEISA 4.0)
+                'kantor_muat' => ['required', 'string', 'max:10'],
+                'jenis_ekspor' => ['required', 'string', 'max:50'],
+                'kategori_ekspor' => ['required', 'string', 'max:50'],
+                'cara_dagang' => ['nullable', 'string', 'max:50'],
+                'cara_bayar' => ['required', 'string', 'max:50'],
+                'komoditi' => ['required', 'in:MIGAS,NON_MIGAS'],
+                'curah' => ['required', 'in:CURAH,NON_CURAH'],
+
+                // Data Entitas — Eksportir
                 'nama_eksportir' => ['required', 'string', 'max:255'],
                 'npwp_eksportir' => ['required', 'string', 'max:25'],
                 'alamat_eksportir' => ['required', 'string', 'max:500'],
 
-                // Data penerima / tujuan
+                // Data Entitas — Penerima / Pembeli (consignee)
                 'nama_penerima' => ['required', 'string', 'max:255'],
                 'negara_tujuan' => ['required', 'string', 'size:2'], // ISO 2 huruf
+                'alamat_penerima' => ['nullable', 'string', 'max:500'],
 
-                // Pengangkutan
+                // Data Pengangkut
+                'cara_angkut' => ['nullable', 'string', 'max:50'],
+                'nama_sarana' => ['nullable', 'string', 'max:255'],
+                'voy_flight' => ['nullable', 'string', 'max:50'],
                 'pelabuhan_muat' => ['required', 'string', 'max:10'],
                 'pelabuhan_bongkar' => ['nullable', 'string', 'max:10'],
+                'pelabuhan_tujuan' => ['required', 'string', 'max:10'],
+                'tanggal_ekspor' => ['nullable', 'date'],
 
-                // Nilai transaksi
+                // Data Transaksi
                 'kode_valuta' => ['required', 'string', 'size:3'],
+                'ndpbm' => ['required', 'numeric', 'min:0'],
+                'incoterm' => ['required', 'string', 'max:5'],
                 'nilai_fob' => ['required', 'numeric', 'min:0'],
+                'freight' => ['nullable', 'numeric', 'min:0'],
+                'asuransi_jenis' => ['nullable', 'in:DN,LN'],
+                'nilai_asuransi' => ['nullable', 'numeric', 'min:0'],
+                'bruto' => ['required', 'numeric', 'min:0'],
+                'bank_devisa' => ['nullable', 'string', 'max:100'],
                 'cara_pembayaran' => ['nullable', 'string', 'max:50'],
+
+                // Pernyataan
+                'pernyataan_nama' => ['required', 'string', 'max:255'],
+                'pernyataan_jabatan' => ['required', 'string', 'max:100'],
+                'pernyataan_kota' => ['nullable', 'string', 'max:100'],
+
+                // Data Barang (field tambahan ekspor)
+                'barang.*.merk' => ['nullable', 'string', 'max:100'],
+                'barang.*.tipe' => ['nullable', 'string', 'max:100'],
+                'barang.*.ukuran' => ['nullable', 'string', 'max:100'],
+                'barang.*.negara_asal' => ['nullable', 'string', 'size:2'],
+                'barang.*.daerah_asal' => ['nullable', 'string', 'max:100'],
+                'barang.*.jumlah_kemasan' => ['nullable', 'numeric', 'min:0'],
+                'barang.*.kode_kemasan' => ['nullable', 'string', 'max:5'],
+                'barang.*.volume' => ['nullable', 'numeric', 'min:0'],
             ], $this->barangRules('nilai_fob'));
         } elseif (in_array($docType, ['BC20', 'BC24'], true)) {
             $rules = array_merge($rules, [
@@ -149,6 +186,17 @@ class StoreDocumentRequest extends FormRequest
             'nomor_awb_bl' => 'nomor AWB/BL',
             'tanggal_awb_bl' => 'tanggal AWB/BL',
             'alasan_segera' => 'alasan segera',
+            // BC 3.0 ekspor (CEISA 4.0)
+            'kantor_muat' => 'kantor muat',
+            'jenis_ekspor' => 'jenis ekspor',
+            'kategori_ekspor' => 'kategori ekspor',
+            'cara_bayar' => 'cara bayar',
+            'pelabuhan_tujuan' => 'pelabuhan tujuan',
+            'ndpbm' => 'NDPBM (kurs)',
+            'incoterm' => 'cara penyerahan (Incoterm)',
+            'bruto' => 'berat kotor (bruto)',
+            'pernyataan_nama' => 'nama penanggung jawab',
+            'pernyataan_jabatan' => 'jabatan penanggung jawab',
         ];
     }
 
@@ -163,8 +211,20 @@ class StoreDocumentRequest extends FormRequest
         $docType = $v['doc_type'];
 
         if ($docType === 'BC30') {
+            $ndpbm = (float) $v['ndpbm'];
+
             return [
                 'header' => [
+                    // Klasifikasi ekspor (CEISA 4.0 Data Header)
+                    'kantor_muat' => $v['kantor_muat'],
+                    'jenis_ekspor' => $v['jenis_ekspor'],
+                    'kategori_ekspor' => $v['kategori_ekspor'],
+                    'cara_dagang' => $v['cara_dagang'] ?? null,
+                    'cara_bayar' => $v['cara_bayar'],
+                    'komoditi' => $v['komoditi'],
+                    'curah' => $v['curah'],
+
+                    // Entitas
                     'eksportir' => [
                         'nama' => $v['nama_eksportir'],
                         'npwp' => $v['npwp_eksportir'],
@@ -173,16 +233,66 @@ class StoreDocumentRequest extends FormRequest
                     'penerima' => [
                         'nama' => $v['nama_penerima'],
                         'negara' => strtoupper($v['negara_tujuan']),
+                        'alamat' => $v['alamat_penerima'] ?? null,
                     ],
+
+                    // Pengangkutan
                     'pengangkutan' => [
+                        'cara_angkut' => $v['cara_angkut'] ?? null,
+                        'sarana_angkut' => $v['nama_sarana'] ?? null,
+                        'voy_flight' => $v['voy_flight'] ?? null,
                         'pelabuhan_muat' => $v['pelabuhan_muat'],
                         'pelabuhan_bongkar' => $v['pelabuhan_bongkar'] ?? null,
+                        'pelabuhan_tujuan' => $v['pelabuhan_tujuan'],
+                        'tanggal_ekspor' => $v['tanggal_ekspor'] ?? null,
                     ],
+
+                    // Transaksi
                     'valuta' => strtoupper($v['kode_valuta']),
+                    'ndpbm' => $ndpbm,
+                    'incoterm' => strtoupper($v['incoterm']),
                     'nilai_fob' => (float) $v['nilai_fob'],
+                    'freight' => isset($v['freight']) ? (float) $v['freight'] : null,
+                    'asuransi' => [
+                        'jenis' => $v['asuransi_jenis'] ?? null,
+                        'nilai' => isset($v['nilai_asuransi']) ? (float) $v['nilai_asuransi'] : null,
+                    ],
+                    'bruto' => (float) $v['bruto'],
+                    'bank_devisa' => $v['bank_devisa'] ?? null,
                     'cara_pembayaran' => $v['cara_pembayaran'] ?? null,
+
+                    // Pernyataan
+                    'pernyataan' => [
+                        'nama' => $v['pernyataan_nama'],
+                        'jabatan' => $v['pernyataan_jabatan'],
+                        'kota' => $v['pernyataan_kota'] ?? null,
+                        'tanggal' => now()->toDateString(),
+                    ],
                 ],
-                'barang' => $this->mapBarang($v['barang'], 'nilai_fob'),
+                'barang' => array_map(static function (array $b, int $i): array {
+                    $fob = (float) $b['nilai_fob'];
+                    $qty = (float) $b['jumlah_satuan'];
+
+                    return [
+                        'seri' => $i + 1,
+                        'hs_code' => $b['hs_code'],
+                        'uraian' => $b['uraian'],
+                        'merk' => $b['merk'] ?? null,
+                        'tipe' => $b['tipe'] ?? null,
+                        'ukuran' => $b['ukuran'] ?? null,
+                        'negara_asal' => isset($b['negara_asal']) ? strtoupper($b['negara_asal']) : null,
+                        'daerah_asal' => $b['daerah_asal'] ?? null,
+                        'jumlah_satuan' => $qty,
+                        'kode_satuan' => $b['kode_satuan'],
+                        'jumlah_kemasan' => isset($b['jumlah_kemasan']) ? (float) $b['jumlah_kemasan'] : null,
+                        'kode_kemasan' => $b['kode_kemasan'] ?? null,
+                        'netto' => (float) $b['netto'],
+                        'volume' => isset($b['volume']) ? (float) $b['volume'] : null,
+                        'nilai_fob' => $fob,
+                        // Harga satuan FOB (auto, sesuai perilaku portal CEISA)
+                        'harga_satuan' => $qty > 0 ? round($fob / $qty, 4) : 0.0,
+                    ];
+                }, $v['barang'], array_keys($v['barang'])),
             ];
         } elseif (in_array($docType, ['BC20', 'BC24'], true)) {
             return [

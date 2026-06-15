@@ -147,6 +147,12 @@
                                         <p class="text-xs text-slate-600">No. AWB / BL: <span class="font-mono font-bold text-slate-800">{{ data_get($document->payload, 'header.dokumen_pengangkutan.awb_bl') }}</span></p>
                                         <p class="text-xs text-slate-600">Tanggal AWB: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.dokumen_pengangkutan.tanggal') }}</span></p>
                                         <p class="text-xs text-slate-600">Kemasan: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.kemasan.jumlah') }} {{ data_get($document->payload, 'header.kemasan.jenis') }}</span></p>
+                                    @elseif ($document->doc_type === 'BC30')
+                                        <p class="text-xs text-slate-600">Pelabuhan Muat: <span class="font-bold text-slate-800 font-mono">{{ data_get($document->payload, 'header.pengangkutan.pelabuhan_muat') }}</span></p>
+                                        <p class="text-xs text-slate-600">Pelabuhan Tujuan: <span class="font-bold text-slate-800 font-mono">{{ data_get($document->payload, 'header.pengangkutan.pelabuhan_tujuan') ?? '—' }}</span></p>
+                                        <p class="text-xs text-slate-600">Cara Angkut: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.pengangkutan.cara_angkut') ?? '—' }}</span></p>
+                                        <p class="text-xs text-slate-600">Sarana / Voy: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.pengangkutan.sarana_angkut') ?? '—' }} {{ data_get($document->payload, 'header.pengangkutan.voy_flight') ? '· '.data_get($document->payload, 'header.pengangkutan.voy_flight') : '' }}</span></p>
+                                        <p class="text-xs text-slate-600">Perkiraan Ekspor: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.pengangkutan.tanggal_ekspor') ?? '—' }}</span></p>
                                     @else
                                         <p class="text-xs text-slate-600">Pelabuhan Muat: <span class="font-bold text-slate-800 font-mono">{{ data_get($document->payload, 'header.pengangkutan.pelabuhan_muat') }}</span></p>
                                         <p class="text-xs text-slate-600">Pelabuhan Bongkar: <span class="font-bold text-slate-800 font-mono">{{ data_get($document->payload, 'header.pengangkutan.pelabuhan_bongkar') ?? '—' }}</span></p>
@@ -173,8 +179,29 @@
                                     @if (data_get($document->payload, 'header.cara_pembayaran'))
                                         <p class="text-[11px] text-slate-500 mt-2 border-t border-indigo-100/50 pt-1">Metode Pembayaran: <span class="font-semibold text-slate-700">{{ data_get($document->payload, 'header.cara_pembayaran') }}</span></p>
                                     @endif
+                                    @if ($document->doc_type === 'BC30')
+                                        <div class="mt-2 border-t border-indigo-100/50 pt-2 grid grid-cols-3 gap-2 text-[11px]">
+                                            <p class="text-slate-500">Incoterm: <span class="font-bold text-slate-700">{{ data_get($document->payload, 'header.incoterm') ?? '—' }}</span></p>
+                                            <p class="text-slate-500">NDPBM: <span class="font-bold text-slate-700">{{ number_format(data_get($document->payload, 'header.ndpbm', 0), 0, ',', '.') }}</span></p>
+                                            <p class="text-slate-500">Bruto: <span class="font-bold text-slate-700">{{ number_format(data_get($document->payload, 'header.bruto', 0), 2, ',', '.') }} kg</span></p>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
+
+                            @if ($document->doc_type === 'BC30')
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Klasifikasi &amp; Pernyataan</h4>
+                                    <div class="text-sm bg-slate-50 p-4 rounded-xl space-y-1 text-xs text-slate-600">
+                                        <p>Jenis Ekspor: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.jenis_ekspor') ?? '—' }}</span> · Kategori: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.kategori_ekspor') ?? '—' }}</span></p>
+                                        <p>Komoditi: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.komoditi') === 'MIGAS' ? 'Migas' : 'Non Migas' }}</span> · {{ data_get($document->payload, 'header.curah') === 'CURAH' ? 'Curah' : 'Non Curah' }}</p>
+                                        @if (data_get($document->payload, 'header.bank_devisa'))
+                                            <p>Bank Devisa: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.bank_devisa') }}</span></p>
+                                        @endif
+                                        <p class="border-t border-slate-200 pt-1 mt-1">Penanggung Jawab: <span class="font-bold text-slate-800">{{ data_get($document->payload, 'header.pernyataan.nama') ?? '—' }}</span>{{ data_get($document->payload, 'header.pernyataan.jabatan') ? ' ('.data_get($document->payload, 'header.pernyataan.jabatan').')' : '' }}</p>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                     </div>

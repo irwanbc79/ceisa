@@ -136,8 +136,73 @@
                                 </button>
                             </div>
 
-                            {{-- BC 3.0 (Eksportir & Penerima) --}}
+                            {{-- BC 3.0 (Header Klasifikasi + Eksportir & Penerima) --}}
                             <div x-show="doc_type === 'BC30'" class="space-y-6">
+                                {{-- Data Header: klasifikasi ekspor sesuai CEISA 4.0 --}}
+                                <div class="border-b border-slate-100 pb-4">
+                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Data Header (Klasifikasi Ekspor)</h4>
+                                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
+                                        <div>
+                                            <x-input-label for="kantor_muat" value="Kantor Muat" />
+                                            <select id="kantor_muat" name="kantor_muat" x-model="formData.kantor_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <option value="">-- Pilih Kantor Muat --</option>
+                                                <template x-for="k in references.kantorMuat" :key="k.code">
+                                                    <option :value="k.code" x-text="k.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="jenis_ekspor" value="Jenis Ekspor" />
+                                            <select id="jenis_ekspor" name="jenis_ekspor" x-model="formData.jenis_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <template x-for="j in references.jenisEkspor" :key="j.code">
+                                                    <option :value="j.code" x-text="j.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="kategori_ekspor" value="Kategori Ekspor" />
+                                            <select id="kategori_ekspor" name="kategori_ekspor" x-model="formData.kategori_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <template x-for="k in references.kategoriEkspor" :key="k.code">
+                                                    <option :value="k.code" x-text="k.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="cara_dagang" value="Cara Dagang" />
+                                            <select id="cara_dagang" name="cara_dagang" x-model="formData.cara_dagang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <template x-for="c in references.caraDagang" :key="c.code">
+                                                    <option :value="c.code" x-text="c.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="cara_bayar" value="Cara Bayar" />
+                                            <select id="cara_bayar" name="cara_bayar" x-model="formData.cara_bayar" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <template x-for="c in references.caraBayar" :key="c.code">
+                                                    <option :value="c.code" x-text="c.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <x-input-label for="komoditi" value="Komoditi" />
+                                                <select id="komoditi" name="komoditi" x-model="formData.komoditi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                    <option value="NON_MIGAS">Non Migas</option>
+                                                    <option value="MIGAS">Migas</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <x-input-label for="curah" value="Curah" />
+                                                <select id="curah" name="curah" x-model="formData.curah" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                    <option value="NON_CURAH">Non Curah</option>
+                                                    <option value="CURAH">Curah</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Entitas: Eksportir --}}
                                 <div class="border-b border-slate-100 pb-4">
                                     <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Identitas Eksportir</h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
@@ -155,6 +220,8 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                {{-- Entitas: Penerima --}}
                                 <div>
                                     <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Identitas Penerima (Consignee)</h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
@@ -170,6 +237,10 @@
                                                     <option :value="c.code" x-text="c.label"></option>
                                                 </template>
                                             </select>
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <x-input-label for="alamat_penerima" value="Alamat Penerima (Opsional)" />
+                                            <textarea id="alamat_penerima" name="alamat_penerima" x-model="formData.alamat_penerima" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -310,8 +381,119 @@
                                 <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap 3 dari 5</span>
                             </div>
 
-                            {{-- BC 3.0 / BC 2.0 / BC 2.4 --}}
-                            <div x-show="doc_type === 'BC30' || doc_type === 'BC20' || doc_type === 'BC24'" class="grid sm:grid-cols-2 gap-4">
+                            {{-- BC 3.0 — Pengangkut & Transaksi (CEISA 4.0) --}}
+                            <div x-show="doc_type === 'BC30'" class="space-y-6">
+                                <div class="border-b border-slate-100 pb-4">
+                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Data Pengangkut</h4>
+                                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
+                                        <div>
+                                            <x-input-label for="cara_angkut" value="Cara Pengangkutan" />
+                                            <select id="cara_angkut" name="cara_angkut" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <template x-for="c in references.caraAngkut" :key="c.code">
+                                                    <option :value="c.code" x-text="c.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="nama_sarana" value="Nama Sarana Pengangkut" />
+                                            <input type="text" id="nama_sarana" name="nama_sarana" x-model="formData.nama_sarana" placeholder="mis. MV Sinar Jaya" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="voy_flight" value="No. Voyage / Flight" />
+                                            <input type="text" id="voy_flight" name="voy_flight" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="pelabuhan_muat_bc30" value="Pelabuhan Muat Ekspor" />
+                                            <select id="pelabuhan_muat_bc30" name="pelabuhan_muat" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                                <option value="">-- Pilih Pelabuhan Muat --</option>
+                                                <template x-for="p in references.ports" :key="p.code">
+                                                    <option :value="p.code" x-text="p.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="pelabuhan_tujuan" value="Pelabuhan Tujuan" />
+                                            <select id="pelabuhan_tujuan" name="pelabuhan_tujuan" x-model="formData.pelabuhan_tujuan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                                <option value="">-- Pilih Pelabuhan Tujuan --</option>
+                                                <template x-for="p in references.ports" :key="p.code">
+                                                    <option :value="p.code" x-text="p.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="tanggal_ekspor" value="Tanggal Perkiraan Ekspor" />
+                                            <input type="date" id="tanggal_ekspor" name="tanggal_ekspor" x-model="formData.tanggal_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Data Transaksi</h4>
+                                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
+                                        <div>
+                                            <x-input-label for="kode_valuta_bc30" value="Valuta" />
+                                            <select id="kode_valuta_bc30" name="kode_valuta" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                                <option value="">-- Pilih Mata Uang --</option>
+                                                <template x-for="c in references.currencies" :key="c.code">
+                                                    <option :value="c.code" x-text="c.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="ndpbm" value="NDPBM / Kurs (ke IDR)" />
+                                            <input type="number" step="0.0001" min="0" id="ndpbm" name="ndpbm" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="incoterm" value="Cara Penyerahan (Incoterm)" />
+                                            <select id="incoterm" name="incoterm" x-model="formData.incoterm" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                                <template x-for="i in references.incoterms" :key="i.code">
+                                                    <option :value="i.code" x-text="i.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="nilai_fob" value="Nilai FOB Total" />
+                                            <input type="number" step="0.01" min="0" id="nilai_fob" name="nilai_fob" x-model="formData.nilai_fob" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                            <p class="text-[10px] text-slate-400 mt-1">Auto-terisi dari total Pos Barang bila dikosongkan.</p>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="freight" value="Freight (Opsional)" />
+                                            <input type="number" step="0.01" min="0" id="freight" name="freight" x-model="formData.freight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="bruto" value="Berat Kotor / Bruto (KGM)" />
+                                            <input type="number" step="0.01" min="0" id="bruto" name="bruto" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="asuransi_jenis" value="Asuransi" />
+                                            <select id="asuransi_jenis" name="asuransi_jenis" x-model="formData.asuransi_jenis" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <option value="DN">Dalam Negeri</option>
+                                                <option value="LN">Luar Negeri</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="nilai_asuransi" value="Nilai Asuransi (Opsional)" />
+                                            <input type="number" step="0.01" min="0" id="nilai_asuransi" name="nilai_asuransi" x-model="formData.nilai_asuransi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="bank_devisa" value="Bank Devisa (Opsional)" />
+                                            <input type="text" id="bank_devisa" name="bank_devisa" x-model="formData.bank_devisa" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                        <div class="sm:col-span-2 lg:col-span-3">
+                                            <x-input-label for="cara_pembayaran_bc30" value="Cara Pembayaran (Opsional)" />
+                                            <select id="cara_pembayaran_bc30" name="cara_pembayaran" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <option value="">-- Pilih Cara Pembayaran --</option>
+                                                <template x-for="m in references.paymentMethods" :key="m.code">
+                                                    <option :value="m.code" x-text="m.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- BC 2.0 / BC 2.4 --}}
+                            <div x-show="doc_type === 'BC20' || doc_type === 'BC24'" class="grid sm:grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label for="pelabuhan_muat" value="Pelabuhan Muat (Kode Referensi)" />
                                     <select id="pelabuhan_muat" name="pelabuhan_muat" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
@@ -340,11 +522,6 @@
                                     </select>
                                 </div>
                                 
-                                <div x-show="doc_type === 'BC30'">
-                                    <x-input-label for="nilai_fob" value="Nilai FOB Total" />
-                                    <input type="number" step="0.01" min="0" id="nilai_fob" name="nilai_fob" x-model="formData.nilai_fob" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
-                                </div>
-
                                 <div x-show="doc_type === 'BC20' || doc_type === 'BC24'">
                                     <x-input-label for="nilai_cif" value="Nilai CIF Total (Cost, Insurance, Freight)" />
                                     <input type="number" step="0.01" min="0" id="nilai_cif" name="nilai_cif" x-model="formData.nilai_cif" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
@@ -473,6 +650,54 @@
                                                        class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
                                             </div>
                                             
+                                            {{-- Field tambahan khusus BC 3.0 ekspor --}}
+                                            <template x-if="doc_type === 'BC30'">
+                                                <div class="sm:col-span-3 grid sm:grid-cols-3 gap-3 border-t border-dashed border-slate-200 pt-3 mt-1">
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Merk (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][merk]`" x-model="item.merk" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Tipe (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][tipe]`" x-model="item.tipe" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Ukuran (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][ukuran]`" x-model="item.ukuran" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Negara Asal Barang</label>
+                                                        <select :name="`barang[${index}][negara_asal]`" x-model="item.negara_asal" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm">
+                                                            <option value="">-- Pilih --</option>
+                                                            <template x-for="c in references.countries" :key="c.code">
+                                                                <option :value="c.code" x-text="c.label"></option>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Daerah Asal (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][daerah_asal]`" x-model="item.daerah_asal" placeholder="mis. Jawa Barat" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Volume (m³, Opsional)</label>
+                                                        <input type="number" step="0.0001" min="0" :name="`barang[${index}][volume]`" x-model="item.volume" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Jumlah Kemasan</label>
+                                                        <input type="number" step="0.01" min="0" :name="`barang[${index}][jumlah_kemasan]`" x-model="item.jumlah_kemasan" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Jenis Kemasan</label>
+                                                        <select :name="`barang[${index}][kode_kemasan]`" x-model="item.kode_kemasan" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm">
+                                                            <option value="">-- Pilih --</option>
+                                                            <template x-for="p in references.packages" :key="p.code">
+                                                                <option :value="p.code" x-text="p.label"></option>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </template>
+
                                             {{-- Dynamic Monetary Value for Item --}}
                                             <div class="sm:col-span-3">
                                                 <label class="block text-[11px] font-bold text-slate-500 uppercase"
@@ -583,6 +808,28 @@
                                         </template>
                                     </dl>
                                 </div>
+
+                                {{-- Pernyataan (BC 3.0) --}}
+                                <template x-if="doc_type === 'BC30'">
+                                    <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pernyataan Penanggung Jawab</h4>
+                                        <div class="grid sm:grid-cols-3 gap-4">
+                                            <div>
+                                                <x-input-label for="pernyataan_nama" value="Nama Penanggung Jawab" />
+                                                <input type="text" id="pernyataan_nama" name="pernyataan_nama" x-model="formData.pernyataan_nama" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="pernyataan_jabatan" value="Jabatan" />
+                                                <input type="text" id="pernyataan_jabatan" name="pernyataan_jabatan" x-model="formData.pernyataan_jabatan" placeholder="mis. Direktur" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="pernyataan_kota" value="Kota (Opsional)" />
+                                                <input type="text" id="pernyataan_kota" name="pernyataan_kota" x-model="formData.pernyataan_kota" placeholder="mis. Jakarta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            </div>
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 mt-3">Dengan ini menyatakan bahwa data yang diisi adalah benar dan bertanggung jawab penuh sesuai ketentuan kepabeanan.</p>
+                                    </div>
+                                </template>
 
                                 {{-- Validation Guard Message --}}
                                 <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-900 flex items-start gap-2.5">
@@ -998,18 +1245,99 @@
                         { code: 'Pemasukan Bahan Baku dari TLDDP (BC 4.0)', label: 'Pemasukan dari TLDDP (BC 4.0)' },
                         { code: 'Pemasukan Bahan Baku dari LDP (BC 2.3)', label: 'Pemasukan dari LDP (BC 2.3)' },
                         { code: 'Pengiriman antar TPB (BC 2.7)', label: 'Pengiriman ke TPB Lain (BC 2.7)' }
+                    ],
+                    // Referensi BC 3.0 ekspor (CEISA 4.0)
+                    kantorMuat: [
+                        { code: '050100', label: '050100 - KPU Tanjung Priok' },
+                        { code: '040300', label: '040300 - KPPBC Soekarno-Hatta' },
+                        { code: '070300', label: '070300 - KPPBC Tanjung Perak' },
+                        { code: '060400', label: '060400 - KPPBC Tanjung Emas' },
+                        { code: '010200', label: '010200 - KPPBC Belawan' },
+                        { code: '090400', label: '090400 - KPPBC Makassar' }
+                    ],
+                    jenisEkspor: [
+                        { code: 'Biasa', label: 'Ekspor Biasa' },
+                        { code: 'Akan Diimpor Kembali', label: 'Akan Diimpor Kembali' },
+                        { code: 'Reekspor', label: 'Reekspor' },
+                        { code: 'Reekspor ex Impor Sementara', label: 'Reekspor ex Impor Sementara' }
+                    ],
+                    kategoriEkspor: [
+                        { code: 'Umum', label: 'Umum' },
+                        { code: 'KITE', label: 'KITE (Kemudahan Impor Tujuan Ekspor)' },
+                        { code: 'Niper', label: 'Niper' },
+                        { code: 'Barang Perwakilan Negara Asing', label: 'Barang Perwakilan Negara Asing' },
+                        { code: 'Barang Penumpang', label: 'Barang Penumpang / Awak Sarana' },
+                        { code: 'Migas', label: 'Migas' },
+                        { code: 'Barang Kiriman', label: 'Barang Kiriman' },
+                        { code: 'PLB', label: 'Pusat Logistik Berikat (PLB)' },
+                        { code: 'Lainnya', label: 'Lainnya' }
+                    ],
+                    caraDagang: [
+                        { code: 'Biasa', label: 'Biasa' },
+                        { code: 'IMB', label: 'IMB (Imbal Beli)' },
+                        { code: 'Lainnya', label: 'Lainnya' }
+                    ],
+                    caraBayar: [
+                        { code: 'Biasa/Tunai', label: 'Biasa / Tunai' },
+                        { code: 'Berkala', label: 'Berkala' },
+                        { code: 'Dengan Jaminan', label: 'Dengan Jaminan' },
+                        { code: 'Gabungan', label: 'Gabungan' }
+                    ],
+                    incoterms: [
+                        { code: 'FOB', label: 'FOB - Free On Board' },
+                        { code: 'CIF', label: 'CIF - Cost, Insurance & Freight' },
+                        { code: 'CFR', label: 'CFR - Cost & Freight' },
+                        { code: 'CIP', label: 'CIP - Carriage & Insurance Paid' },
+                        { code: 'CPT', label: 'CPT - Carriage Paid To' },
+                        { code: 'EXW', label: 'EXW - Ex Works' },
+                        { code: 'FAS', label: 'FAS - Free Alongside Ship' },
+                        { code: 'DAP', label: 'DAP - Delivered At Place' },
+                        { code: 'DDP', label: 'DDP - Delivered Duty Paid' }
+                    ],
+                    caraAngkut: [
+                        { code: 'Laut', label: 'Laut' },
+                        { code: 'Udara', label: 'Udara' },
+                        { code: 'Darat', label: 'Darat' },
+                        { code: 'Multimoda', label: 'Multimoda' }
                     ]
                 },
                 
                 // Form Fields Data Model
                 formData: {
-                    // BC30
+                    // BC30 — Header klasifikasi ekspor (CEISA 4.0)
+                    kantor_muat: '',
+                    jenis_ekspor: 'Biasa',
+                    kategori_ekspor: 'Umum',
+                    cara_dagang: 'Biasa',
+                    cara_bayar: 'Biasa/Tunai',
+                    komoditi: 'NON_MIGAS',
+                    curah: 'NON_CURAH',
+                    // BC30 — Entitas
                     nama_eksportir: '',
                     npwp_eksportir: '',
                     alamat_eksportir: '',
                     nama_penerima: '',
                     negara_tujuan: '',
-                    
+                    alamat_penerima: '',
+                    // BC30 — Pengangkut
+                    cara_angkut: 'Laut',
+                    nama_sarana: '',
+                    voy_flight: '',
+                    pelabuhan_tujuan: '',
+                    tanggal_ekspor: '',
+                    // BC30 — Transaksi tambahan
+                    ndpbm: '',
+                    incoterm: 'FOB',
+                    freight: '',
+                    asuransi_jenis: 'DN',
+                    nilai_asuransi: '',
+                    bruto: '',
+                    bank_devisa: '',
+                    // BC30 — Pernyataan
+                    pernyataan_nama: '',
+                    pernyataan_jabatan: '',
+                    pernyataan_kota: '',
+
                     // BC20 / BC24
                     nama_importir: '',
                     npwp_importir: '',
@@ -1048,7 +1376,7 @@
                     
                     // Pos Barang
                     barang: [
-                        { hs_code: '', uraian: '', jumlah_satuan: '', kode_satuan: '', netto: '', nilai_fob: '', nilai_cif: '', nilai_barang: '' }
+                        { hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: '' }
                     ]
                 },
 
@@ -1078,7 +1406,9 @@
                 isStepValid(s) {
                     if (s === 2) {
                         if (this.doc_type === 'BC30') {
-                            return this.formData.nama_eksportir && this.formData.npwp_eksportir && this.formData.nama_penerima && this.formData.negara_tujuan;
+                            return this.formData.kantor_muat && this.formData.jenis_ekspor && this.formData.kategori_ekspor && this.formData.cara_bayar
+                                && this.formData.nama_eksportir && this.formData.npwp_eksportir && this.formData.alamat_eksportir
+                                && this.formData.nama_penerima && this.formData.negara_tujuan;
                         }
                         if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
                             return this.formData.nama_importir && this.formData.npwp_importir && this.formData.nama_pemasok && this.formData.negara_pemasok;
@@ -1092,7 +1422,8 @@
                     }
                     if (s === 3) {
                         if (this.doc_type === 'BC30') {
-                            return this.formData.pelabuhan_muat && this.formData.nilai_fob;
+                            return this.formData.pelabuhan_muat && this.formData.pelabuhan_tujuan && this.formData.kode_valuta
+                                && this.formData.ndpbm && this.formData.incoterm && this.formData.nilai_fob && this.formData.bruto;
                         }
                         if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
                             return this.formData.pelabuhan_muat && this.formData.pelabuhan_bongkar && this.formData.nilai_cif;
@@ -1109,7 +1440,7 @@
 
                 addItem() {
                     this.formData.barang.push({
-                        hs_code: '', uraian: '', jumlah_satuan: '', kode_satuan: '', netto: '', nilai_fob: '', nilai_cif: '', nilai_barang: ''
+                        hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: ''
                     });
                 },
 
@@ -1144,22 +1475,57 @@
                     if (docType === 'BC30') {
                         return {
                             header: {
+                                kantor_muat: f.kantor_muat,
+                                jenis_ekspor: f.jenis_ekspor,
+                                kategori_ekspor: f.kategori_ekspor,
+                                cara_dagang: f.cara_dagang || null,
+                                cara_bayar: f.cara_bayar,
+                                komoditi: f.komoditi,
+                                curah: f.curah,
                                 eksportir: { nama: f.nama_eksportir, npwp: f.npwp_eksportir, alamat: f.alamat_eksportir },
-                                penerima: { nama: f.nama_penerima, negara: (f.negara_tujuan || '').toUpperCase() },
-                                pengangkutan: { pelabuhan_muat: f.pelabuhan_muat, pelabuhan_bongkar: f.pelabuhan_bongkar || null },
+                                penerima: { nama: f.nama_penerima, negara: (f.negara_tujuan || '').toUpperCase(), alamat: f.alamat_penerima || null },
+                                pengangkutan: {
+                                    cara_angkut: f.cara_angkut || null,
+                                    sarana_angkut: f.nama_sarana || null,
+                                    voy_flight: f.voy_flight || null,
+                                    pelabuhan_muat: f.pelabuhan_muat,
+                                    pelabuhan_bongkar: f.pelabuhan_bongkar || null,
+                                    pelabuhan_tujuan: f.pelabuhan_tujuan,
+                                    tanggal_ekspor: f.tanggal_ekspor || null
+                                },
                                 valuta: (f.kode_valuta || '').toUpperCase(),
+                                ndpbm: parseFloat(f.ndpbm) || 0.0,
+                                incoterm: (f.incoterm || '').toUpperCase(),
                                 nilai_fob: parseFloat(f.nilai_fob) || 0.0,
-                                cara_pembayaran: f.cara_pembayaran || null
+                                freight: f.freight !== '' ? (parseFloat(f.freight) || 0.0) : null,
+                                asuransi: { jenis: f.asuransi_jenis || null, nilai: f.nilai_asuransi !== '' ? (parseFloat(f.nilai_asuransi) || 0.0) : null },
+                                bruto: parseFloat(f.bruto) || 0.0,
+                                bank_devisa: f.bank_devisa || null,
+                                cara_pembayaran: f.cara_pembayaran || null,
+                                pernyataan: { nama: f.pernyataan_nama, jabatan: f.pernyataan_jabatan, kota: f.pernyataan_kota || null }
                             },
-                            barang: f.barang.map((b, i) => ({
-                                seri: i + 1,
-                                hs_code: b.hs_code,
-                                uraian: b.uraian,
-                                jumlah_satuan: parseFloat(b.jumlah_satuan) || 0.0,
-                                kode_satuan: b.kode_satuan,
-                                netto: parseFloat(b.netto) || 0.0,
-                                nilai_fob: parseFloat(b.nilai_fob) || 0.0
-                            }))
+                            barang: f.barang.map((b, i) => {
+                                const fob = parseFloat(b.nilai_fob) || 0.0;
+                                const qty = parseFloat(b.jumlah_satuan) || 0.0;
+                                return {
+                                    seri: i + 1,
+                                    hs_code: b.hs_code,
+                                    uraian: b.uraian,
+                                    merk: b.merk || null,
+                                    tipe: b.tipe || null,
+                                    ukuran: b.ukuran || null,
+                                    negara_asal: b.negara_asal ? b.negara_asal.toUpperCase() : null,
+                                    daerah_asal: b.daerah_asal || null,
+                                    jumlah_satuan: qty,
+                                    kode_satuan: b.kode_satuan,
+                                    jumlah_kemasan: b.jumlah_kemasan !== '' ? (parseFloat(b.jumlah_kemasan) || 0.0) : null,
+                                    kode_kemasan: b.kode_kemasan || null,
+                                    netto: parseFloat(b.netto) || 0.0,
+                                    volume: b.volume !== '' ? (parseFloat(b.volume) || 0.0) : null,
+                                    nilai_fob: fob,
+                                    harga_satuan: qty > 0 ? Math.round((fob / qty) * 10000) / 10000 : 0.0
+                                };
+                            })
                         };
                     } else if (docType === 'BC20' || docType === 'BC24') {
                         return {
@@ -1228,18 +1594,41 @@
                     const docType = this.doc_type;
                     
                     if (docType === 'BC30') {
+                        this.formData.kantor_muat = '050100';
+                        this.formData.jenis_ekspor = 'Biasa';
+                        this.formData.kategori_ekspor = 'Umum';
+                        this.formData.cara_dagang = 'Biasa';
+                        this.formData.cara_bayar = 'Biasa/Tunai';
+                        this.formData.komoditi = 'NON_MIGAS';
+                        this.formData.curah = 'NON_CURAH';
                         this.formData.nama_eksportir = 'PT Mora Multi Berkah';
                         this.formData.npwp_eksportir = '012345678901000';
                         this.formData.alamat_eksportir = 'Jl. Kemang Timur No. 45, Mampang Prapatan, Jakarta Selatan';
                         this.formData.nama_penerima = 'Global Trade Logistics Pte Ltd';
                         this.formData.negara_tujuan = 'SG';
+                        this.formData.alamat_penerima = '8 Marina Boulevard, Singapore 018981';
+                        this.formData.cara_angkut = 'Laut';
+                        this.formData.nama_sarana = 'MV Sinar Bintang';
+                        this.formData.voy_flight = 'V-1024E';
                         this.formData.pelabuhan_muat = 'IDJKT';
                         this.formData.pelabuhan_bongkar = 'SGSIN';
+                        this.formData.pelabuhan_tujuan = 'SGSIN';
+                        this.formData.tanggal_ekspor = '2026-06-20';
                         this.formData.kode_valuta = 'USD';
+                        this.formData.ndpbm = 15800;
+                        this.formData.incoterm = 'FOB';
                         this.formData.nilai_fob = 12500.00;
+                        this.formData.freight = 350.00;
+                        this.formData.asuransi_jenis = 'DN';
+                        this.formData.nilai_asuransi = 125.00;
+                        this.formData.bruto = 135.5;
+                        this.formData.bank_devisa = 'Bank Mandiri';
                         this.formData.cara_pembayaran = 'L/C';
+                        this.formData.pernyataan_nama = 'Irwan';
+                        this.formData.pernyataan_jabatan = 'Direktur';
+                        this.formData.pernyataan_kota = 'Jakarta';
                         this.formData.barang = [
-                            { hs_code: '6109100000', uraian: 'Kaos Katun Premium Polos M2B', jumlah_satuan: 500, kode_satuan: 'PCE', netto: 120, nilai_fob: 12500.00 }
+                            { hs_code: '6109100000', uraian: 'Kaos Katun Premium Polos M2B', merk: 'M2B', tipe: 'Round Neck', ukuran: 'All Size', negara_asal: 'ID', daerah_asal: 'Jawa Barat', jumlah_satuan: 500, kode_satuan: 'PCE', jumlah_kemasan: 20, kode_kemasan: 'CT', netto: 120, volume: 2.5, nilai_fob: 12500.00 }
                         ];
                     } else if (docType === 'BC20') {
                         this.formData.nama_importir = 'PT Mora Multi Berkah';
@@ -1324,6 +1713,9 @@
                         if (!b.hs_code || !b.uraian || !b.jumlah_satuan || !b.kode_satuan || !b.netto || !b[vf]) {
                             return { step: 4, message: `Lengkapi seluruh isian pada Pos Barang #${i + 1} (Tahap 4).` };
                         }
+                    }
+                    if (this.doc_type === 'BC30' && (!this.formData.pernyataan_nama || !this.formData.pernyataan_jabatan)) {
+                        return { step: 5, message: 'Lengkapi Pernyataan Penanggung Jawab (nama & jabatan) di Tahap 5.' };
                     }
                     return null;
                 },

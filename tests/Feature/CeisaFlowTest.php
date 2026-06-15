@@ -17,6 +17,56 @@ class CeisaFlowTest extends TestCase
         return User::factory()->create(['role' => User::ROLE_OPERATOR]);
     }
 
+    /**
+     * Payload form BC 3.0 ekspor lengkap (struktur CEISA 4.0).
+     *
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    protected function bc30Payload(array $overrides = []): array
+    {
+        return array_merge([
+            'doc_type' => 'BC30',
+            // Header
+            'kantor_muat' => 'IDJKT',
+            'jenis_ekspor' => 'Biasa',
+            'kategori_ekspor' => 'Umum',
+            'cara_dagang' => 'Biasa',
+            'cara_bayar' => 'Biasa/Tunai',
+            'komoditi' => 'NON_MIGAS',
+            'curah' => 'NON_CURAH',
+            // Entitas
+            'nama_eksportir' => 'PT Mora Multi Berkah',
+            'npwp_eksportir' => '012345678901000',
+            'alamat_eksportir' => 'Jakarta',
+            'nama_penerima' => 'ACME Pte Ltd',
+            'negara_tujuan' => 'SG',
+            // Pengangkut
+            'pelabuhan_muat' => 'IDJKT',
+            'pelabuhan_tujuan' => 'SGSIN',
+            // Transaksi
+            'kode_valuta' => 'USD',
+            'ndpbm' => 15800,
+            'incoterm' => 'FOB',
+            'nilai_fob' => 1500.50,
+            'bruto' => 130.0,
+            // Pernyataan
+            'pernyataan_nama' => 'Irwan',
+            'pernyataan_jabatan' => 'Direktur',
+            // Barang
+            'barang' => [
+                [
+                    'hs_code' => '6109100000',
+                    'uraian' => 'Kaos katun',
+                    'jumlah_satuan' => 100,
+                    'kode_satuan' => 'PCE',
+                    'netto' => 25.5,
+                    'nilai_fob' => 1500.50,
+                ],
+            ],
+        ], $overrides);
+    }
+
     public function test_dashboard_loads(): void
     {
         $this->actingAs($this->authedUser())
@@ -74,30 +124,8 @@ class CeisaFlowTest extends TestCase
             'api_key' => 'secret-key',
         ]);
 
-        $payload = [
-            'doc_type' => 'BC30',
-            'nama_eksportir' => 'PT Mora Multi Berkah',
-            'npwp_eksportir' => '01.234.567.8-901.000',
-            'alamat_eksportir' => 'Jakarta',
-            'nama_penerima' => 'ACME Pte Ltd',
-            'negara_tujuan' => 'SG',
-            'pelabuhan_muat' => 'IDJKT',
-            'kode_valuta' => 'USD',
-            'nilai_fob' => 1500.50,
-            'barang' => [
-                [
-                    'hs_code' => '6109100000',
-                    'uraian' => 'Kaos katun',
-                    'jumlah_satuan' => 100,
-                    'kode_satuan' => 'PCE',
-                    'netto' => 25.5,
-                    'nilai_fob' => 1500.50,
-                ],
-            ],
-        ];
-
         $this->actingAs($user)
-            ->post('/dokumen/submit', $payload)
+            ->post('/dokumen/submit', $this->bc30Payload())
             ->assertRedirect();
 
         $doc = Document::first();
@@ -106,6 +134,13 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('000001-PEB', $doc->nomor_aju);
         $this->assertSame(Document::STATUS_SUBMITTED, $doc->status);
         $this->assertSame('TOKEN-XYZ', $user->ceisaCredential->fresh()->token);
+
+        // Struktur payload CEISA 4.0 tersimpan lengkap.
+        $this->assertSame('Biasa', data_get($doc->payload, 'header.jenis_ekspor'));
+        $this->assertSame('FOB', data_get($doc->payload, 'header.incoterm'));
+        $this->assertEquals(15800, data_get($doc->payload, 'header.ndpbm'));
+        $this->assertSame('Irwan', data_get($doc->payload, 'header.pernyataan.nama'));
+        $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
     public function test_webhook_updates_document_status(): void
@@ -212,31 +247,8 @@ class CeisaFlowTest extends TestCase
             'api_key' => 'secret-key',
         ]);
 
-        $payload = [
-            'doc_type' => 'BC30',
-            'submit_action' => 'draft',
-            'nama_eksportir' => 'PT Mora Multi Berkah',
-            'npwp_eksportir' => '01.234.567.8-901.000',
-            'alamat_eksportir' => 'Jakarta',
-            'nama_penerima' => 'ACME Pte Ltd',
-            'negara_tujuan' => 'SG',
-            'pelabuhan_muat' => 'IDJKT',
-            'kode_valuta' => 'USD',
-            'nilai_fob' => 1500.50,
-            'barang' => [
-                [
-                    'hs_code' => '6109100000',
-                    'uraian' => 'Kaos katun',
-                    'jumlah_satuan' => 100,
-                    'kode_satuan' => 'PCE',
-                    'netto' => 25.5,
-                    'nilai_fob' => 1500.50,
-                ],
-            ],
-        ];
-
         $this->actingAs($user)
-            ->post('/dokumen/submit', $payload)
+            ->post('/dokumen/submit', $this->bc30Payload(['submit_action' => 'draft']))
             ->assertRedirect();
 
         $doc = Document::latest('id')->first();
