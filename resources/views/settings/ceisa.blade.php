@@ -98,7 +98,7 @@
                 @if ($credential)
                     <form method="POST" action="{{ route('settings.ceisa.test') }}" class="mt-4 pt-4 border-t border-gray-100">
                         @csrf
-                        <x-secondary-button>Uji Koneksi (ambil token)</x-secondary-button>
+                        <x-secondary-button type="submit">Uji Koneksi (ambil token)</x-secondary-button>
                         <span class="text-xs text-gray-400 ml-2">Mengirim request token ke CEISA.</span>
                     </form>
                 @endif
