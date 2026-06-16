@@ -180,6 +180,102 @@ class DocumentController extends Controller
     }
 
     /**
+     * Impor dokumen hasil query status CEISA menjadi dokumen arsip lokal.
+     */
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'nomor_aju' => ['required', 'string', 'max:100'],
+            'nomor_daftar' => ['nullable', 'string', 'max:100'],
+            'jenis_doc' => ['nullable', 'string', 'max:50'],
+            'status' => ['required', 'string', 'max:100'],
+            'kantor' => ['nullable', 'string', 'max:100'],
+            'tanggal_daftar' => ['nullable', 'string', 'max:100'],
+            'nilai_pabean' => ['nullable', 'string', 'max:100'],
+            'nama_perusahaan' => ['required', 'string', 'max:255'],
+            'uraian' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $user = $request->user();
+
+        // 1. Cek duplikasi
+        $exists = Document::where('nomor_aju', $request->input('nomor_aju'))->where('user_id', $user->id)->exists();
+        if ($exists) {
+            return back()->with('error', 'Dokumen dengan nomor aju ini sudah ada di database lokal.');
+        }
+
+        // 2. Normalisasi jenis_doc ke doc_type (BC30, BC20, BC24, TPB, RUSH)
+        $jenisDoc = strtoupper((string) $request->input('jenis_doc'));
+        $docType = 'BC30'; // fallback
+        if (str_contains($jenisDoc, '30') || str_contains($jenisDoc, 'PEB') || str_contains($jenisDoc, 'EKSPOR')) {
+            $docType = 'BC30';
+        } elseif (str_contains($jenisDoc, '20') || str_contains($jenisDoc, 'PIB') || str_contains($jenisDoc, 'IMPOR')) {
+            $docType = 'BC20';
+        } elseif (str_contains($jenisDoc, '24')) {
+            $docType = 'BC24';
+        } elseif (str_contains($jenisDoc, 'TPB')) {
+            $docType = 'TPB';
+        } elseif (str_contains($jenisDoc, 'RUSH') || str_contains($jenisDoc, 'SEGERA')) {
+            $docType = 'RUSH';
+        }
+
+        // 3. Normalisasi status
+        $rawStatus = strtoupper((string) $request->input('status'));
+        $status = Document::STATUS_SUBMITTED; // fallback
+        if (str_contains($rawStatus, 'TERIMA') || str_contains($rawStatus, 'ACCEPT') || str_contains($rawStatus, 'SPPB') || str_contains($rawStatus, 'SELESAI')) {
+            $status = Document::STATUS_ACCEPTED;
+        } elseif (str_contains($rawStatus, 'TOLAK') || str_contains($rawStatus, 'REJECT') || str_contains($rawStatus, 'NPP')) {
+            $status = Document::STATUS_REJECTED;
+        }
+
+        // Parse nilai numeric if possible
+        $nilaiRaw = $request->input('nilai_pabean');
+        $nilai = null;
+        if (!empty($nilaiRaw)) {
+            $clean = trim($nilaiRaw);
+            $lastComma = strrpos($clean, ',');
+            $lastDot = strrpos($clean, '.');
+            
+            if ($lastComma !== false && $lastDot !== false) {
+                if ($lastComma > $lastDot) {
+                    $clean = str_replace('.', '', $clean);
+                    $clean = str_replace(',', '.', $clean);
+                } else {
+                    $clean = str_replace(',', '', $clean);
+                }
+            } elseif ($lastComma !== false) {
+                $clean = str_replace(',', '.', $clean);
+            }
+            
+            $nilai = is_numeric($clean) ? (float) $clean : null;
+        }
+
+        // 4. Buat dokumen dengan source = 'arsip' agar muncul sebagai dokumen arsip historis
+        $document = $user->documents()->create([
+            'doc_type' => $docType,
+            'source' => Document::SOURCE_ARSIP,
+            'nomor_aju' => $request->input('nomor_aju'),
+            'nomor_daftar' => $request->input('nomor_daftar'),
+            'status' => $status,
+            'payload' => [
+                'arsip' => true,
+                'nama_perusahaan' => $request->input('nama_perusahaan'),
+                'kantor_pabean' => $request->input('kantor'),
+                'tanggal_dokumen' => $request->input('tanggal_daftar'),
+                'nilai' => $nilai,
+                'valuta' => 'USD', // default fallback
+                'uraian' => $request->input('uraian'),
+                'keterangan' => 'Diimpor dari Portal CEISA DJBC',
+            ],
+            'submitted_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('documents.show', $document)
+            ->with('success', 'Dokumen berhasil diimpor dari portal CEISA ke riwayat M2B.');
+    }
+
+    /**
      * Pastikan dokumen milik user yang sedang login.
      */
     protected function authorizeOwnership(Request $request, Document $document): void

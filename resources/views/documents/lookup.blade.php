@@ -153,6 +153,54 @@
                                 <pre class="text-[11px] font-mono text-emerald-400 overflow-x-auto">{{ json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) }}</pre>
                             </div>
                         </div>
+
+                        @if (!$localDoc)
+                            <div class="mt-6 border-t border-slate-100 pt-6">
+                                <div class="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4">
+                                    <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                        <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        Impor ke Riwayat Lokal (Arsip)
+                                    </h4>
+                                    <p class="text-xs text-slate-500 mb-4">Simpan dokumen historis dari portal CEISA ini ke database lokal M2B agar tampil di dashboard.</p>
+                                    
+                                    <form method="POST" action="{{ route('documents.import') }}" class="space-y-4">
+                                        @csrf
+                                        <input type="hidden" name="nomor_aju" value="{{ data_get($result, 'nomor_aju', data_get($result, 'data.nomor_aju', $nomorAju)) }}" />
+                                        <input type="hidden" name="nomor_daftar" value="{{ data_get($result, 'nomor_daftar', data_get($result, 'data.nomor_daftar')) }}" />
+                                        <input type="hidden" name="jenis_doc" value="{{ data_get($result, 'jenis_doc', data_get($result, 'data.jenis_doc')) }}" />
+                                        <input type="hidden" name="status" value="{{ $ceisaStatus }}" />
+                                        <input type="hidden" name="kantor" value="{{ data_get($result, 'kantor', data_get($result, 'data.kantor')) }}" />
+                                        <input type="hidden" name="tanggal_daftar" value="{{ data_get($result, 'tanggal_daftar', data_get($result, 'data.tanggal_daftar')) }}" />
+                                        <input type="hidden" name="nilai_pabean" value="{{ data_get($result, 'nilai_pabean', data_get($result, 'data.nilai_pabean')) }}" />
+                                        
+                                        <div class="grid sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <x-input-label for="nama_perusahaan" value="Nama Perusahaan / Importir / Eksportir" />
+                                                <input type="text" id="nama_perusahaan" name="nama_perusahaan" 
+                                                       value="PT. MORA MULTI BERKAH" 
+                                                       class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" 
+                                                       required />
+                                            </div>
+                                            <div>
+                                                <x-input-label for="uraian" value="Uraian Singkat Barang (Opsional)" />
+                                                <input type="text" id="uraian" name="uraian" 
+                                                       placeholder="mis. Spareparts Mesin, Textile" 
+                                                       class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex justify-end pt-2">
+                                            <button type="submit" 
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-100 transition-colors">
+                                                Simpan Sebagai Arsip Lokal
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endisset

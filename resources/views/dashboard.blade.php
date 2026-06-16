@@ -58,6 +58,7 @@
                             <tr class="text-left text-gray-500">
                                 <th class="px-4 py-3">No. Aju</th>
                                 <th class="px-4 py-3">Jenis</th>
+                                <th class="px-4 py-3">Pihak / Entitas</th>
                                 <th class="px-4 py-3">Status</th>
                                 <th class="px-4 py-3">Dibuat</th>
                                 <th class="px-4 py-3"></th>
@@ -88,6 +89,12 @@
                                         @endif
                                     </td>
                                     <td class="px-4 py-3">
+                                        <div class="font-medium text-slate-900 leading-snug">{{ $doc->partyName() ?? '—' }}</div>
+                                        @if ($doc->partyNpwp())
+                                            <div class="text-[11px] text-slate-400 font-mono mt-0.5">NPWP: {{ $doc->partyNpwp() }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-3">
                                         <div class="flex items-center gap-1.5">
                                             <x-status-badge :status="$doc->status" />
                                             <x-jalur-badge :jalur="$doc->jalur" />
@@ -100,7 +107,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-gray-400">
+                                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
                                         Belum ada dokumen. <a href="{{ route('documents.create') }}" class="text-indigo-600 underline">Buat dokumen pertama</a>.
                                     </td>
                                 </tr>

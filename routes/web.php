@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Arsip / rekam manual dokumen lama (PIB/PEB dari portal DJBC)
     Route::get('/dokumen/arsip', [DocumentController::class, 'archiveCreate'])->name('documents.archive.create');
     Route::post('/dokumen/arsip', [DocumentController::class, 'archiveStore'])->name('documents.archive.store');
+    Route::post('/dokumen/import', [DocumentController::class, 'import'])->name('documents.import');
     Route::get('/dokumen/lookup', [DocumentController::class, 'lookup'])->name('documents.lookup');
     Route::post('/dokumen/lookup', [DocumentController::class, 'lookupSearch'])->name('documents.lookup.search');
     Route::get('/dokumen/{document}', [DocumentController::class, 'show'])->name('documents.show');

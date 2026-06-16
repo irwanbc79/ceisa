@@ -70,6 +70,39 @@ class Document extends Model
         return $this->source === self::SOURCE_ARSIP;
     }
 
+    /**
+     * Nama pihak utama (eksportir/importir/pengusaha TPB/pemohon/arsip).
+     */
+    public function partyName(): ?string
+    {
+        return data_get($this->payload, 'header.eksportir.nama')
+            ?? data_get($this->payload, 'header.importir.nama')
+            ?? data_get($this->payload, 'header.pengusaha_tpb.nama')
+            ?? data_get($this->payload, 'header.pemohon.nama')
+            ?? data_get($this->payload, 'nama_perusahaan');
+    }
+
+    /**
+     * NPWP pihak utama (format NPWP16) dari payload mana pun.
+     */
+    public function partyNpwp(): ?string
+    {
+        return data_get($this->payload, 'header.eksportir.npwp')
+            ?? data_get($this->payload, 'header.importir.npwp')
+            ?? data_get($this->payload, 'header.pengusaha_tpb.npwp')
+            ?? data_get($this->payload, 'header.pemohon.npwp')
+            ?? data_get($this->payload, 'npwp');
+    }
+
+    /**
+     * NITKU (Nomor Identitas Tempat Kegiatan Usaha) bila tersedia di payload.
+     */
+    public function partyNitku(): ?string
+    {
+        return data_get($this->payload, 'header.nitku')
+            ?? data_get($this->payload, 'nitku');
+    }
+
     public function statusBadgeColor(): string
     {
         return match ($this->status) {

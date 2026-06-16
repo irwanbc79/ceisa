@@ -21,7 +21,16 @@
 
             {{-- 1. Status Ringkasan & Aksi --}}
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between gap-6">
-                <dl class="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm grow">
+                <dl class="grid grid-cols-2 md:grid-cols-5 gap-6 text-sm grow">
+                    <div>
+                        <dt class="text-slate-400 font-semibold uppercase text-[10px]">Pihak / Entitas Utama</dt>
+                        <dd class="text-slate-800 font-bold mt-1 text-sm leading-tight">
+                            {{ $document->partyName() ?? '—' }}
+                            @if ($document->partyNpwp())
+                                <span class="block text-[11px] text-slate-400 font-mono font-normal mt-0.5">NPWP: {{ $document->partyNpwp() }}</span>
+                            @endif
+                        </dd>
+                    </div>
                     <div>
                         <dt class="text-slate-400 font-semibold uppercase text-[10px]">Nomor Aju</dt>
                         <dd class="font-mono text-slate-800 font-bold mt-1 text-sm">{{ $document->nomor_aju ?? '—' }}</dd>

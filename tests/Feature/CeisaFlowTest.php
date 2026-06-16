@@ -389,4 +389,128 @@ class CeisaFlowTest extends TestCase
         $this->assertSame(Document::STATUS_DRAFT, $doc->status);
         $this->assertNull($doc->nomor_aju);
     }
+
+    public function test_document_party_helper_methods(): void
+    {
+        $user = $this->authedUser();
+
+        // 1. Test BC30 (Ekspor)
+        $docBc30 = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => [
+                'header' => [
+                    'eksportir' => [
+                        'nama' => 'PT Ekspor Indonesia',
+                        'npwp' => '111111111111111',
+                    ],
+                    'nitku' => '0000000000000001',
+                ],
+            ],
+        ]);
+        $this->assertSame('PT Ekspor Indonesia', $docBc30->partyName());
+        $this->assertSame('111111111111111', $docBc30->partyNpwp());
+        $this->assertSame('0000000000000001', $docBc30->partyNitku());
+
+        // 2. Test BC20 (Impor)
+        $docBc20 = $user->documents()->create([
+            'doc_type' => 'BC20',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => [
+                'header' => [
+                    'importir' => [
+                        'nama' => 'PT Impor Indonesia',
+                        'npwp' => '222222222222222',
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertSame('PT Impor Indonesia', $docBc20->partyName());
+        $this->assertSame('222222222222222', $docBc20->partyNpwp());
+        $this->assertNull($docBc20->partyNitku());
+
+        // 3. Test TPB
+        $docTpb = $user->documents()->create([
+            'doc_type' => 'TPB',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => [
+                'header' => [
+                    'pengusaha_tpb' => [
+                        'nama' => 'PT TPB Nusantara',
+                        'npwp' => '333333333333333',
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertSame('PT TPB Nusantara', $docTpb->partyName());
+        $this->assertSame('333333333333333', $docTpb->partyNpwp());
+
+        // 4. Test RUSH
+        $docRush = $user->documents()->create([
+            'doc_type' => 'RUSH',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => [
+                'header' => [
+                    'pemohon' => [
+                        'nama' => 'PT Rush Express',
+                        'npwp' => '444444444444444',
+                    ],
+                ],
+            ],
+        ]);
+        $this->assertSame('PT Rush Express', $docRush->partyName());
+        $this->assertSame('444444444444444', $docRush->partyNpwp());
+
+        // 5. Test Arsip
+        $docArsip = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'source' => Document::SOURCE_ARSIP,
+            'status' => Document::STATUS_ACCEPTED,
+            'payload' => [
+                'nama_perusahaan' => 'PT Arsip Legacy',
+                'npwp' => '555555555555555',
+            ],
+        ]);
+        $this->assertSame('PT Arsip Legacy', $docArsip->partyName());
+        $this->assertSame('555555555555555', $docArsip->partyNpwp());
+    }
+
+    public function test_user_can_import_queried_document_from_ceisa_portal(): void
+    {
+        $user = $this->authedUser();
+
+        $payload = [
+            'nomor_aju' => '000020MOT83720260301000015',
+            'nomor_daftar' => 'REG-12345',
+            'jenis_doc' => 'BC20 — Pemberitahuan Impor Barang',
+            'status' => 'DITERIMA / SPPB',
+            'kantor' => 'KPPBC Belawan',
+            'tanggal_daftar' => '2026-03-04',
+            'nilai_pabean' => '12.500,00',
+            'nama_perusahaan' => 'PT. Mora Multi Berkah',
+            'uraian' => 'Mesin Pabrik',
+        ];
+
+        // 1. Sukses mengimpor dokumen
+        $this->actingAs($user)
+            ->post('/dokumen/import', $payload)
+            ->assertRedirect();
+
+        $doc = Document::where('nomor_aju', '000020MOT83720260301000015')->first();
+        $this->assertNotNull($doc);
+        $this->assertSame(Document::SOURCE_ARSIP, $doc->source);
+        $this->assertSame('BC20', $doc->doc_type);
+        $this->assertSame(Document::STATUS_ACCEPTED, $doc->status);
+        $this->assertSame('REG-12345', $doc->nomor_daftar);
+        $this->assertSame('PT. Mora Multi Berkah', data_get($doc->payload, 'nama_perusahaan'));
+        $this->assertSame('KPPBC Belawan', data_get($doc->payload, 'kantor_pabean'));
+        $this->assertEquals(12500.0, data_get($doc->payload, 'nilai'));
+        $this->assertSame('Mesin Pabrik', data_get($doc->payload, 'uraian'));
+
+        // 2. Proteksi anti-duplikasi
+        $this->actingAs($user)
+            ->post('/dokumen/import', $payload)
+            ->assertRedirect()
+            ->assertSessionHas('error');
+    }
 }
