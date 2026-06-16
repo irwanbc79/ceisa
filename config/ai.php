@@ -33,7 +33,8 @@ return [
         'claude' => [
             'api_key' => env('ANTHROPIC_API_KEY'),
             'base_url' => rtrim(env('ANTHROPIC_BASE_URL', 'https://api.anthropic.com'), '/'),
-            'model' => env('CLAUDE_MODEL', 'claude-opus-4-8'),
+            // Haiku 4.5: cepat & hemat — cocok untuk validasi/ekstraksi terstruktur rutin staf M2B.
+            'model' => env('CLAUDE_MODEL', 'claude-haiku-4-5'),
             'version' => env('ANTHROPIC_VERSION', '2023-06-01'),
         ],
 
