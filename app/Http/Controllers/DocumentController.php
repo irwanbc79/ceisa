@@ -231,11 +231,11 @@ class DocumentController extends Controller
         // Parse nilai numeric if possible
         $nilaiRaw = $request->input('nilai_pabean');
         $nilai = null;
-        if (!empty($nilaiRaw)) {
+        if (! empty($nilaiRaw)) {
             $clean = trim($nilaiRaw);
             $lastComma = strrpos($clean, ',');
             $lastDot = strrpos($clean, '.');
-            
+
             if ($lastComma !== false && $lastDot !== false) {
                 if ($lastComma > $lastDot) {
                     $clean = str_replace('.', '', $clean);
@@ -246,7 +246,7 @@ class DocumentController extends Controller
             } elseif ($lastComma !== false) {
                 $clean = str_replace(',', '.', $clean);
             }
-            
+
             $nilai = is_numeric($clean) ? (float) $clean : null;
         }
 

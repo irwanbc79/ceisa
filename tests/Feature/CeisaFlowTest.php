@@ -153,7 +153,7 @@ class CeisaFlowTest extends TestCase
     public function test_login_uses_official_h2h_endpoint_and_headers(): void
     {
         Http::fake([
-            '*openapi-auth*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
         ]);
 
         $user = $this->authedUser();
@@ -167,7 +167,7 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('TOK', $token);
 
         Http::assertSent(function (Request $request) {
-            return str_contains($request->url(), '/v1/openapi-auth/user/login')
+            return str_contains($request->url(), '/nle-oauth/v1/user/login')
                 && $request->method() === 'POST'
                 && $request['username'] === 'm2b_user'
                 && $request['password'] === 'm2b_pass'
@@ -193,8 +193,83 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('TOK-CUSTOM', $token);
 
         Http::assertSent(function (Request $request) {
-            return str_starts_with($request->url(), 'https://custom-gateway.example.com/v1/openapi-auth/user/login');
+            return str_starts_with($request->url(), 'https://custom-gateway.example.com/nle-oauth/v1/user/login');
         });
+    }
+
+    public function test_login_stores_refresh_token_from_response(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'ACCESS-1',
+                'refresh_token' => 'REFRESH-1',
+                'expires_in' => 300,
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+        ]);
+
+        CeisaService::forCredential($credential)->getToken();
+
+        $credential->refresh();
+        $this->assertSame('ACCESS-1', $credential->token);
+        $this->assertSame('REFRESH-1', $credential->refresh_token);
+    }
+
+    public function test_expired_token_is_refreshed_via_update_token_endpoint(): void
+    {
+        Http::fake([
+            '*user/update-token*' => Http::response(['access_token' => 'ACCESS-2'], 200),
+            '*user/login*' => Http::response(['access_token' => 'SHOULD-NOT-BE-USED'], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+            'token' => 'OLD-EXPIRED',
+            'refresh_token' => 'REFRESH-1',
+            'token_expires_at' => now()->subMinutes(5),
+        ]);
+
+        $token = CeisaService::forCredential($credential)->refreshTokenIfExpired();
+
+        $this->assertSame('ACCESS-2', $token);
+
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/nle-oauth/v1/user/update-token')
+            && $r->method() === 'POST'
+            && $r->hasHeader('Authorization', 'REFRESH-1'));
+        Http::assertNotSent(fn (Request $r) => str_contains($r->url(), 'user/login'));
+    }
+
+    public function test_refresh_falls_back_to_full_login_when_update_token_fails(): void
+    {
+        Http::fake([
+            '*user/update-token*' => Http::response(['message' => 'refresh expired'], 401),
+            '*user/login*' => Http::response(['access_token' => 'ACCESS-FRESH', 'refresh_token' => 'REFRESH-NEW', 'expires_in' => 300], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+            'token' => 'OLD-EXPIRED',
+            'refresh_token' => 'REFRESH-OLD',
+            'token_expires_at' => now()->subMinutes(5),
+        ]);
+
+        $token = CeisaService::forCredential($credential)->refreshTokenIfExpired();
+
+        $this->assertSame('ACCESS-FRESH', $token);
+        $credential->refresh();
+        $this->assertSame('REFRESH-NEW', $credential->refresh_token);
     }
 
     public function test_create_form_requires_credential(): void
@@ -227,11 +302,11 @@ class CeisaFlowTest extends TestCase
     public function test_submit_document_sends_to_ceisa_and_persists(): void
     {
         Http::fake([
-            '*openapi-auth*' => Http::response([
+            '*user/login*' => Http::response([
                 'access_token' => 'TOKEN-XYZ',
                 'expires_in' => 3600,
             ], 200),
-            '*/v2/openapi/document*' => Http::response([
+            '*/openapi/document*' => Http::response([
                 'error_code' => 0,
                 'nomor_aju' => '000001-PEB',
                 'status' => 'DITERIMA',
@@ -383,11 +458,11 @@ class CeisaFlowTest extends TestCase
     public function test_submit_bc20_document_sends_to_ceisa_and_persists(): void
     {
         Http::fake([
-            '*openapi-auth*' => Http::response([
+            '*user/login*' => Http::response([
                 'access_token' => 'TOKEN-XYZ',
                 'expires_in' => 3600,
             ], 200),
-            '*/v2/openapi/document*' => Http::response([
+            '*/openapi/document*' => Http::response([
                 'error_code' => 0,
                 'nomor_aju' => '000002-PIB',
                 'status' => 'DITERIMA',

@@ -10,11 +10,13 @@ class CeisaCredential extends Model
     protected $fillable = [
         'user_id',
         'username',
+        'npwp',
         'password',
         'app_id',
         'api_key',
         'base_url',
         'token',
+        'refresh_token',
         'token_expires_at',
     ];
 
@@ -23,6 +25,7 @@ class CeisaCredential extends Model
         'password',
         'api_key',
         'token',
+        'refresh_token',
     ];
 
     protected function casts(): array
@@ -33,6 +36,7 @@ class CeisaCredential extends Model
             'password' => 'encrypted',
             'api_key' => 'encrypted',
             'token' => 'encrypted',
+            'refresh_token' => 'encrypted',
             'token_expires_at' => 'datetime',
         ];
     }

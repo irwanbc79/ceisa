@@ -27,6 +27,7 @@ class CeisaSettingController extends Controller
     {
         $data = $request->validate([
             'username' => ['required', 'string', 'max:255'],
+            'npwp' => ['nullable', 'string', 'max:20'],
             // password & api_key opsional saat update (kosong = pertahankan yang lama)
             'password' => ['nullable', 'string', 'max:255'],
             'api_key' => ['nullable', 'string', 'max:1000'],
@@ -59,6 +60,7 @@ class CeisaSettingController extends Controller
 
         $attributes = [
             'username' => $data['username'],
+            'npwp' => $data['npwp'] ?? null,
             'app_id' => $data['app_id'] ?? null,
             'base_url' => $baseUrl,
         ];
@@ -76,9 +78,10 @@ class CeisaSettingController extends Controller
             }
         }
 
-        // Kredensial rahasia berubah -> token lama tidak valid lagi.
+        // Kredensial rahasia berubah -> token & refresh_token lama tidak valid lagi.
         if ($secretChanged) {
             $attributes['token'] = null;
+            $attributes['refresh_token'] = null;
             $attributes['token_expires_at'] = null;
         }
 

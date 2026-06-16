@@ -201,22 +201,101 @@ class CeisaReferenceSeeder extends Seeder
      *
      * @return array<string, string>
      */
+    /**
+     * Kantor Pabean DJBC (KdKantor 6-digit). Daftar kurasi kantor pelayanan utama
+     * (KPU) & KPPBC yang menangani arus barang impor/ekspor terbesar di Indonesia.
+     *
+     * CATATAN: daftar penuh (~120 kantor) adalah sumber kebenaran DJBC dan sebaiknya
+     * disinkron via `php artisan ceisa:sync-references` saat endpoint referensi resmi
+     * tersedia. Subset ini mencakup mayoritas kantor yang dipakai PPJK/forwarder.
+     *
+     * @return array<string, string>
+     */
     private function kantorPabean(): array
     {
         return [
-            '011200' => '011200 - KPPBC TMP C Kuala Tanjung',
-            '010300' => '010300 - KPPBC TMP B Belawan',
+            // --- Kantor Pelayanan Utama (KPU) ---
             '050100' => '050100 - KPU BC Tipe A Tanjung Priok',
-            '051000' => '051000 - KPPBC TMP A Jakarta',
             '040100' => '040100 - KPU BC Tipe C Soekarno-Hatta',
-            '041000' => '041000 - KPPBC TMP Bekasi',
-            '060300' => '060300 - KPPBC TMP Tanjung Emas Semarang',
-            '070300' => '070300 - KPPBC TMP Tanjung Perak Surabaya',
-            '080300' => '080300 - KPPBC TMP B Ngurah Rai',
-            '090400' => '090400 - KPPBC TMP B Makassar',
             '030100' => '030100 - KPU BC Tipe B Batam',
+
+            // --- Sumatera ---
+            '010100' => '010100 - KPPBC TMP B Banda Aceh',
+            '010200' => '010200 - KPPBC TMP C Lhokseumawe',
+            '010300' => '010300 - KPPBC TMP B Belawan',
+            '011200' => '011200 - KPPBC TMP C Kuala Tanjung',
+            '010600' => '010600 - KPPBC TMP C Sibolga',
+            '050200' => '050200 - KPPBC TMP B Tanjung Balai Asahan',
+            '020100' => '020100 - KPPBC TMP B Pekanbaru',
             '020200' => '020200 - KPPBC TMP B Tanjung Balai Karimun',
+            '020300' => '020300 - KPPBC TMP C Dumai',
+            '020600' => '020600 - KPPBC TMP C Bengkalis',
+            '021000' => '021000 - KPPBC TMP C Tembilahan',
+            '030200' => '030200 - KPPBC TMP C Tanjung Pinang',
+            '040200' => '040200 - KPPBC TMP B Teluk Bayur (Padang)',
+            '040500' => '040500 - KPPBC TMP C Jambi',
+            '050300' => '050300 - KPPBC TMP B Palembang',
+            '050500' => '050500 - KPPBC TMP C Pangkal Pinang',
+            '060100' => '060100 - KPPBC TMP B Bandar Lampung (Panjang)',
+
+            // --- DKI Jakarta, Banten & Jawa Barat ---
+            '051000' => '051000 - KPPBC TMP A Jakarta',
+            '050600' => '050600 - KPPBC TMP A Marunda',
+            '055000' => '055000 - KPPBC TMP A Tangerang (Soekarno-Hatta Kargo)',
+            '090100' => '090100 - KPPBC TMP A Bekasi',
+            '041000' => '041000 - KPPBC TMP Bekasi',
+            '090200' => '090200 - KPPBC TMP A Purwakarta',
+            '090300' => '090300 - KPPBC TMP A Bandung',
+            '090500' => '090500 - KPPBC TMP C Cirebon',
+            '090600' => '090600 - KPPBC TMP C Merak',
+
+            // --- Jawa Tengah, DIY & Jawa Timur ---
+            '060300' => '060300 - KPPBC TMP Tanjung Emas Semarang',
+            '060400' => '060400 - KPPBC TMP C Surakarta',
+            '060700' => '060700 - KPPBC TMP B Yogyakarta',
+            '070100' => '070100 - KPPBC TMP Juanda',
+            '070300' => '070300 - KPPBC TMP Tanjung Perak Surabaya',
+            '070400' => '070400 - KPPBC TMP C Gresik',
+            '070500' => '070500 - KPPBC TMP C Pasuruan',
+            '070600' => '070600 - KPPBC TMP C Malang',
+            '070900' => '070900 - KPPBC TMP C Madiun',
+            '071400' => '071400 - KPPBC TMP C Kediri',
+            '071600' => '071600 - KPPBC TMP C Blitar',
+
+            // --- Bali, NTB & NTT ---
+            '080100' => '080100 - KPPBC TMP B Ngurah Rai',
+            '080300' => '080300 - KPPBC TMP B Ngurah Rai (Kargo)',
+            '080400' => '080400 - KPPBC TMP C Benoa',
+            '080700' => '080700 - KPPBC TMP C Mataram',
+            '081000' => '081000 - KPPBC TMP C Kupang',
+
+            // --- Kalimantan ---
+            '100100' => '100100 - KPPBC TMP B Pontianak',
+            '110100' => '110100 - KPPBC TMP B Banjarmasin',
+            '120100' => '120100 - KPPBC TMP C Sampit',
+            '130100' => '130100 - KPPBC TMP B Balikpapan',
             '160100' => '160100 - KPPBC TMP B Balikpapan',
+            '130200' => '130200 - KPPBC TMP C Samarinda',
+            '130400' => '130400 - KPPBC TMP C Bontang',
+            '130600' => '130600 - KPPBC TMP B Tarakan',
+
+            // --- Sulawesi ---
+            '090400' => '090400 - KPPBC TMP B Makassar',
+            '140100' => '140100 - KPPBC TMP A Makassar',
+            '140400' => '140400 - KPPBC TMP C Pare-Pare',
+            '150100' => '150100 - KPPBC TMP B Bitung',
+            '150200' => '150200 - KPPBC TMP C Manado',
+            '150400' => '150400 - KPPBC TMP C Gorontalo',
+            '160300' => '160300 - KPPBC TMP C Kendari',
+            '160500' => '160500 - KPPBC TMP C Palu',
+
+            // --- Maluku & Papua ---
+            '170100' => '170100 - KPPBC TMP C Ambon',
+            '170300' => '170300 - KPPBC TMP C Ternate',
+            '180100' => '180100 - KPPBC TMP B Jayapura',
+            '180300' => '180300 - KPPBC TMP C Sorong',
+            '180500' => '180500 - KPPBC TMP C Merauke',
+            '180700' => '180700 - KPPBC TMP C Biak',
         ];
     }
 

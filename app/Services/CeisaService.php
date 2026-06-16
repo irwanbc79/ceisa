@@ -13,18 +13,22 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai (CEISA 4.0).
+ * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai (CEISA 4.0 / PIA).
  *
- * Auth resmi (openapi.beacukai.go.id):
+ * Auth resmi (ceisa40.gitbook.io/pia-ceisa40, openapi.beacukai.go.id):
  *   - SEMUA request membawa header `beacukai-api-key: {api_key}`.
- *   - Login: POST {host}/v1/openapi-auth/user/login dengan body username+password
- *     -> mengembalikan access_token (Bearer).
- *   - Layanan Pabean (kirim dokumen, dll) di {host}/v2/openapi memakai
+ *   - Login : POST {host}/nle-oauth/v1/user/login (body username+password)
+ *     -> mengembalikan access_token (Bearer) + refresh_token.
+ *   - Refresh: POST {host}/nle-oauth/v1/user/update-token
+ *     dengan header Authorization: {refresh_token} -> access_token baru.
+ *   - Layanan Pabean (kirim dokumen, status) di {host}/openapi memakai
  *     Authorization: Bearer {access_token} + header beacukai-api-key.
  *
- * Alur:
- *   1. getToken()       -> login, simpan access_token + masa berlaku.
- *   2. submitDocument() -> POST dokumen (auto-refresh token bila perlu).
+ * Alur token (access token CEISA berumur ~5 menit):
+ *   1. getToken()             -> login penuh, simpan access_token + refresh_token + masa berlaku.
+ *   2. refreshAccessToken()   -> tukar refresh_token jadi access_token baru tanpa login ulang.
+ *   3. refreshTokenIfExpired()-> dipakai sebelum tiap request: pakai token valid,
+ *      coba refresh_token bila ada, fallback login penuh bila gagal.
  */
 class CeisaService
 {
@@ -73,10 +77,7 @@ class CeisaService
         }
 
         // CEISA dapat membungkus token di beberapa lokasi tergantung versi.
-        $token = $data['access_token']
-            ?? $data['token']
-            ?? data_get($data, 'item.access_token')
-            ?? data_get($data, 'data.access_token');
+        $token = $this->extractToken($data);
 
         if (empty($token)) {
             throw new CeisaException(
@@ -85,23 +86,65 @@ class CeisaService
             );
         }
 
-        // expires_in dalam detik. Access Token CEISA 4.0 berumur ~5 menit;
-        // pakai 300 dtk sebagai fallback bila server tak menyertakan expires_in.
-        $expiresIn = (int) ($data['expires_in']
-            ?? data_get($data, 'item.expires_in')
-            ?? data_get($data, 'data.expires_in')
-            ?? config('ceisa.token_ttl_fallback', 300));
+        $this->storeToken($token, $this->extractRefreshToken($data), $this->extractExpiresIn($data));
 
-        $this->credential->forceFill([
-            'token' => $token,
-            'token_expires_at' => Carbon::now()->addSeconds($expiresIn),
-        ])->save();
+        return $token;
+    }
+
+    /**
+     * Tukar refresh_token menjadi access_token baru tanpa login ulang penuh.
+     * Endpoint: POST /nle-oauth/v1/user/update-token, header Authorization: {refresh_token}.
+     *
+     * @throws CeisaException
+     */
+    public function refreshAccessToken(): string
+    {
+        $refreshToken = $this->credential->refresh_token;
+
+        if (empty($refreshToken)) {
+            // Tak ada refresh_token tersimpan -> harus login penuh.
+            return $this->getToken();
+        }
+
+        $endpoint = config('ceisa.endpoints.refresh_token');
+
+        try {
+            $response = $this->baseRequest()
+                ->withHeaders(['Authorization' => $refreshToken])
+                ->post($endpoint);
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                'Gagal terhubung ke server CEISA saat refresh token: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+
+        $data = $this->decode($response);
+
+        // Refresh token kadaluarsa / ditolak -> jatuh ke login penuh.
+        if (! $response->successful()) {
+            return $this->getToken();
+        }
+
+        $token = $this->extractToken($data);
+
+        if (empty($token)) {
+            return $this->getToken();
+        }
+
+        // update-token bisa mengembalikan refresh_token baru; pertahankan yang lama bila tidak.
+        $this->storeToken(
+            $token,
+            $this->extractRefreshToken($data) ?: $refreshToken,
+            $this->extractExpiresIn($data),
+        );
 
         return $token;
     }
 
     /**
      * Pastikan token masih valid; refresh bila sudah/akan kadaluarsa.
+     * Pakai refresh_token bila tersedia, fallback login penuh.
      *
      * @throws CeisaException
      */
@@ -111,7 +154,59 @@ class CeisaService
             return $this->credential->token;
         }
 
-        return $this->getToken();
+        return $this->refreshAccessToken();
+    }
+
+    /**
+     * Simpan access_token (+ refresh_token & masa berlaku) ke DB.
+     */
+    protected function storeToken(string $token, ?string $refreshToken, int $expiresIn): void
+    {
+        $attributes = [
+            'token' => $token,
+            'token_expires_at' => Carbon::now()->addSeconds($expiresIn),
+        ];
+
+        if (! empty($refreshToken)) {
+            $attributes['refresh_token'] = $refreshToken;
+        }
+
+        $this->credential->forceFill($attributes)->save();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function extractToken(array $data): ?string
+    {
+        return $data['access_token']
+            ?? $data['token']
+            ?? data_get($data, 'item.access_token')
+            ?? data_get($data, 'data.access_token');
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function extractRefreshToken(array $data): ?string
+    {
+        return $data['refresh_token']
+            ?? data_get($data, 'item.refresh_token')
+            ?? data_get($data, 'data.refresh_token');
+    }
+
+    /**
+     * expires_in (detik). Access Token CEISA 4.0 berumur ~5 menit;
+     * fallback config token_ttl_fallback bila server tak menyertakannya.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected function extractExpiresIn(array $data): int
+    {
+        return (int) ($data['expires_in']
+            ?? data_get($data, 'item.expires_in')
+            ?? data_get($data, 'data.expires_in')
+            ?? config('ceisa.token_ttl_fallback', 300));
     }
 
     /**
@@ -212,12 +307,13 @@ class CeisaService
     public function queryDocumentStatus(string $nomorAju): array
     {
         $token = $this->refreshTokenIfExpired();
-        $endpoint = config('ceisa.endpoints.status');
+        // CEISA: GET /openapi/status/{nomorAju}
+        $endpoint = rtrim((string) config('ceisa.endpoints.status'), '/').'/'.rawurlencode($nomorAju);
 
         try {
             $response = $this->baseRequest()
                 ->withToken($token)
-                ->get($endpoint, ['nomor_aju' => $nomorAju]);
+                ->get($endpoint);
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal menghubungi CEISA saat query status: '.$e->getMessage(),

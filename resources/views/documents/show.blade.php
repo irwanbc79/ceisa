@@ -3,7 +3,7 @@
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
                 <h2 class="font-bold text-2xl text-slate-800 tracking-tight">
-                    Rincian Dokumen <span class="text-indigo-600 font-extrabold" x-text="'{{ $document->doc_type }}'"></span>
+                    Rincian Dokumen <span class="text-indigo-600 font-extrabold">{{ $document->doc_type }}</span>
                     <span class="text-slate-400 font-normal text-sm ml-2">ID #{{ $document->id }}</span>
                 </h2>
                 <p class="text-xs text-slate-500 mt-1">Status pengiriman ke Bea Cukai Indonesia</p>

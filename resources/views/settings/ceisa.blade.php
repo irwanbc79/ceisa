@@ -41,6 +41,14 @@
                     </div>
 
                     <div>
+                        <x-input-label for="npwp" value="NPWP Perusahaan (opsional)" />
+                        <x-text-input id="npwp" name="npwp" type="text" class="mt-1 block w-full"
+                                      :value="old('npwp', $credential?->npwp)" autocomplete="off"
+                                      placeholder="15/16 digit — dipakai untuk query status per perusahaan" />
+                        <x-input-error :messages="$errors->get('npwp')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="password" value="Password" />
                         <x-text-input id="password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password"
                                       placeholder="{{ $credential ? '•••••••• (biarkan kosong untuk mempertahankan)' : '' }}" />

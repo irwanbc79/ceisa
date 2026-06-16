@@ -11,8 +11,8 @@ return [
     | Kredensial per-user (username, password, api_key) disimpan terenkripsi di
     | tabel ceisa_credentials. Nilai di sini adalah fallback/default level aplikasi.
     |
-    | Host gateway resmi (lihat openapi.beacukai.go.id). Auth ada di /v1/openapi-auth,
-    | layanan Pabean (kirim dokumen) di /v2/openapi.
+    | Host gateway resmi (lihat openapi.beacukai.go.id / ceisa40.gitbook.io).
+    | Auth (login & refresh) di /nle-oauth/v1, layanan Pabean (dokumen, status) di /openapi.
     */
     'base_url' => rtrim(env('CEISA_BASE_URL', 'https://apis-gw.beacukai.go.id'), '/'),
 
@@ -32,15 +32,20 @@ return [
 
     /*
     | Endpoint relatif terhadap base_url (host gateway).
-    | - token : login H2H (POST username+password, header beacukai-api-key) -> access_token.
-    |   Terverifikasi dari dokumentasi resmi: {host}/v1/openapi-auth/user/login.
-    | - submit/status : layanan Pabean di /v2/openapi (46 resource). Path resource
-    |   spesifik mengikuti Swagger JSON openapi (Pabean) — override via .env bila berbeda.
+    | Terverifikasi dari dokumentasi resmi PIA-CEISA40 (ceisa40.gitbook.io/pia-ceisa40):
+    |   - token  : POST {host}/nle-oauth/v1/user/login (body: username+password)
+    |   - refresh: POST {host}/nle-oauth/v1/user/update-token (header: Authorization refresh_token)
+    |   - submit : POST {host}/openapi/document
+    |   - status : GET  {host}/openapi/status/{nomorAju} atau ?idPerusahaan={NPWP}
     */
     'endpoints' => [
-        'token' => env('CEISA_TOKEN_ENDPOINT', '/v1/openapi-auth/user/login'),
-        'submit' => env('CEISA_SUBMIT_ENDPOINT', '/v2/openapi/document'),
-        'status' => env('CEISA_STATUS_ENDPOINT', '/v2/openapi/document/status'),
+        'token'           => env('CEISA_TOKEN_ENDPOINT', '/nle-oauth/v1/user/login'),
+        'refresh_token'   => env('CEISA_REFRESH_ENDPOINT', '/nle-oauth/v1/user/update-token'),
+        'submit'          => env('CEISA_SUBMIT_ENDPOINT', '/openapi/document'),
+        'status'          => env('CEISA_STATUS_ENDPOINT', '/openapi/status'),
+        'download_respon' => env('CEISA_DOWNLOAD_ENDPOINT', '/openapi/download-respon'),
+        'cetak_formulir'  => env('CEISA_CETAK_ENDPOINT', '/openapi/respon/cetak-formulir'),
+        'billing'         => env('CEISA_BILLING_ENDPOINT', '/openapi/respon/billing'),
     ],
 
     /*
