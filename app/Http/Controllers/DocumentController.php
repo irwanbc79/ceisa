@@ -8,6 +8,7 @@ use App\Http\Requests\StoreDocumentRequest;
 use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Services\CeisaService;
+use App\Services\DocumentValidator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -162,6 +163,20 @@ class DocumentController extends Controller
         return redirect()
             ->route('documents.show', $document)
             ->with('success', 'Dokumen berhasil dikirim ke CEISA. Menunggu response.');
+    }
+
+    /**
+     * Validasi cerdas (hybrid AI + aturan) sebelum dokumen dikirim ke CEISA.
+     */
+    public function validateAi(Request $request, Document $document, DocumentValidator $validator): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        $result = $validator->validate($document);
+
+        return redirect()
+            ->route('documents.show', $document)
+            ->with('ai_validation', $result);
     }
 
     /**

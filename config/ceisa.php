@@ -39,13 +39,13 @@ return [
     |   - status : GET  {host}/openapi/status/{nomorAju} atau ?idPerusahaan={NPWP}
     */
     'endpoints' => [
-        'token'           => env('CEISA_TOKEN_ENDPOINT', '/nle-oauth/v1/user/login'),
-        'refresh_token'   => env('CEISA_REFRESH_ENDPOINT', '/nle-oauth/v1/user/update-token'),
-        'submit'          => env('CEISA_SUBMIT_ENDPOINT', '/openapi/document'),
-        'status'          => env('CEISA_STATUS_ENDPOINT', '/openapi/status'),
+        'token' => env('CEISA_TOKEN_ENDPOINT', '/nle-oauth/v1/user/login'),
+        'refresh_token' => env('CEISA_REFRESH_ENDPOINT', '/nle-oauth/v1/user/update-token'),
+        'submit' => env('CEISA_SUBMIT_ENDPOINT', '/openapi/document'),
+        'status' => env('CEISA_STATUS_ENDPOINT', '/openapi/status'),
         'download_respon' => env('CEISA_DOWNLOAD_ENDPOINT', '/openapi/download-respon'),
-        'cetak_formulir'  => env('CEISA_CETAK_ENDPOINT', '/openapi/respon/cetak-formulir'),
-        'billing'         => env('CEISA_BILLING_ENDPOINT', '/openapi/respon/billing'),
+        'cetak_formulir' => env('CEISA_CETAK_ENDPOINT', '/openapi/respon/cetak-formulir'),
+        'billing' => env('CEISA_BILLING_ENDPOINT', '/openapi/respon/billing'),
     ],
 
     /*

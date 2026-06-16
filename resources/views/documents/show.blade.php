@@ -19,6 +19,59 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <x-flash />
 
+            @if (session('ai_validation'))
+                @php($av = session('ai_validation'))
+                @php($all = array_merge($av['rule_findings'], $av['ai_findings']))
+                @php($errors = collect($all)->where('level', 'error')->count())
+                @php($warnings = collect($all)->where('level', 'warning')->count())
+                <div class="bg-white rounded-2xl shadow-sm border border-violet-100 overflow-hidden">
+                    <div class="bg-violet-50 px-6 py-4 border-b border-violet-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="h-5 w-5 text-violet-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
+                            <h3 class="font-bold text-slate-800 text-sm">Hasil Validasi Cerdas</h3>
+                        </div>
+                        <div class="flex items-center gap-2 text-[11px] font-bold">
+                            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">{{ $errors }} error</span>
+                            <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">{{ $warnings }} peringatan</span>
+                            @if ($av['provider'])
+                                <span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 uppercase">AI: {{ $av['provider'] }}</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        @if ($av['ai_error'])
+                            <div class="rounded-xl bg-amber-50 border border-amber-100 p-3 text-xs text-amber-800">
+                                <span class="font-bold">Analisis AI tidak tersedia:</span> {{ $av['ai_error'] }}
+                                <span class="block mt-0.5 text-amber-600">Hasil di bawah hanya dari pemeriksaan aturan.</span>
+                            </div>
+                        @endif
+
+                        @if (empty($all))
+                            <div class="flex items-center gap-2 text-sm text-emerald-700 font-semibold">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                                Tidak ada masalah terdeteksi. Dokumen tampak siap dikirim.
+                            </div>
+                        @else
+                            <ul class="space-y-2">
+                                @foreach ($all as $item)
+                                    @php($c = ['error' => ['bg-rose-50','border-rose-100','text-rose-800','text-rose-500'], 'warning' => ['bg-amber-50','border-amber-100','text-amber-800','text-amber-500'], 'info' => ['bg-sky-50','border-sky-100','text-sky-800','text-sky-500']][$item['level']] ?? ['bg-slate-50','border-slate-100','text-slate-800','text-slate-500'])
+                                    <li class="flex items-start gap-3 rounded-xl border {{ $c[0] }} {{ $c[1] }} p-3 text-sm">
+                                        <span class="mt-0.5 shrink-0 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded {{ $c[3] }} bg-white border {{ $c[1] }}">{{ $item['level'] }}</span>
+                                        <span class="{{ $c[2] }}">
+                                            @if ($item['field'])<span class="font-bold">{{ $item['field'] }}:</span> @endif{{ $item['message'] }}
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                        <p class="text-[11px] text-slate-400 border-t border-slate-100 pt-3">
+                            Validasi ini bersifat bantuan (aturan deterministik + AI hybrid Claude/Gemini/DeepSeek). Keputusan akhir tetap pada operator; CEISA DJBC melakukan validasi resmi saat submit.
+                        </p>
+                    </div>
+                </div>
+            @endif
+
             {{-- 1. Status Ringkasan & Aksi --}}
             <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between gap-6">
                 <dl class="grid grid-cols-2 md:grid-cols-5 gap-6 text-sm grow">
@@ -58,6 +111,13 @@
 
                     <div class="flex items-center gap-2">
                         @unless ($document->isArchived())
+                            <form method="POST" action="{{ route('documents.validate', $document) }}">
+                                @csrf
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold rounded-xl shadow-md shadow-violet-100 transition-all">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" /></svg>
+                                    Validasi AI
+                                </button>
+                            </form>
                             <form method="POST" action="{{ route('documents.duplicate', $document) }}">
                                 @csrf
                                 <button type="submit" class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all"

@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dokumen/{document}', [DocumentController::class, 'show'])->name('documents.show');
     Route::post('/dokumen/{document}/submit', [DocumentController::class, 'submit'])->name('documents.submit');
     Route::post('/dokumen/{document}/duplikasi', [DocumentController::class, 'duplicate'])->name('documents.duplicate');
+    Route::post('/dokumen/{document}/validasi-ai', [DocumentController::class, 'validateAi'])->name('documents.validate');
 
     // Pengaturan kredensial CEISA
     Route::get('/settings/ceisa', [CeisaSettingController::class, 'edit'])->name('settings.ceisa.edit');
