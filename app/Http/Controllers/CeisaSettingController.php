@@ -31,6 +31,8 @@ class CeisaSettingController extends Controller
             'password' => ['nullable', 'string', 'max:255'],
             'api_key' => ['nullable', 'string', 'max:1000'],
             'app_id' => ['nullable', 'string', 'max:255'],
+            'environment' => ['required', 'string', 'in:production,sandbox,custom'],
+            'custom_base_url' => ['required_if:environment,custom', 'nullable', 'string', 'max:500'],
         ]);
 
         $credential = $request->user()->ceisaCredential;
@@ -49,12 +51,23 @@ class CeisaSettingController extends Controller
             }
         }
 
+        $baseUrl = match ($data['environment']) {
+            'sandbox' => 'https://apisdev-gw.beacukai.go.id',
+            'production' => 'https://apis-gw.beacukai.go.id',
+            'custom' => $data['custom_base_url'] ? rtrim($data['custom_base_url'], '/') : null,
+        };
+
         $attributes = [
             'username' => $data['username'],
             'app_id' => $data['app_id'] ?? null,
+            'base_url' => $baseUrl,
         ];
 
         $secretChanged = false;
+
+        if ($credential && $credential->base_url !== $baseUrl) {
+            $secretChanged = true;
+        }
 
         foreach (['password', 'api_key'] as $secret) {
             if (! empty($data[$secret])) {

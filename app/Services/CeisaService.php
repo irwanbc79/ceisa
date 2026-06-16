@@ -236,7 +236,9 @@ class CeisaService
      */
     protected function baseRequest(): PendingRequest
     {
-        return Http::baseUrl(config('ceisa.base_url'))
+        $baseUrl = $this->credential->base_url ?: config('ceisa.base_url');
+
+        return Http::baseUrl(rtrim($baseUrl, '/'))
             ->timeout((int) config('ceisa.timeout', 30))
             ->withHeaders([
                 // Wajib pada SEMUA request CEISA 4.0 (auth maupun layanan).

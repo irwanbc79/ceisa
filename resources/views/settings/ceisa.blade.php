@@ -1,4 +1,17 @@
 <x-app-layout>
+    @php
+        $currentBaseUrl = $credential?->base_url;
+        $env = 'production'; // default
+        if ($currentBaseUrl) {
+            if ($currentBaseUrl === 'https://apisdev-gw.beacukai.go.id') {
+                $env = 'sandbox';
+            } elseif ($currentBaseUrl === 'https://apis-gw.beacukai.go.id') {
+                $env = 'production';
+            } else {
+                $env = 'custom';
+            }
+        }
+    @endphp
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Pengaturan CEISA') }}
@@ -42,6 +55,23 @@
                     </div>
 
                     <div>
+                        <x-input-label for="environment" value="Environment / Gateway URL" />
+                        <select id="environment" name="environment" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" onchange="toggleCustomUrl(this.value)">
+                            <option value="production" {{ old('environment', $env) === 'production' ? 'selected' : '' }}>Production (https://apis-gw.beacukai.go.id)</option>
+                            <option value="sandbox" {{ old('environment', $env) === 'sandbox' ? 'selected' : '' }}>Sandbox / Development (https://apisdev-gw.beacukai.go.id)</option>
+                            <option value="custom" {{ old('environment', $env) === 'custom' ? 'selected' : '' }}>Custom Gateway URL</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('environment')" class="mt-2" />
+                    </div>
+
+                    <div id="custom-url-container" style="display: {{ old('environment', $env) === 'custom' ? 'block' : 'none' }}">
+                        <x-input-label for="custom_base_url" value="Custom Gateway URL" />
+                        <x-text-input id="custom_base_url" name="custom_base_url" type="text" class="mt-1 block w-full"
+                                      :value="old('custom_base_url', $credential?->base_url)" placeholder="https://..." />
+                        <x-input-error :messages="$errors->get('custom_base_url')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="app_id" value="App ID (opsional)" />
                         <x-text-input id="app_id" name="app_id" type="text" class="mt-1 block w-full"
                                       :value="old('app_id', $credential?->app_id)" />
@@ -75,4 +105,15 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleCustomUrl(value) {
+            var container = document.getElementById('custom-url-container');
+            if (value === 'custom') {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
+        }
+    </script>
 </x-app-layout>

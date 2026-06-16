@@ -88,12 +88,14 @@ class CeisaFlowTest extends TestCase
                 'password' => 'm2b_pass',
                 'api_key' => 'secret-key',
                 'app_id' => 'APP123',
+                'environment' => 'production',
             ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('ceisa_credentials', [
             'user_id' => $user->id,
             'app_id' => 'APP123',
+            'base_url' => 'https://apis-gw.beacukai.go.id',
         ]);
 
         // Kredensial sensitif tersimpan terenkripsi -> tidak boleh plaintext di DB
@@ -103,6 +105,49 @@ class CeisaFlowTest extends TestCase
         $this->assertNotSame('m2b_pass', $credential->getRawOriginal('password'));
         $this->assertSame('m2b_user', $credential->username);
         $this->assertSame('m2b_pass', $credential->password);
+    }
+
+    public function test_user_can_save_ceisa_credential_with_sandbox(): void
+    {
+        $user = $this->authedUser();
+
+        $this->actingAs($user)
+            ->post('/settings/ceisa', [
+                'username' => 'm2b_user',
+                'password' => 'm2b_pass',
+                'api_key' => 'secret-key',
+                'app_id' => 'APP123',
+                'environment' => 'sandbox',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('ceisa_credentials', [
+            'user_id' => $user->id,
+            'app_id' => 'APP123',
+            'base_url' => 'https://apisdev-gw.beacukai.go.id',
+        ]);
+    }
+
+    public function test_user_can_save_ceisa_credential_with_custom_url(): void
+    {
+        $user = $this->authedUser();
+
+        $this->actingAs($user)
+            ->post('/settings/ceisa', [
+                'username' => 'm2b_user',
+                'password' => 'm2b_pass',
+                'api_key' => 'secret-key',
+                'app_id' => 'APP123',
+                'environment' => 'custom',
+                'custom_base_url' => 'https://custom-gateway.example.com/',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('ceisa_credentials', [
+            'user_id' => $user->id,
+            'app_id' => 'APP123',
+            'base_url' => 'https://custom-gateway.example.com',
+        ]);
     }
 
     public function test_login_uses_official_h2h_endpoint_and_headers(): void
@@ -127,6 +172,28 @@ class CeisaFlowTest extends TestCase
                 && $request['username'] === 'm2b_user'
                 && $request['password'] === 'm2b_pass'
                 && $request->hasHeader('beacukai-api-key', 'KEY-123');
+        });
+    }
+
+    public function test_login_uses_credential_base_url_when_provided(): void
+    {
+        Http::fake([
+            'https://custom-gateway.example.com/*' => Http::response(['access_token' => 'TOK-CUSTOM', 'expires_in' => 3600], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+            'base_url' => 'https://custom-gateway.example.com',
+        ]);
+
+        $token = CeisaService::forCredential($credential)->getToken();
+        $this->assertSame('TOK-CUSTOM', $token);
+
+        Http::assertSent(function (Request $request) {
+            return str_starts_with($request->url(), 'https://custom-gateway.example.com/v1/openapi-auth/user/login');
         });
     }
 
