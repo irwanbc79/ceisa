@@ -65,9 +65,30 @@
                 </div>
                 
                 <div class="p-6 space-y-8">
+                    @if ($document->isArchived())
+                        {{-- Panel data arsip (rekam manual dokumen lama DJBC) --}}
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                            <div class="flex items-center gap-2 mb-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600 uppercase tracking-wide">Arsip Manual</span>
+                                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Data Dokumen Lama</h4>
+                            </div>
+                            <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                                <div><dt class="text-slate-400 text-[10px] uppercase font-bold">Perusahaan</dt><dd class="font-bold text-slate-800">{{ data_get($document->payload, 'nama_perusahaan') ?? '—' }}</dd></div>
+                                <div><dt class="text-slate-400 text-[10px] uppercase font-bold">NPWP</dt><dd class="font-mono text-slate-700">{{ data_get($document->payload, 'npwp') ?? '—' }}</dd></div>
+                                <div><dt class="text-slate-400 text-[10px] uppercase font-bold">Kantor Pabean</dt><dd class="font-semibold text-slate-700">{{ data_get($document->payload, 'kantor_pabean') ?? '—' }}</dd></div>
+                                <div><dt class="text-slate-400 text-[10px] uppercase font-bold">Tanggal Dokumen</dt><dd class="font-semibold text-slate-700">{{ data_get($document->payload, 'tanggal_dokumen') ?? '—' }}</dd></div>
+                                <div><dt class="text-slate-400 text-[10px] uppercase font-bold">Nilai</dt><dd class="font-bold text-indigo-700">{{ data_get($document->payload, 'nilai') !== null ? number_format(data_get($document->payload, 'nilai'), 2, ',', '.').' '.(data_get($document->payload, 'valuta') ?? '') : '—' }}</dd></div>
+                                <div><dt class="text-slate-400 text-[10px] uppercase font-bold">Uraian</dt><dd class="text-slate-700">{{ data_get($document->payload, 'uraian') ?? '—' }}</dd></div>
+                                @if (data_get($document->payload, 'keterangan'))
+                                    <div class="sm:col-span-2"><dt class="text-slate-400 text-[10px] uppercase font-bold">Keterangan</dt><dd class="text-slate-700">{{ data_get($document->payload, 'keterangan') }}</dd></div>
+                                @endif
+                            </dl>
+                        </div>
+                    @endif
+
                     {{-- Header Row: Parties/Entities & Transport/Values --}}
-                    <div class="grid md:grid-cols-2 gap-8">
-                        
+                    <div class="grid md:grid-cols-2 gap-8" @if ($document->isArchived()) style="display:none" @endif>
+
                         {{-- Left Column: Entities (Importir/Eksportir dll) --}}
                         <div class="space-y-4">
                             @if ($document->doc_type === 'BC30')

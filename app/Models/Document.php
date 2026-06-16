@@ -26,9 +26,14 @@ class Document extends Model
 
     public const JALUR_MERAH = 'M';
 
+    public const SOURCE_H2H = 'h2h';
+
+    public const SOURCE_ARSIP = 'arsip';
+
     protected $fillable = [
         'user_id',
         'doc_type',
+        'source',
         'nomor_aju',
         'nomor_daftar',
         'payload',
@@ -58,6 +63,11 @@ class Document extends Model
     public function webhookLogs(): HasMany
     {
         return $this->hasMany(WebhookLog::class);
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->source === self::SOURCE_ARSIP;
     }
 
     public function statusBadgeColor(): string

@@ -198,6 +198,34 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
+    public function test_user_can_archive_old_document(): void
+    {
+        $user = $this->authedUser();
+
+        $this->actingAs($user)
+            ->post('/dokumen/arsip', [
+                'doc_type' => 'BC30',
+                'nomor_aju' => '301012B628EF20260611000001',
+                'status' => 'accepted',
+                'jalur' => 'H',
+                'nama_perusahaan' => 'PT Sumatera Fan Jaya',
+                'tanggal_dokumen' => '2026-06-11',
+                'kode_valuta' => 'USD',
+                'nilai' => 21250,
+            ])
+            ->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertNotNull($doc);
+        $this->assertSame(Document::SOURCE_ARSIP, $doc->source);
+        $this->assertTrue($doc->isArchived());
+        $this->assertSame(Document::STATUS_ACCEPTED, $doc->status);
+        $this->assertSame('H', $doc->jalur);
+        $this->assertSame('PT Sumatera Fan Jaya', data_get($doc->payload, 'nama_perusahaan'));
+        // Dokumen arsip tampil di Dashboard (riwayat).
+        $this->actingAs($user)->get('/dashboard')->assertOk()->assertSee('301012B628EF20260611000001');
+    }
+
     public function test_webhook_updates_document_status(): void
     {
         $user = $this->authedUser();

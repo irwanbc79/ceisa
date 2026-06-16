@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CeisaException;
+use App\Http\Requests\StoreArchiveDocumentRequest;
 use App\Http\Requests\StoreDocumentRequest;
 use App\Models\CeisaReference;
 use App\Models\Document;
@@ -28,6 +29,40 @@ class DocumentController extends Controller
             'docTypes' => config('ceisa.doc_types'),
             'references' => CeisaReference::forWizard(),
         ]);
+    }
+
+    /**
+     * Form rekam manual (arsip) dokumen lama PIB/PEB dari portal DJBC.
+     */
+    public function archiveCreate(Request $request): View
+    {
+        return view('documents.arsip', [
+            'docTypes' => config('ceisa.doc_types'),
+            'references' => CeisaReference::forWizard(),
+        ]);
+    }
+
+    /**
+     * Simpan dokumen arsip (tidak dikirim ke CEISA) agar tampil di riwayat.
+     */
+    public function archiveStore(StoreArchiveDocumentRequest $request): RedirectResponse
+    {
+        $v = $request->validated();
+
+        $document = $request->user()->documents()->create([
+            'doc_type' => $v['doc_type'],
+            'source' => Document::SOURCE_ARSIP,
+            'nomor_aju' => $v['nomor_aju'],
+            'nomor_daftar' => $v['nomor_daftar'] ?? null,
+            'status' => $v['status'],
+            'jalur' => $v['jalur'] ?? null,
+            'payload' => $request->toArchivePayload(),
+            'submitted_at' => $v['tanggal_dokumen'] ?? null,
+        ]);
+
+        return redirect()
+            ->route('documents.show', $document)
+            ->with('success', 'Dokumen arsip berhasil direkam ke riwayat M2B.');
     }
 
     /**
