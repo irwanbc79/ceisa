@@ -9,9 +9,11 @@ use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Services\CeisaService;
 use App\Services\DocumentValidator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller
 {
@@ -20,8 +22,75 @@ class DocumentController extends Controller
      */
     public function index(Request $request): View
     {
-        $user = $request->user();
+        [$query, $filters] = $this->filteredDocuments($request);
 
+        // Rekap agregat (mengikuti filter aktif) dalam satu query.
+        $agg = (clone $query)
+            ->selectRaw('count(*) as total')
+            ->selectRaw('sum(case when status = ? then 1 else 0 end) as accepted', [Document::STATUS_ACCEPTED])
+            ->selectRaw('sum(case when status in (?, ?) then 1 else 0 end) as rejected', [Document::STATUS_REJECTED, Document::STATUS_ERROR])
+            ->selectRaw('sum(case when jalur = ? then 1 else 0 end) as merah', [Document::JALUR_MERAH])
+            ->first();
+
+        $rekap = [
+            'total' => (int) $agg->total,
+            'accepted' => (int) $agg->accepted,
+            'rejected' => (int) $agg->rejected,
+            'merah' => (int) $agg->merah,
+        ];
+
+        $documents = $query->latest()->paginate(20)->withQueryString();
+
+        return view('documents.index', [
+            'documents' => $documents,
+            'filters' => $filters,
+            'rekap' => $rekap,
+            'docTypes' => config('ceisa.doc_types'),
+        ]);
+    }
+
+    /**
+     * Ekspor daftar dokumen terfilter ke CSV (streamed, tanpa dependensi tambahan).
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        [$query] = $this->filteredDocuments($request);
+
+        $filename = 'dokumen-ceisa-'.now()->format('Ymd-His').'.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $out = fopen('php://output', 'w');
+            // BOM agar Excel mengenali UTF-8.
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['No. Aju', 'Nomor Daftar', 'Jenis', 'Status', 'Jalur', 'Sumber', 'Pihak/Entitas', 'NPWP', 'Dibuat']);
+
+            $query->latest()->chunk(200, function ($chunk) use ($out) {
+                foreach ($chunk as $doc) {
+                    fputcsv($out, [
+                        $doc->nomor_aju,
+                        $doc->nomor_daftar,
+                        $doc->doc_type,
+                        $doc->status,
+                        $doc->jalurInfo()['label'] ?? '',
+                        $doc->isArchived() ? 'Arsip' : 'H2H',
+                        $doc->partyName(),
+                        $doc->partyNpwp(),
+                        $doc->created_at?->format('Y-m-d H:i'),
+                    ]);
+                }
+            });
+
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * Bangun query dokumen milik user sesuai filter request + array filter.
+     *
+     * @return array{0: Builder, 1: array<string, mixed>}
+     */
+    protected function filteredDocuments(Request $request): array
+    {
         $filters = [
             'q' => trim((string) $request->input('q')),
             'doc_type' => $request->input('doc_type'),
@@ -32,7 +101,7 @@ class DocumentController extends Controller
             'to' => $request->input('to'),
         ];
 
-        $documents = $user->documents()
+        $query = $request->user()->documents()
             ->when($filters['q'] !== '', function ($query) use ($filters) {
                 $term = '%'.$filters['q'].'%';
                 $query->where(fn ($q) => $q
@@ -44,16 +113,9 @@ class DocumentController extends Controller
             ->when($filters['jalur'], fn ($q, $v) => $q->where('jalur', $v))
             ->when($filters['source'], fn ($q, $v) => $q->where('source', $v))
             ->when($filters['from'], fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
-            ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v));
 
-        return view('documents.index', [
-            'documents' => $documents,
-            'filters' => $filters,
-            'docTypes' => config('ceisa.doc_types'),
-        ]);
+        return [$query, $filters];
     }
 
     /**

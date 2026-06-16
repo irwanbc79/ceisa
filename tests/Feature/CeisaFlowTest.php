@@ -743,4 +743,32 @@ class CeisaFlowTest extends TestCase
             ->post(route('documents.duplicate', $doc))
             ->assertForbidden();
     }
+
+    public function test_document_index_shows_rekap_counts(): void
+    {
+        $user = $this->authedUser();
+        $user->documents()->create(['doc_type' => 'BC30', 'source' => Document::SOURCE_H2H, 'nomor_aju' => 'A1', 'payload' => ['x' => 1], 'status' => Document::STATUS_ACCEPTED, 'jalur' => Document::JALUR_MERAH]);
+        $user->documents()->create(['doc_type' => 'BC20', 'source' => Document::SOURCE_H2H, 'nomor_aju' => 'A2', 'payload' => ['x' => 1], 'status' => Document::STATUS_ERROR]);
+
+        $this->actingAs($user)->get(route('documents.index'))
+            ->assertOk()
+            ->assertViewHas('rekap', fn ($r) => $r['total'] === 2 && $r['accepted'] === 1 && $r['rejected'] === 1 && $r['merah'] === 1);
+    }
+
+    public function test_document_export_csv_respects_filters(): void
+    {
+        $user = $this->authedUser();
+        $user->documents()->create(['doc_type' => 'BC30', 'source' => Document::SOURCE_H2H, 'nomor_aju' => 'EKSPOR-CSV', 'payload' => ['header' => ['eksportir' => ['nama' => 'PT M2B']]], 'status' => Document::STATUS_SUBMITTED]);
+        $user->documents()->create(['doc_type' => 'BC20', 'source' => Document::SOURCE_H2H, 'nomor_aju' => 'IMPOR-CSV', 'payload' => ['x' => 1], 'status' => Document::STATUS_DRAFT]);
+
+        $response = $this->actingAs($user)->get(route('documents.export', ['doc_type' => 'BC30']));
+        $response->assertOk();
+        $response->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+        $csv = $response->streamedContent();
+        $this->assertStringContainsString('No. Aju', $csv); // header row
+        $this->assertStringContainsString('EKSPOR-CSV', $csv);
+        $this->assertStringContainsString('PT M2B', $csv);
+        $this->assertStringNotContainsString('IMPOR-CSV', $csv); // tersaring oleh filter BC30
+    }
 }

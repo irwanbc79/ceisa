@@ -15,6 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Daftar dokumen lengkap (filter, search, jalur)
     Route::get('/daftar-dokumen', [DocumentController::class, 'index'])->name('documents.index');
+    Route::get('/daftar-dokumen/export', [DocumentController::class, 'export'])->name('documents.export');
 
     // Dokumen CEISA
     Route::get('/dokumen/buat', [DocumentController::class, 'create'])->name('documents.create');

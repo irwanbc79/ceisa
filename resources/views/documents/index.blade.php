@@ -2,16 +2,38 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">Daftar Dokumen</h2>
-            <a href="{{ route('documents.create') }}"
-               class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
-                + Buat Dokumen
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('documents.export', request()->query()) }}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 shadow-sm transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" /></svg>
+                    Export CSV
+                </a>
+                <a href="{{ route('documents.create') }}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-700">
+                    + Buat Dokumen
+                </a>
+            </div>
         </div>
     </x-slot>
 
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-5">
             <x-flash />
+
+            {{-- Rekap (mengikuti filter aktif) --}}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                @foreach ([
+                    ['Total (terfilter)', $rekap['total'], 'text-slate-900'],
+                    ['Diterima', $rekap['accepted'], 'text-emerald-600'],
+                    ['Ditolak/Error', $rekap['rejected'], 'text-rose-600'],
+                    ['Jalur Merah', $rekap['merah'], 'text-rose-600'],
+                ] as [$label, $value, $color])
+                    <div class="bg-white shadow-sm rounded-xl p-4 border border-slate-100">
+                        <div class="text-xs text-slate-500">{{ $label }}</div>
+                        <div class="text-2xl font-bold {{ $color }}">{{ $value }}</div>
+                    </div>
+                @endforeach
+            </div>
 
             {{-- Filter bar --}}
             <form method="GET" action="{{ route('documents.index') }}"
