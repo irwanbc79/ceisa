@@ -56,14 +56,26 @@
                         </div>
                     @endif
 
-                    @if (in_array($document->status, ['draft', 'error']))
-                        <form method="POST" action="{{ route('documents.submit', $document) }}">
-                            @csrf
-                            <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-100 transition-all">
-                                {{ $document->status === 'draft' ? 'Kirim ke CEISA' : 'Kirim Ulang ke CEISA' }}
-                            </button>
-                        </form>
-                    @endif
+                    <div class="flex items-center gap-2">
+                        @unless ($document->isArchived())
+                            <form method="POST" action="{{ route('documents.duplicate', $document) }}">
+                                @csrf
+                                <button type="submit" class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all"
+                                        onclick="return confirm('Duplikasi dokumen ini sebagai draft baru?')">
+                                    Duplikasi
+                                </button>
+                            </form>
+                        @endunless
+
+                        @if (in_array($document->status, ['draft', 'error']))
+                            <form method="POST" action="{{ route('documents.submit', $document) }}">
+                                @csrf
+                                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-100 transition-all">
+                                    {{ $document->status === 'draft' ? 'Kirim ke CEISA' : 'Kirim Ulang ke CEISA' }}
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
             </div>
 

@@ -655,4 +655,92 @@ class CeisaFlowTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('error');
     }
+
+    public function test_document_index_filters_by_type_status_and_search(): void
+    {
+        $user = $this->authedUser();
+
+        $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-EKSPOR-1', 'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
+        ]);
+        $user->documents()->create([
+            'doc_type' => 'BC20', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-IMPOR-1', 'payload' => ['x' => 2], 'status' => Document::STATUS_DRAFT,
+        ]);
+
+        // Filter jenis BC30 -> hanya dokumen ekspor.
+        $this->actingAs($user)->get(route('documents.index', ['doc_type' => 'BC30']))
+            ->assertOk()
+            ->assertSee('AJU-EKSPOR-1')
+            ->assertDontSee('AJU-IMPOR-1');
+
+        // Filter status draft -> hanya dokumen impor.
+        $this->actingAs($user)->get(route('documents.index', ['status' => 'draft']))
+            ->assertOk()
+            ->assertSee('AJU-IMPOR-1')
+            ->assertDontSee('AJU-EKSPOR-1');
+
+        // Pencarian nomor aju.
+        $this->actingAs($user)->get(route('documents.index', ['q' => 'IMPOR']))
+            ->assertOk()
+            ->assertSee('AJU-IMPOR-1')
+            ->assertDontSee('AJU-EKSPOR-1');
+    }
+
+    public function test_user_can_duplicate_document_into_new_draft(): void
+    {
+        $user = $this->authedUser();
+        $original = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000001-PEB', 'nomor_daftar' => 'REG-1',
+            'payload' => ['header' => ['eksportir' => ['nama' => 'PT M2B']]],
+            'status' => Document::STATUS_ACCEPTED, 'jalur' => Document::JALUR_HIJAU,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('documents.duplicate', $original))
+            ->assertRedirect();
+
+        $this->assertSame(2, $user->documents()->count());
+
+        $clone = Document::latest('id')->first();
+        $this->assertNotSame($original->id, $clone->id);
+        $this->assertSame('BC30', $clone->doc_type);
+        $this->assertSame(Document::STATUS_DRAFT, $clone->status);
+        $this->assertNull($clone->nomor_aju);
+        $this->assertNull($clone->nomor_daftar);
+        $this->assertNull($clone->jalur);
+        $this->assertSame('PT M2B', data_get($clone->payload, 'header.eksportir.nama'));
+    }
+
+    public function test_archived_document_cannot_be_duplicated(): void
+    {
+        $user = $this->authedUser();
+        $arsip = $user->documents()->create([
+            'doc_type' => 'BC20', 'source' => Document::SOURCE_ARSIP,
+            'nomor_aju' => 'ARSIP-1', 'payload' => ['nama_perusahaan' => 'PT Lama'],
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('documents.duplicate', $arsip))
+            ->assertSessionHas('error');
+
+        $this->assertSame(1, $user->documents()->count());
+    }
+
+    public function test_user_cannot_duplicate_other_users_document(): void
+    {
+        $owner = $this->authedUser();
+        $doc = $owner->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'payload' => ['x' => 1], 'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $intruder = $this->authedUser();
+        $this->actingAs($intruder)
+            ->post(route('documents.duplicate', $doc))
+            ->assertForbidden();
+    }
 }

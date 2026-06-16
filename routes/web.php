@@ -13,6 +13,9 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Daftar dokumen lengkap (filter, search, jalur)
+    Route::get('/daftar-dokumen', [DocumentController::class, 'index'])->name('documents.index');
+
     // Dokumen CEISA
     Route::get('/dokumen/buat', [DocumentController::class, 'create'])->name('documents.create');
     Route::post('/dokumen/submit', [DocumentController::class, 'store'])->name('documents.store');
@@ -25,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/dokumen/lookup', [DocumentController::class, 'lookupSearch'])->name('documents.lookup.search');
     Route::get('/dokumen/{document}', [DocumentController::class, 'show'])->name('documents.show');
     Route::post('/dokumen/{document}/submit', [DocumentController::class, 'submit'])->name('documents.submit');
+    Route::post('/dokumen/{document}/duplikasi', [DocumentController::class, 'duplicate'])->name('documents.duplicate');
 
     // Pengaturan kredensial CEISA
     Route::get('/settings/ceisa', [CeisaSettingController::class, 'edit'])->name('settings.ceisa.edit');

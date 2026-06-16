@@ -5,6 +5,11 @@
                 {{ __('Dashboard') }}
             </h2>
             <div class="flex items-center gap-2">
+                <a href="{{ route('documents.index') }}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 shadow-sm transition-colors">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" /></svg>
+                    Daftar Dokumen
+                </a>
                 <a href="{{ route('documents.lookup') }}"
                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-50 shadow-sm transition-colors">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803m10.607.197a7.5 7.5 0 0 1-10.607 0" /></svg>
@@ -101,8 +106,15 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-3 text-gray-500">{{ $doc->created_at->format('d/m/Y H:i') }}</td>
-                                    <td class="px-4 py-3 text-right">
+                                    <td class="px-4 py-3 text-right whitespace-nowrap">
                                         <a href="{{ route('documents.show', $doc) }}" class="text-indigo-600 hover:underline">Detail</a>
+                                        @unless ($doc->isArchived())
+                                            <form method="POST" action="{{ route('documents.duplicate', $doc) }}" class="inline ml-3">
+                                                @csrf
+                                                <button type="submit" class="text-slate-500 hover:text-slate-800"
+                                                        onclick="return confirm('Duplikasi dokumen ini sebagai draft baru?')">Duplikasi</button>
+                                            </form>
+                                        @endunless
                                     </td>
                                 </tr>
                             @empty

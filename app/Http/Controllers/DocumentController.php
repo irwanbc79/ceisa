@@ -15,6 +15,70 @@ use Illuminate\View\View;
 class DocumentController extends Controller
 {
     /**
+     * Daftar dokumen lengkap dengan filter jenis/status/jalur/sumber/tanggal & pencarian.
+     */
+    public function index(Request $request): View
+    {
+        $user = $request->user();
+
+        $filters = [
+            'q' => trim((string) $request->input('q')),
+            'doc_type' => $request->input('doc_type'),
+            'status' => $request->input('status'),
+            'jalur' => $request->input('jalur'),
+            'source' => $request->input('source'),
+            'from' => $request->input('from'),
+            'to' => $request->input('to'),
+        ];
+
+        $documents = $user->documents()
+            ->when($filters['q'] !== '', function ($query) use ($filters) {
+                $term = '%'.$filters['q'].'%';
+                $query->where(fn ($q) => $q
+                    ->where('nomor_aju', 'like', $term)
+                    ->orWhere('nomor_daftar', 'like', $term));
+            })
+            ->when($filters['doc_type'], fn ($q, $v) => $q->where('doc_type', $v))
+            ->when($filters['status'], fn ($q, $v) => $q->where('status', $v))
+            ->when($filters['jalur'], fn ($q, $v) => $q->where('jalur', $v))
+            ->when($filters['source'], fn ($q, $v) => $q->where('source', $v))
+            ->when($filters['from'], fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
+            ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('documents.index', [
+            'documents' => $documents,
+            'filters' => $filters,
+            'docTypes' => config('ceisa.doc_types'),
+        ]);
+    }
+
+    /**
+     * Duplikasi (Salin Data AJU) dokumen H2H menjadi draft baru siap kirim ulang.
+     */
+    public function duplicate(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        if ($document->isArchived()) {
+            return back()->with('error', 'Dokumen arsip tidak dapat diduplikasi.');
+        }
+
+        $clone = $request->user()->documents()->create([
+            'doc_type' => $document->doc_type,
+            'source' => Document::SOURCE_H2H,
+            'payload' => $document->payload,
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        return redirect()
+            ->route('documents.show', $clone)
+            ->with('success', 'Dokumen berhasil diduplikasi sebagai draft baru. Periksa data, lalu kirim ke CEISA.');
+    }
+
+    /**
      * Form input dokumen BC 3.0 (PEB Ekspor).
      */
     public function create(Request $request): View|RedirectResponse
