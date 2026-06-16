@@ -54,7 +54,7 @@
 
                     <div>
                         <x-input-label for="nomor_aju" value="Nomor Aju / Pengajuan" />
-                        <input type="text" id="nomor_aju" name="nomor_aju" value="{{ old('nomor_aju') }}" placeholder="mis. 301012B628EF20260611000001" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm font-mono" required />
+                        <input type="text" id="nomor_aju" name="nomor_aju" value="{{ old('nomor_aju', request('nomor_aju')) }}" placeholder="mis. 301012B628EF20260611000001" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm font-mono" required />
                     </div>
                     <div>
                         <x-input-label for="nomor_daftar" value="Nomor Pendaftaran (Opsional)" />

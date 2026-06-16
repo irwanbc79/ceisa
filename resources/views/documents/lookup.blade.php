@@ -69,6 +69,12 @@
                         <p class="font-bold text-rose-800 text-sm">Tidak dapat mengambil data dari CEISA</p>
                         <p class="text-rose-700 text-xs mt-1">{{ $error }}</p>
                         <p class="text-rose-500 text-xs mt-2">Kemungkinan: nomor aju tidak ditemukan di sistem CEISA, token expired, atau endpoint status belum diaktifkan untuk akun ini.</p>
+                        <div class="mt-3">
+                            <a href="{{ route('documents.archive.create', ['nomor_aju' => $nomorAju]) }}" 
+                               class="inline-flex items-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
+                                Rekam Manual Sebagai Arsip Lokal &rarr;
+                            </a>
+                        </div>
                     </div>
                 </div>
             @endisset

@@ -1271,7 +1271,47 @@
                             }
                         }
                         @if ($errors->any())
-                            this.step = this.steps.length;
+                            const errorKeys = @json($errors->keys());
+                            const stepMap = {
+                                'kantor_muat': 2, 'jenis_ekspor': 2, 'kategori_ekspor': 2, 'cara_dagang': 2, 'cara_bayar': 2, 'komoditi': 2, 'curah': 2,
+                                'nama_eksportir': 2, 'npwp_eksportir': 2, 'alamat_eksportir': 2, 'nama_penerima': 2, 'negara_tujuan': 2, 'alamat_penerima': 2,
+                                'nama_importir': 2, 'npwp_importir': 2, 'alamat_importir': 2, 'nama_pemasok': 2, 'negara_pemasok': 2,
+                                'nama_tpb': 2, 'npwp_tpb': 2, 'alamat_tpb': 2, 'jenis_tpb': 2, 'tujuan_tpb': 2, 'dokumen_referensi': 2,
+                                'nama_pemohon': 2, 'npwp_pemohon': 2, 'alamat_pemohon': 2, 'alasan_segera': 2,
+                                
+                                'cara_angkut': 3, 'nama_sarana': 3, 'voy_flight': 3, 'pelabuhan_muat': 3, 'pelabuhan_bongkar': 3, 'pelabuhan_tujuan': 3, 'tanggal_ekspor': 3,
+                                'kode_valuta': 3, 'ndpbm': 3, 'incoterm': 3, 'nilai_fob': 3, 'freight': 3, 'asuransi_jenis': 3, 'nilai_asuransi': 3, 'bruto': 3, 'bank_devisa': 3,
+                                'nilai_cif': 3, 'nilai_barang': 3, 'cara_pembayaran': 3,
+                                'nama_sarana_pengangkut': 3, 'nomor_flight': 3, 'nomor_awb_bl': 3, 'tanggal_awb_bl': 3, 'jumlah_kemasan': 3, 'jenis_kemasan': 3,
+                                
+                                'barang': 4,
+                                
+                                'pernyataan_nama': 5, 'pernyataan_jabatan': 5, 'pernyataan_kota': 5
+                            };
+                            
+                            let targetStep = 5;
+                            for (const key of errorKeys) {
+                                if (key.startsWith('barang.')) {
+                                    targetStep = 4;
+                                    break;
+                                }
+                                if (stepMap[key]) {
+                                    targetStep = stepMap[key];
+                                    break;
+                                }
+                            }
+                            this.step = targetStep;
+                            
+                            const firstErrorKey = errorKeys.find(k => !k.startsWith('barang.'));
+                            if (firstErrorKey) {
+                                setTimeout(() => {
+                                    const element = document.getElementById(firstErrorKey);
+                                    if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        element.focus({ preventScroll: true });
+                                    }
+                                }, 300);
+                            }
                         @endif
                     }
                 },
