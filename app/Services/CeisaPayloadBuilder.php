@@ -505,7 +505,7 @@ class CeisaPayloadBuilder
             'nomorAju' => $nomorAju,
             'tanggalAju' => date('Y-m-d'),
 
-            'kodeKantor' => '040100',
+            'kodeKantor' => $header['kode_kantor'] ?? '040100',
             'kodeValuta' => $header['valuta'] ?? 'USD',
             'nilaiBarang' => isset($header['nilai_barang']) ? (float) $header['nilai_barang'] : 0.0,
 
@@ -530,7 +530,16 @@ class CeisaPayloadBuilder
 
         $flat['barang'] = $this->barangNilaiSederhana($barang);
         $flat['kemasan'] = [$this->kemasanDefault()];
-        $flat['pengangkut'] = [$this->pengangkutImporDefault()];
+        
+        $p = $header['pengangkutan'] ?? [];
+        $flat['pengangkut'] = [[
+            'seriPengangkut' => 1,
+            'namaPengangkut' => $p['sarana_angkut'] ?? 'MV CONTAINER',
+            'nomorPengangkut' => $p['voy_flight'] ?? 'V-100',
+            'kodeBendera' => $p['bendera'] ?? 'US',
+            'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Laut'),
+        ]];
+        
         $flat['dokumen'] = [$this->dokumenInvoice($nomorAju)];
 
         return $flat;
@@ -554,7 +563,7 @@ class CeisaPayloadBuilder
             'nomorAju' => $nomorAju,
             'tanggalAju' => date('Y-m-d'),
 
-            'kodeKantor' => '040100',
+            'kodeKantor' => $header['kode_kantor'] ?? '040100',
             'alasanSegera' => $header['alasan_rush_handling'] ?? '',
 
             'entitas' => [],
@@ -583,13 +592,16 @@ class CeisaPayloadBuilder
             'kodeJenisKemasan' => $header['kemasan']['jenis'] ?? 'CT',
             'merkKemasan' => 'UNMARKED',
         ]];
+        
+        $p = $header['pengangkutan'] ?? [];
         $flat['pengangkut'] = [[
             'seriPengangkut' => 1,
-            'namaPengangkut' => $header['pengangkutan']['sarana'] ?? 'MV CARGO',
-            'nomorPengangkut' => $header['pengangkutan']['flight_no'] ?? 'V-100',
-            'kodeBendera' => 'US',
-            'kodeCaraAngkut' => '4',
+            'namaPengangkut' => $p['sarana'] ?? 'MV CARGO',
+            'nomorPengangkut' => $p['flight_no'] ?? 'V-100',
+            'kodeBendera' => $p['bendera'] ?? 'US',
+            'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Udara'),
         ]];
+        
         $flat['dokumen'] = [[
             'seriDokumen' => 1,
             'kodeDokumen' => '740',

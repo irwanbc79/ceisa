@@ -143,6 +143,13 @@ class StoreDocumentRequest extends FormRequest
                 // Transaksi
                 'kode_valuta' => ['required', 'string', 'size:3'],
                 'nilai_barang' => ['required', 'numeric', 'min:0'],
+
+                // Pengangkutan & Kantor (dynamic fallbacks)
+                'kode_kantor' => ['nullable', 'string', 'max:10'],
+                'cara_angkut' => ['nullable', 'string', 'max:50'],
+                'nama_sarana' => ['nullable', 'string', 'max:255'],
+                'voy_flight' => ['nullable', 'string', 'max:50'],
+                'kode_bendera' => ['nullable', 'string', 'size:2'],
             ], $this->barangRules('nilai_barang'));
         } elseif ($docType === 'RUSH') {
             $rules = array_merge($rules, [
@@ -163,6 +170,11 @@ class StoreDocumentRequest extends FormRequest
                 // Kemasan
                 'jumlah_kemasan' => ['required', 'integer', 'min:1'],
                 'jenis_kemasan' => ['required', 'string', 'max:50'],
+
+                // Pengangkutan & Kantor (dynamic fallbacks)
+                'kode_kantor' => ['nullable', 'string', 'max:10'],
+                'kode_bendera' => ['nullable', 'string', 'size:2'],
+                'cara_angkut' => ['nullable', 'string', 'max:50'],
             ], $this->barangRules('nilai_barang'));
         }
 
@@ -373,6 +385,13 @@ class StoreDocumentRequest extends FormRequest
                     'dokumen_referensi' => $v['dokumen_referensi'],
                     'valuta' => strtoupper($v['kode_valuta']),
                     'nilai_barang' => (float) $v['nilai_barang'],
+                    'kode_kantor' => $v['kode_kantor'] ?? null,
+                    'pengangkutan' => [
+                        'cara_angkut' => $v['cara_angkut'] ?? null,
+                        'sarana_angkut' => $v['nama_sarana'] ?? null,
+                        'voy_flight' => $v['voy_flight'] ?? null,
+                        'bendera' => isset($v['kode_bendera']) ? strtoupper($v['kode_bendera']) : null,
+                    ],
                 ],
                 'barang' => $this->mapBarang($v['barang'], 'nilai_barang'),
             ];
@@ -387,6 +406,8 @@ class StoreDocumentRequest extends FormRequest
                     'pengangkutan' => [
                         'sarana' => $v['nama_sarana_pengangkut'],
                         'flight_no' => $v['nomor_flight'],
+                        'bendera' => isset($v['kode_bendera']) ? strtoupper($v['kode_bendera']) : null,
+                        'cara_angkut' => $v['cara_angkut'] ?? null,
                     ],
                     'dokumen_pengangkutan' => [
                         'awb_bl' => $v['nomor_awb_bl'],
@@ -397,6 +418,7 @@ class StoreDocumentRequest extends FormRequest
                         'jumlah' => (int) $v['jumlah_kemasan'],
                         'jenis' => $v['jenis_kemasan'],
                     ],
+                    'kode_kantor' => $v['kode_kantor'] ?? null,
                 ],
                 'barang' => $this->mapBarang($v['barang'], 'nilai_barang'),
             ];

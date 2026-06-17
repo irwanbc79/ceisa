@@ -1108,6 +1108,67 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('02', $flat['entitas'][0]['kodeJenisApi']);
     }
 
+    public function test_tpb_and_rush_carry_transport_and_office_fields(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/document*' => Http::response(['status' => 'OK', 'idHeader' => 'uuid-tpb-rush'], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '012345678901000',
+        ]);
+
+        // 1. Submit TPB
+        $this->actingAs($user)->post('/dokumen/submit', [
+            'doc_type' => 'TPB',
+            'nama_tpb' => 'PT TPB Berikat', 'npwp_tpb' => '333333333333333', 'alamat_tpb' => 'Cikarang',
+            'jenis_tpb' => 'Kawasan Berikat', 'tujuan_tpb' => 'Pemasukan', 'dokumen_referensi' => 'REF-123',
+            'kode_valuta' => 'USD', 'nilai_barang' => 5000,
+            'kode_kantor' => '040300', 'cara_angkut' => 'Laut', 'nama_sarana' => 'MV BINTANG', 'voy_flight' => 'V-99', 'kode_bendera' => 'sg',
+            'barang' => [[
+                'hs_code' => '8471.30.20', 'uraian' => 'Laptop', 'jumlah_satuan' => 5,
+                'kode_satuan' => 'UNT', 'netto' => 10, 'nilai_barang' => 5000,
+            ]],
+        ])->assertRedirect();
+
+        $docTpb = Document::where('doc_type', 'TPB')->first();
+        $this->assertSame('040300', data_get($docTpb->payload, 'header.kode_kantor'));
+        $this->assertSame('MV BINTANG', data_get($docTpb->payload, 'header.pengangkutan.sarana_angkut'));
+        
+        $flatTpb = CeisaPayloadBuilder::make()->build('TPB', $docTpb->payload, 'AJU-TPB-1');
+        $this->assertSame('040300', $flatTpb['kodeKantor']);
+        $this->assertSame('MV BINTANG', $flatTpb['pengangkut'][0]['namaPengangkut']);
+        $this->assertSame('SG', $flatTpb['pengangkut'][0]['kodeBendera']);
+        $this->assertSame('1', $flatTpb['pengangkut'][0]['kodeCaraAngkut']);
+
+        // 2. Submit RUSH
+        $this->actingAs($user)->post('/dokumen/submit', [
+            'doc_type' => 'RUSH',
+            'nama_pemohon' => 'PT Rush Express', 'npwp_pemohon' => '444444444444444', 'alamat_pemohon' => 'Bandara Soetta',
+            'nama_sarana_pengangkut' => 'Singapore Airlines', 'nomor_flight' => 'SQ-123',
+            'nomor_awb_bl' => 'AWB-999', 'tanggal_awb_bl' => '2026-07-02',
+            'alasan_segera' => 'Vaksin', 'jumlah_kemasan' => 5, 'jenis_kemasan' => 'BX',
+            'kode_kantor' => '050100', 'kode_bendera' => 'sg', 'cara_angkut' => 'Udara',
+            'barang' => [[
+                'hs_code' => '3002.20.00', 'uraian' => 'Vaksin', 'jumlah_satuan' => 1000,
+                'kode_satuan' => 'VLS', 'netto' => 50, 'nilai_barang' => 15000,
+            ]],
+        ])->assertRedirect();
+
+        $docRush = Document::where('doc_type', 'RUSH')->first();
+        $this->assertSame('050100', data_get($docRush->payload, 'header.kode_kantor'));
+        $this->assertSame('Singapore Airlines', data_get($docRush->payload, 'header.pengangkutan.sarana'));
+        $this->assertSame('SG', data_get($docRush->payload, 'header.pengangkutan.bendera'));
+
+        $flatRush = CeisaPayloadBuilder::make()->build('RUSH', $docRush->payload, 'AJU-RUSH-1');
+        $this->assertSame('050100', $flatRush['kodeKantor']);
+        $this->assertSame('Singapore Airlines', $flatRush['pengangkut'][0]['namaPengangkut']);
+        $this->assertSame('SG', $flatRush['pengangkut'][0]['kodeBendera']);
+        $this->assertSame('4', $flatRush['pengangkut'][0]['kodeCaraAngkut']);
+    }
+
     public function test_settings_page_shows_token_countdown(): void
     {
         $user = $this->authedUser();

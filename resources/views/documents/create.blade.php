@@ -634,24 +634,85 @@
                             </div>
 
                             {{-- TPB --}}
-                            <div x-show="doc_type === 'TPB'" class="grid sm:grid-cols-2 gap-4">
-                                <div>
-                                    <x-input-label for="kode_valuta_tpb" value="Mata Uang / Valuta (Referensi)" />
-                                    <select id="kode_valuta_tpb" :name="doc_type === 'TPB' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
-                                        <option value="">-- Pilih Mata Uang --</option>
-                                        <template x-for="c in references.currencies" :key="c.code">
-                                            <option :value="c.code" x-text="c.label"></option>
-                                        </template>
-                                    </select>
+                            <div x-show="doc_type === 'TPB'" class="space-y-6">
+                                <div class="grid sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <x-input-label for="kode_kantor_tpb" value="Kantor Bea Cukai (Referensi)" />
+                                        <select id="kode_kantor_tpb" :name="doc_type === 'TPB' ? 'kode_kantor' : ''" x-model="formData.kode_kantor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
+                                            <option value="">-- Pilih Kantor Bea Cukai --</option>
+                                            <template x-for="k in references.kantorMuat" :key="k.code">
+                                                <option :value="k.code" x-text="k.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <x-input-label for="kode_valuta_tpb" value="Mata Uang / Valuta (Referensi)" />
+                                        <select id="kode_valuta_tpb" :name="doc_type === 'TPB' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
+                                            <option value="">-- Pilih Mata Uang --</option>
+                                            <template x-for="c in references.currencies" :key="c.code">
+                                                <option :value="c.code" x-text="c.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <x-input-label for="nilai_barang" value="Nilai Total Barang TPB" />
+                                        <input type="number" step="0.01" min="0" id="nilai_barang" name="nilai_barang" x-model="formData.nilai_barang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
+                                    </div>
                                 </div>
-                                <div>
-                                    <x-input-label for="nilai_barang" value="Nilai Total Barang TPB" />
-                                    <input type="number" step="0.01" min="0" id="nilai_barang" name="nilai_barang" x-model="formData.nilai_barang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
+                                <div class="border-t border-slate-100 pt-4">
+                                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Informasi Pengangkutan</h4>
+                                    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        <div>
+                                            <x-input-label for="cara_angkut_tpb" value="Cara Pengangkutan" />
+                                            <select id="cara_angkut_tpb" :name="doc_type === 'TPB' ? 'cara_angkut' : ''" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <option value="">-- Pilih Cara Angkut --</option>
+                                                <template x-for="c in references.caraAngkut" :key="c.code">
+                                                    <option :value="c.code" x-text="c.label"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <x-input-label for="nama_sarana_tpb" value="Nama Sarana Pengangkut" />
+                                            <input type="text" id="nama_sarana_tpb" :name="doc_type === 'TPB' ? 'nama_sarana' : ''" x-model="formData.nama_sarana" placeholder="mis. MV CONTAINER" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="voy_flight_tpb" value="Nomor Voy / Flight" />
+                                            <input type="text" id="voy_flight_tpb" :name="doc_type === 'TPB' ? 'voy_flight' : ''" x-model="formData.voy_flight" placeholder="mis. V-100" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                        </div>
+                                        <div>
+                                            <x-input-label for="kode_bendera_tpb" value="Bendera Pengangkut" />
+                                            <input type="text" maxlength="2" id="kode_bendera_tpb" :name="doc_type === 'TPB' ? 'kode_bendera' : ''" x-model="formData.kode_bendera" placeholder="mis. US" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm uppercase" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
                             {{-- RUSH --}}
                             <div x-show="doc_type === 'RUSH'" class="space-y-4">
+                                <div class="grid sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <x-input-label for="kode_kantor_rush" value="Kantor Bea Cukai (Referensi)" />
+                                        <select id="kode_kantor_rush" :name="doc_type === 'RUSH' ? 'kode_kantor' : ''" x-model="formData.kode_kantor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
+                                            <option value="">-- Pilih Kantor Bea Cukai --</option>
+                                            <template x-for="k in references.kantorMuat" :key="k.code">
+                                                <option :value="k.code" x-text="k.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <x-input-label for="cara_angkut_rush" value="Cara Pengangkutan" />
+                                        <select id="cara_angkut_rush" :name="doc_type === 'RUSH' ? 'cara_angkut' : ''" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <option value="">-- Pilih Cara Angkut --</option>
+                                            <template x-for="c in references.caraAngkut" :key="c.code">
+                                                <option :value="c.code" x-text="c.label"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <x-input-label for="kode_bendera_rush" value="Bendera Pengangkut" />
+                                        <input type="text" maxlength="2" id="kode_bendera_rush" :name="doc_type === 'RUSH' ? 'kode_bendera' : ''" x-model="formData.kode_bendera" placeholder="mis. US" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm uppercase" />
+                                    </div>
+                                </div>
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     <div>
                                         <x-input-label for="nama_sarana_pengangkut" value="Sarana Pengangkut (Airlines / Carrier)" />
@@ -1342,6 +1403,7 @@
                     jenis_kemasan: '',
 
                     // Common
+                    kode_kantor: '',
                     pelabuhan_muat: '',
                     pelabuhan_bongkar: '',
                     kode_valuta: 'USD',
