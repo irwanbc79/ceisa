@@ -954,6 +954,51 @@ class CeisaService
     }
 
     /**
+     * Ambil satu tabel referensi (master data) dari CEISA 4.0.
+     * Dipakai cron sinkronisasi (HS Code, pelabuhan, kurs, kemasan, dll)
+     * agar master data tidak kedaluwarsa & payload lolos validasi.
+     *
+     * @param  array<string, mixed>  $query
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws CeisaException
+     */
+    public function fetchReference(string $path, array $query = []): array
+    {
+        $token = $this->refreshTokenIfExpired();
+
+        try {
+            $response = $this->baseRequest()
+                ->withToken($token)
+                ->get($path, $query);
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                'Gagal menghubungi CEISA saat ambil referensi: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+
+        $data = $this->decode($response);
+        $this->guardAgainstErrorCode($data, $response);
+
+        if (! $response->successful()) {
+            throw new CeisaException(
+                'CEISA menolak permintaan referensi (HTTP '.$response->status().').',
+                context: $data,
+            );
+        }
+
+        // Daftar bisa di root, atau dibungkus data/item/rows/content.
+        foreach (['data', 'item', 'rows', 'content', 'result'] as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                return array_values(array_filter($data[$key], 'is_array'));
+            }
+        }
+
+        return array_values(array_filter($data, 'is_array'));
+    }
+
+    /**
      * Download respon PDF dari CEISA.
      *
      * @throws CeisaException

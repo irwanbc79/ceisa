@@ -72,6 +72,27 @@ return [
     ],
 
     /*
+    | Sinkronisasi master data referensi (cron `ceisa:sync-references`).
+    | Key = tipe internal pada tabel ceisa_references (lihat CeisaReference::forWizard).
+    | Value = path resource API referensi CEISA (relatif base_url).
+    |
+    | ⚠ Path persisnya berada di Swagger "openapi" (Pabean) yang butuh auth untuk
+    | diunduh — ISI/override via .env saat sudah diketahui. Tipe dengan path kosong
+    | otomatis dilewati (data dasarnya tetap tersedia via CeisaReferenceSeeder).
+    */
+    'reference_endpoints' => array_filter([
+        'negara' => env('CEISA_REF_NEGARA'),
+        'pelabuhan' => env('CEISA_REF_PELABUHAN'),
+        'valuta' => env('CEISA_REF_VALUTA'),
+        'satuan' => env('CEISA_REF_SATUAN'),
+        'kemasan' => env('CEISA_REF_KEMASAN'),
+        'kantor_pabean' => env('CEISA_REF_KANTOR'),
+        'incoterm' => env('CEISA_REF_INCOTERM'),
+        'cara_angkut' => env('CEISA_REF_CARA_ANGKUT'),
+        'hs_code' => env('CEISA_REF_HS'),
+    ]),
+
+    /*
     | Margin (detik) sebelum token benar-benar expired agar di-refresh lebih awal.
     */
     'token_refresh_margin' => env('CEISA_TOKEN_REFRESH_MARGIN', 60),

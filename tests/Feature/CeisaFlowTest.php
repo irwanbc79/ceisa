@@ -1055,4 +1055,44 @@ class CeisaFlowTest extends TestCase
         $arsip->refresh();
         $this->assertSame('PT Sudah Diperbaiki', data_get($arsip->payload, 'nama_perusahaan'));
     }
+
+    public function test_sync_references_command_upserts_from_ceisa(): void
+    {
+        config(['ceisa.reference_endpoints' => ['negara' => '/v2/openapi/referensi/negara']]);
+
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*referensi/negara*' => Http::response([
+                'data' => [
+                    ['kodeNegara' => 'SG', 'uraianNegara' => 'Singapura'],
+                    ['kodeNegara' => 'ID', 'uraianNegara' => 'Indonesia'],
+                ],
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $this->artisan('ceisa:sync-references', ['--type' => ['negara']])
+            ->assertExitCode(0);
+
+        $this->assertDatabaseHas('ceisa_references', ['type' => 'negara', 'code' => 'SG', 'label' => 'Singapura', 'active' => true]);
+        $this->assertDatabaseHas('ceisa_references', ['type' => 'negara', 'code' => 'ID', 'label' => 'Indonesia']);
+    }
+
+    public function test_sync_references_command_skips_when_no_endpoints_mapped(): void
+    {
+        config(['ceisa.reference_endpoints' => []]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $this->artisan('ceisa:sync-references')
+            ->expectsOutputToContain('Belum ada endpoint referensi')
+            ->assertExitCode(0);
+    }
 }
