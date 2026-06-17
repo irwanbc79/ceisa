@@ -205,6 +205,7 @@ class DocumentController extends Controller
 
         $document = $user->documents()->create([
             'doc_type' => $request->validated('doc_type'),
+            'nomor_aju' => $request->validated('nomor_aju'),
             'payload' => $request->toCeisaPayload(),
             'status' => Document::STATUS_DRAFT,
         ]);
@@ -280,6 +281,7 @@ class DocumentController extends Controller
 
         $document->update([
             'doc_type' => $request->validated('doc_type'),
+            'nomor_aju' => $request->validated('nomor_aju'),
             'payload' => $request->toCeisaPayload(),
         ]);
 
@@ -397,6 +399,29 @@ class DocumentController extends Controller
         }
 
         return back()->with('success', 'Dokumen berhasil dikirim ulang ke CEISA.');
+    }
+
+    /**
+     * Kirim Nota Pembetulan (NOTUL) / Perbaikan Data ke CEISA.
+     */
+    public function submitRevision(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        $credential = $request->user()->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        if (empty($document->nomor_aju)) {
+            return back()->with('error', 'Dokumen harus memiliki nomor AJU sebelum mengirim pembetulan.');
+        }
+
+        try {
+            CeisaService::forCredential($credential)->submit($document, isRevision: true);
+        } catch (CeisaException $e) {
+            return back()->with('error', 'Kirim pembetulan gagal: '.$e->getMessage());
+        }
+
+        return back()->with('success', 'Nota Pembetulan / Perbaikan Dokumen berhasil dikirim ke CEISA.');
     }
 
     /**

@@ -367,6 +367,78 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
+    public function test_submit_document_with_custom_nomor_aju_saves_it(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'error_code' => 0,
+                'nomor_aju' => '04010020260617012345678912',
+                'status' => 'DITERIMA',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $payload = $this->bc30Payload();
+        $payload['nomor_aju'] = '04010020260617012345678912';
+
+        $this->actingAs($user)
+            ->post('/dokumen/submit', $payload)
+            ->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertNotNull($doc);
+        $this->assertSame('04010020260617012345678912', $doc->nomor_aju);
+    }
+
+    public function test_submit_revision_sends_is_revision_query_to_ceisa(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'status' => 'OK',
+                'nomor_aju' => '04010020260617012345678912',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '04010020260617012345678912',
+            'source' => Document::SOURCE_H2H,
+            'payload' => $this->bc30Payload(),
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $this->actingAs($user)
+            ->post("/dokumen/{$doc->id}/kirim-pembetulan")
+            ->assertRedirect();
+
+        $this->assertSame(Document::STATUS_SUBMITTED, $doc->fresh()->status);
+
+        Http::assertSent(function (Request $request) {
+            return str_contains($request->url(), 'isRevision=true');
+        });
+    }
+
     public function test_submit_sends_is_final_query_and_persists_id_header(): void
     {
         Http::fake([

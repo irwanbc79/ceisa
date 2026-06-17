@@ -26,6 +26,7 @@ class StoreDocumentRequest extends FormRequest
 
         $rules = [
             'doc_type' => ['required', 'in:BC20,BC24,TPB,BC30,RUSH'],
+            'nomor_aju' => ['nullable', 'string', 'size:26', 'regex:/^[A-Za-z0-9]+$/'],
         ];
 
         if ($docType === 'BC30') {

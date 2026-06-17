@@ -304,6 +304,21 @@
                                 @endif
                             @endunless
 
+                            @unless ($document->isArchived())
+                                @if (in_array($document->doc_type, ['BC30', 'TPB']) && in_array($document->status, ['submitted', 'accepted']))
+                                    <form method="POST" action="{{ route('documents.submit-revision', $document) }}">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-amber-200 hover:bg-amber-50 text-amber-700 text-xs font-black rounded-xl shadow-sm hover:border-amber-300 transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0"
+                                                onclick="return confirm('Kirim perbaikan data / Nota Pembetulan (NOTUL) untuk dokumen ini?')">
+                                            <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                                            </svg>
+                                            Kirim Pembetulan (NOTUL)
+                                        </button>
+                                    </form>
+                                @endif
+                            @endunless
+
                             @if (in_array($document->status, ['draft', 'error']))
                                 <form method="POST" action="{{ route('documents.submit', $document) }}">
                                     @csrf

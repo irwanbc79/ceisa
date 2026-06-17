@@ -252,6 +252,136 @@
                 {{ $documents->links() }}
             </div>
 
+            {{-- Pusat Edukasi & Fitur Premium H2H M2B --}}
+            <div class="mt-8 bg-white border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden" x-data="{ open: false }">
+                <button type="button" @click="open = !open" 
+                        class="w-full px-5 py-4 border-b border-slate-100 bg-slate-50/50 hover:bg-slate-100/50 transition-colors flex items-center justify-between text-left">
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-sm flex items-center gap-2">
+                            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+                            </svg>
+                            Pusat Edukasi &amp; Panduan Integrasi H2H CEISA 4.0
+                        </h3>
+                        <p class="text-[11px] text-slate-400 font-medium mt-0.5">Pelajari perbandingan Host-to-Host vs Portal DJBC, varian produk CEISAHUB, dan keunggulan sistem.</p>
+                    </div>
+                    <svg class="h-5 w-5 text-slate-400 transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+                
+                <div class="p-6 space-y-6" x-show="open" x-transition x-cloak>
+                    <!-- Perbandingan H2H vs Portal -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <span class="h-1.5 w-1.5 rounded-full bg-indigo-600"></span>
+                            Perbandingan Aspek Layanan (Host-to-Host vs Portal DJBC)
+                        </h4>
+                        <div class="overflow-x-auto rounded-xl border border-slate-200/80">
+                            <table class="min-w-full divide-y divide-slate-100 text-xs">
+                                <thead class="bg-slate-50">
+                                    <tr class="text-left font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+                                        <th class="px-4 py-3">Aspek</th>
+                                        <th class="px-4 py-3">Host to Host (H2H M2B)</th>
+                                        <th class="px-4 py-3">Portal DJBC Resmi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-slate-600">
+                                    <tr class="hover:bg-slate-50/50">
+                                        <td class="px-4 py-3 font-semibold text-slate-800">Kecepatan</td>
+                                        <td class="px-4 py-3">Lebih cepat karena data langsung dikirim dari sistem internal tanpa input ulang.</td>
+                                        <td class="px-4 py-3">Data perlu diketik ulang atau diunggah secara manual melalui portal web.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/50">
+                                        <td class="px-4 py-3 font-semibold text-slate-800">Fleksibilitas</td>
+                                        <td class="px-4 py-3">Perusahaan dapat melakukan kustomisasi sesuai kebutuhan (tampilan, manajemen user, role).</td>
+                                        <td class="px-4 py-3">Portal dibuat secara umum untuk seluruh pengguna jasa tanpa opsi kustomisasi.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/50">
+                                        <td class="px-4 py-3 font-semibold text-slate-800">Integritas Data</td>
+                                        <td class="px-4 py-3">Sangat terjamin karena data ditarik otomatis dari ERP/Database, meminimalkan ketik ulang.</td>
+                                        <td class="px-4 py-3">Rentan terhadap kesalahan input manusia (human error) saat proses rekam data manual.</td>
+                                    </tr>
+                                    <tr class="hover:bg-slate-50/50">
+                                        <td class="px-4 py-3 font-semibold text-slate-800">Nilai Tambah</td>
+                                        <td class="px-4 py-3">Memungkinkan integrasi API tambahan (sistem internal, AI Validasi, ERP, logistik).</td>
+                                        <td class="px-4 py-3">Hanya terbatas untuk mengirim dokumen dan menarik status respon bawaan.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr class="border-slate-150" />
+
+                    <!-- Varian Produk & Skema Pemasangan -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <span class="h-1.5 w-1.5 rounded-full bg-indigo-600"></span>
+                                Varian Produk M2B CEISAHUB
+                            </h4>
+                            <div class="grid gap-3">
+                                <div class="p-4 rounded-xl border border-indigo-100 bg-indigo-50/20">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-indigo-900 text-xs">1. CEISAHUB (Standar)</span>
+                                        <span class="text-[8px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded-md">CORE</span>
+                                    </div>
+                                    <ul class="text-[11px] text-indigo-800/85 space-y-1 mt-2 list-disc pl-4 font-medium">
+                                        <li>PDE Host-to-Host CEISA 4.0</li>
+                                        <li>Upload Template Data (Excel / XLS)</li>
+                                        <li>Validasi format, tipe data, dan AI Radar Kepatuhan</li>
+                                        <li>Backup berkala periodik BUP/BUE &amp; PDF Respon</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 rounded-xl border border-violet-100 bg-violet-50/20">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-violet-900 text-xs">2. CEISAHUB PRO</span>
+                                        <span class="text-[8px] font-black bg-violet-600 text-white px-2 py-0.5 rounded-md">ENTERPRISE</span>
+                                    </div>
+                                    <ul class="text-[11px] text-violet-800/85 space-y-1 mt-2 list-disc pl-4 font-medium">
+                                        <li class="font-bold">Integrasi In-house System (ERP / SAP / Oracle)</li>
+                                        <li>Seluruh fitur versi CEISAHUB Standar</li>
+                                        <li>Jalur pengiriman data dedicated khusus</li>
+                                        <li>IT Support, Maintenance, dan SLA terjamin</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <span class="h-1.5 w-1.5 rounded-full bg-indigo-600"></span>
+                                Keunggulan Sistem &amp; Pemasangan
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="flex gap-3">
+                                    <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0 h-9 w-9 flex items-center justify-center font-bold text-xs">OP</div>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-800">Skema On-Premise</h5>
+                                        <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">Aplikasi H2H diinstal secara lokal pada infrastruktur server internal milik perusahaan untuk kendali keamanan penuh.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg shrink-0 h-9 w-9 flex items-center justify-center font-bold text-xs">OC</div>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-800">Skema On-Cloud</h5>
+                                        <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">Aplikasi berjalan sepenuhnya di infrastruktur komputasi awan (Cloud Service) terkelola yang terenkripsi dan handal.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <div class="p-2 bg-amber-50 text-amber-600 rounded-lg shrink-0 h-9 w-9 flex items-center justify-center font-bold text-xs">⚡</div>
+                                    <div>
+                                        <h5 class="text-xs font-bold text-slate-800">Efisiensi Volume Besar (1000+ Pos Item)</h5>
+                                        <p class="text-[11px] text-slate-500 mt-0.5 leading-normal">Transfer dokumen dengan ribuan detail barang dapat dikirim sekaligus dalam waktu sangat singkat melalui API terdedikasi.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <x-doc-quick-view-modal />
         </div>
     </div>

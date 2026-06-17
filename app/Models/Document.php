@@ -163,7 +163,10 @@ class Document extends Model
         $h = data_get($this->payload, 'header', []);
         $barang = data_get($this->payload, 'barang', []);
 
-        $common = ['doc_type' => $this->doc_type];
+        $common = [
+            'doc_type' => $this->doc_type,
+            'nomor_aju' => $this->nomor_aju,
+        ];
 
         $data = match ($this->doc_type) {
             'BC30' => [

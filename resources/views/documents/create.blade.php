@@ -395,6 +395,25 @@
                                 <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap 3 dari 5</span>
                             </div>
 
+                            {{-- Common Header Options: Nomor AJU Kustom --}}
+                            <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                                    </svg>
+                                    <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">Nomor AJU Kustom (Opsional)</h4>
+                                </div>
+                                <p class="text-xs text-slate-500 leading-normal mb-3">Isi jika Anda ingin menggunakan nomor pengajuan internal tertentu. Biarkan kosong agar sistem otomatis membuat nomor AJU 26-digit resmi pada saat submit.</p>
+                                <div class="max-w-md">
+                                    <input type="text" id="nomor_aju" name="nomor_aju" x-model="formData.nomor_aju" maxlength="26" minlength="26"
+                                           class="block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs font-mono tracking-wider shadow-sm placeholder-slate-400"
+                                           placeholder="Contoh: 04010020260617012345000001" />
+                                    <p class="text-[10px] text-slate-400 mt-1" :class="formData.nomor_aju && formData.nomor_aju.length !== 26 ? 'text-rose-500 font-semibold' : ''">
+                                        Panjang karakter: <span x-text="formData.nomor_aju ? formData.nomor_aju.length : 0"></span> dari 26 karakter (harus alfanumerik saja).
+                                    </p>
+                                </div>
+                            </div>
+
                             {{-- BC 3.0 — Pengangkut & Transaksi (CEISA 4.0) --}}
                             <div x-show="doc_type === 'BC30'" class="space-y-6">
                                 <div class="border-b border-slate-100 pb-4">
@@ -770,8 +789,12 @@
                                     <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50 hover:border-slate-300 transition-all relative group">
                                         <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
                                             <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">Barang #<span x-text="index + 1"></span></span>
-                                            <button type="button" @click="removeItem(index)" x-show="formData.barang.length > 1"
-                                                    class="text-xs text-rose-600 hover:underline">Hapus Pos</button>
+                                            <div class="flex items-center gap-3">
+                                                <button type="button" @click="copyItem(index)"
+                                                        class="text-xs text-indigo-600 hover:underline">Salin Pos</button>
+                                                <button type="button" @click="removeItem(index)" x-show="formData.barang.length > 1"
+                                                        class="text-xs text-rose-600 hover:underline">Hapus Pos</button>
+                                            </div>
                                         </div>
                                         
                                         <div class="grid sm:grid-cols-3 gap-3">
@@ -1403,6 +1426,7 @@
                     jenis_kemasan: '',
 
                     // Common
+                    nomor_aju: '',
                     kode_kantor: '',
                     pelabuhan_muat: '',
                     pelabuhan_bongkar: '',
@@ -1552,6 +1576,11 @@
                     this.formData.barang.push({
                         hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: ''
                     });
+                },
+
+                copyItem(idx) {
+                    const cloned = JSON.parse(JSON.stringify(this.formData.barang[idx]));
+                    this.formData.barang.splice(idx + 1, 0, cloned);
                 },
 
                 removeItem(idx) {
