@@ -95,14 +95,48 @@
                     </div>
 
                     @if ($credential)
-                        <div class="text-sm text-gray-500">
-                            Status token:
-                            @if ($credential->hasValidToken())
-                                <span class="text-green-600 font-medium">Valid</span>
-                                (kadaluarsa {{ $credential->token_expires_at->diffForHumans() }})
-                            @else
-                                <span class="text-gray-500">Belum ada / kadaluarsa</span>
-                            @endif
+                        @php
+                            $expISO = $credential->token_expires_at?->toIso8601String();
+                        @endphp
+                        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5"
+                             x-data="ceisaTokenCountdown(@js($expISO))" x-init="start()">
+                            <div class="flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-2 text-sm">
+                                    <span class="text-slate-500">Status token akses:</span>
+                                    <template x-if="remaining > 0">
+                                        <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600">
+                                            <span class="relative flex h-2 w-2">
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                            </span>
+                                            Aktif
+                                        </span>
+                                    </template>
+                                    <template x-if="remaining <= 0">
+                                        <span class="inline-flex items-center gap-1.5 font-bold text-slate-400">
+                                            <span class="h-2 w-2 rounded-full bg-slate-300"></span>
+                                            Kedaluwarsa
+                                        </span>
+                                    </template>
+                                </div>
+                                <div class="text-right">
+                                    <template x-if="remaining > 0">
+                                        <span class="font-mono font-bold tabular-nums text-lg"
+                                              :class="remaining <= 60 ? 'text-amber-600' : 'text-slate-700'"
+                                              x-text="formatted"></span>
+                                    </template>
+                                    <template x-if="remaining <= 0">
+                                        <span class="text-xs text-slate-400 font-medium">diperbarui otomatis saat aksi berikutnya</span>
+                                    </template>
+                                </div>
+                            </div>
+                            {{-- Progress bar sisa umur token (asumsi TTL {{ (int) config('ceisa.token_ttl_fallback', 300) }} detik) --}}
+                            <div class="mt-2.5 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden" x-show="remaining > 0">
+                                <div class="h-full rounded-full transition-all duration-1000 ease-linear"
+                                     :class="remaining <= 60 ? 'bg-amber-500' : 'bg-emerald-500'"
+                                     :style="`width: ${Math.min(100, Math.max(0, (remaining / {{ (int) config('ceisa.token_ttl_fallback', 300) }}) * 100))}%`"></div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 mt-2">Access token CEISA 4.0 berumur ±5 menit; sistem me-refresh otomatis (refresh token) saat dibutuhkan.</p>
                         </div>
                     @endif
 
@@ -130,6 +164,28 @@
             } else {
                 container.style.display = 'none';
             }
+        }
+
+        // Countdown live umur access token CEISA (±5 menit).
+        function ceisaTokenCountdown(expiresIso) {
+            return {
+                remaining: 0,
+                formatted: '00:00',
+                timer: null,
+                tick() {
+                    if (!expiresIso) { this.remaining = 0; this.formatted = '00:00'; return; }
+                    const diff = Math.floor((new Date(expiresIso).getTime() - Date.now()) / 1000);
+                    this.remaining = diff > 0 ? diff : 0;
+                    const m = Math.floor(this.remaining / 60);
+                    const s = this.remaining % 60;
+                    this.formatted = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                    if (this.remaining <= 0 && this.timer) { clearInterval(this.timer); this.timer = null; }
+                },
+                start() {
+                    this.tick();
+                    this.timer = setInterval(() => this.tick(), 1000);
+                },
+            };
         }
     </script>
 </x-app-layout>

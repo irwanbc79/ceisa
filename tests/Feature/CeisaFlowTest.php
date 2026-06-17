@@ -1057,6 +1057,21 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('PT Sudah Diperbaiki', data_get($arsip->payload, 'nama_perusahaan'));
     }
 
+    public function test_settings_page_shows_token_countdown(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+            'token' => 'TOK-LIVE', 'token_expires_at' => now()->addMinutes(5),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('settings.ceisa.edit'))
+            ->assertOk()
+            ->assertSee('Status token akses')
+            ->assertSee('ceisaTokenCountdown', false);
+    }
+
     public function test_notifications_page_groups_djbc_webhook_logs(): void
     {
         $user = $this->authedUser();
