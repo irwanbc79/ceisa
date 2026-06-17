@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/dokumen/{document}/arsip', [DocumentController::class, 'updateArchive'])->name('documents.archive.update');
     Route::delete('/dokumen/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
     Route::post('/dokumen/{document}/submit', [DocumentController::class, 'submit'])->name('documents.submit');
+    Route::post('/dokumen/{document}/perbarui-status', [DocumentController::class, 'refreshStatus'])->name('documents.refresh-status');
     Route::post('/dokumen/{document}/duplikasi', [DocumentController::class, 'duplicate'])->name('documents.duplicate');
     Route::post('/dokumen/{document}/validasi-ai', [DocumentController::class, 'validateAi'])->name('documents.validate');
     Route::get('/dokumen/{document}/download-respon', [DocumentController::class, 'downloadRespon'])->name('documents.download-respon');

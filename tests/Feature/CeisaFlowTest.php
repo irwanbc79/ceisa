@@ -1056,6 +1056,42 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('PT Sudah Diperbaiki', data_get($arsip->payload, 'nama_perusahaan'));
     }
 
+    public function test_refresh_status_pulls_and_applies_from_ceisa(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/status/*' => Http::response([
+                'status' => 'SPPB DITERBITKAN',
+                'jalur' => 'HIJAU',
+                'nomor_daftar' => 'REG-99',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-1', 'id_header' => 'uuid-1',
+            'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('documents.refresh-status', $doc))
+            ->assertRedirect();
+
+        $doc->refresh();
+        $this->assertSame(Document::STATUS_ACCEPTED, $doc->status);
+        $this->assertSame(Document::JALUR_HIJAU, $doc->jalur);
+        $this->assertSame('REG-99', $doc->nomor_daftar);
+
+        // idHeader ikut dikirim sebagai query saat menarik status.
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/openapi/status/AJU-1')
+            && str_contains($r->url(), 'idHeader=uuid-1'));
+    }
+
     public function test_sync_references_command_upserts_from_ceisa(): void
     {
         config(['ceisa.reference_endpoints' => ['negara' => '/v2/openapi/referensi/negara']]);

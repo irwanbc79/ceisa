@@ -901,16 +901,19 @@ class CeisaService
      *
      * @throws CeisaException
      */
-    public function queryDocumentStatus(string $nomorAju): array
+    public function queryDocumentStatus(string $nomorAju, ?string $idHeader = null): array
     {
         $token = $this->refreshTokenIfExpired();
         // CEISA: GET /openapi/status/{nomorAju}
         $endpoint = rtrim((string) config('ceisa.endpoints.status'), '/').'/'.rawurlencode($nomorAju);
 
+        // idHeader (UUID submit) disertakan bila tersedia — kunci utama pelacakan respon.
+        $query = ! empty($idHeader) ? ['idHeader' => $idHeader] : [];
+
         try {
             $response = $this->baseRequest()
                 ->withToken($token)
-                ->get($endpoint);
+                ->get($endpoint, $query);
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal menghubungi CEISA saat query status: '.$e->getMessage(),

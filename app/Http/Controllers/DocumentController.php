@@ -8,6 +8,7 @@ use App\Http\Requests\StoreDocumentRequest;
 use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Services\CeisaService;
+use App\Services\CeisaStatusMapper;
 use App\Services\DocumentValidator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -396,6 +397,39 @@ class DocumentController extends Controller
         }
 
         return back()->with('success', 'Dokumen berhasil dikirim ulang ke CEISA.');
+    }
+
+    /**
+     * Tarik status terbaru dokumen dari CEISA (polling manual) lalu terapkan
+     * ke dokumen. Memprioritaskan idHeader hasil submit; fallback nomor aju.
+     */
+    public function refreshStatus(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        if ($document->isArchived()) {
+            return back()->with('error', 'Dokumen arsip tidak memiliki status CEISA untuk ditarik.');
+        }
+
+        if (empty($document->nomor_aju)) {
+            return back()->with('error', 'Dokumen belum memiliki nomor aju — kirim ke CEISA terlebih dahulu.');
+        }
+
+        $credential = $request->user()->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        try {
+            $data = CeisaService::forCredential($credential)
+                ->queryDocumentStatus($document->nomor_aju, $document->id_header);
+        } catch (CeisaException $e) {
+            return back()->with('error', 'Gagal menarik status: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menghubungi server CEISA: '.$e->getMessage());
+        }
+
+        CeisaStatusMapper::apply($document, $data);
+
+        return back()->with('success', 'Status dokumen berhasil diperbarui dari CEISA.');
     }
 
     /**
