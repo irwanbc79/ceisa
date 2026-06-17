@@ -87,6 +87,7 @@ class CeisaFlowTest extends TestCase
                 'username' => 'm2b_user',
                 'password' => 'm2b_pass',
                 'api_key' => 'secret-key',
+                'id_platform' => 'PLAT-001',
                 'app_id' => 'APP123',
                 'environment' => 'production',
             ])
@@ -105,6 +106,30 @@ class CeisaFlowTest extends TestCase
         $this->assertNotSame('m2b_pass', $credential->getRawOriginal('password'));
         $this->assertSame('m2b_user', $credential->username);
         $this->assertSame('m2b_pass', $credential->password);
+        $this->assertSame('PLAT-001', $credential->id_platform);
+    }
+
+    public function test_login_sends_id_platform_header(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+            'id_platform' => 'PLAT-XYZ',
+        ]);
+
+        CeisaService::forCredential($credential)->getToken();
+
+        Http::assertSent(function (Request $request) {
+            return str_contains($request->url(), '/nle-oauth/v1/user/login')
+                && $request->hasHeader('Beacukai-Api-Key', 'KEY-123')
+                && $request->hasHeader('id_platform', 'PLAT-XYZ');
+        });
     }
 
     public function test_user_can_save_ceisa_credential_with_sandbox(): void
@@ -171,7 +196,7 @@ class CeisaFlowTest extends TestCase
                 && $request->method() === 'POST'
                 && $request['username'] === 'm2b_user'
                 && $request['password'] === 'm2b_pass'
-                && $request->hasHeader('beacukai-api-key', 'KEY-123');
+                && $request->hasHeader('Beacukai-Api-Key', 'KEY-123');
         });
     }
 

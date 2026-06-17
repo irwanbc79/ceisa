@@ -14,6 +14,7 @@ class CeisaCredential extends Model
         'password',
         'app_id',
         'api_key',
+        'id_platform',
         'base_url',
         'token',
         'refresh_token',

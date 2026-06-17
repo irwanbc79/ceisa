@@ -31,6 +31,7 @@ class CeisaSettingController extends Controller
             // password & api_key opsional saat update (kosong = pertahankan yang lama)
             'password' => ['nullable', 'string', 'max:255'],
             'api_key' => ['nullable', 'string', 'max:1000'],
+            'id_platform' => ['nullable', 'string', 'max:255'],
             'app_id' => ['nullable', 'string', 'max:255'],
             'environment' => ['required', 'string', 'in:production,sandbox,custom'],
             'custom_base_url' => ['required_if:environment,custom', 'nullable', 'string', 'max:500'],
@@ -61,6 +62,7 @@ class CeisaSettingController extends Controller
         $attributes = [
             'username' => $data['username'],
             'npwp' => $data['npwp'] ?? null,
+            'id_platform' => $data['id_platform'] ?? null,
             'app_id' => $data['app_id'] ?? null,
             'base_url' => $baseUrl,
         ];
@@ -71,7 +73,7 @@ class CeisaSettingController extends Controller
             $secretChanged = true;
         }
 
-        foreach (['password', 'api_key'] as $secret) {
+        foreach (['password', 'api_key', 'id_platform'] as $secret) {
             if (! empty($data[$secret])) {
                 $attributes[$secret] = $data[$secret];
                 $secretChanged = true;

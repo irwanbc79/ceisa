@@ -20,11 +20,13 @@ return [
     | Header API Key wajib pada SEMUA request (auth maupun layanan): beacukai-api-key.
     | Nilai key disimpan per-user terenkripsi di kolom api_key tabel ceisa_credentials.
     */
-    'api_key_header' => env('CEISA_API_KEY_HEADER', 'beacukai-api-key'),
+    'api_key_header' => env('CEISA_API_KEY_HEADER', 'Beacukai-Api-Key'),
 
     'app_id' => env('CEISA_APP_ID'),
 
     'api_key' => env('CEISA_API_KEY'),
+
+    'id_platform' => env('CEISA_ID_PLATFORM'),
 
     'webhook_url' => env('CEISA_WEBHOOK_URL', 'https://ceisa.m2b.co.id/api/webhook/ceisa'),
 
@@ -46,6 +48,9 @@ return [
         'download_respon' => env('CEISA_DOWNLOAD_ENDPOINT', '/openapi/download-respon'),
         'cetak_formulir' => env('CEISA_CETAK_ENDPOINT', '/openapi/respon/cetak-formulir'),
         'billing' => env('CEISA_BILLING_ENDPOINT', '/openapi/respon/billing'),
+        'upload_dokap' => env('CEISA_UPLOAD_DOKAP_ENDPOINT', '/v2/openapi/file/dokumen'),
+        'upload_gambar' => env('CEISA_UPLOAD_GAMBAR_ENDPOINT', '/v2/openapi/file/barang'),
+        'upload_dokap_npd' => env('CEISA_UPLOAD_NPD_ENDPOINT', '/v2/openapi/file/upload-dokap-npd'),
     ],
 
     /*

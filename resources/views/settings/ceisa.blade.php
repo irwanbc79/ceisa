@@ -63,6 +63,14 @@
                     </div>
 
                     <div>
+                        <x-input-label for="id_platform" value="ID Platform" />
+                        <x-text-input id="id_platform" name="id_platform" type="text" class="mt-1 block w-full"
+                                      :value="old('id_platform', $credential?->id_platform)" autocomplete="off"
+                                      placeholder="ID Platform client dari Portal CEISA" />
+                        <x-input-error :messages="$errors->get('id_platform')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="environment" value="Environment / Gateway URL" />
                         <select id="environment" name="environment" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" onchange="toggleCustomUrl(this.value)">
                             <option value="production" {{ old('environment', $env) === 'production' ? 'selected' : '' }}>Production (https://apis-gw.beacukai.go.id)</option>

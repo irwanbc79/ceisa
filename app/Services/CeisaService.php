@@ -16,13 +16,13 @@ use Throwable;
  * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai (CEISA 4.0 / PIA).
  *
  * Auth resmi (ceisa40.gitbook.io/pia-ceisa40, openapi.beacukai.go.id):
- *   - SEMUA request membawa header `beacukai-api-key: {api_key}`.
+ *   - SEMUA request membawa header `Beacukai-Api-Key: {api_key}` dan `id_platform: {id_platform}`.
  *   - Login : POST {host}/nle-oauth/v1/user/login (body username+password)
  *     -> mengembalikan access_token (Bearer) + refresh_token.
  *   - Refresh: POST {host}/nle-oauth/v1/user/update-token
  *     dengan header Authorization: {refresh_token} -> access_token baru.
  *   - Layanan Pabean (kirim dokumen, status) di {host}/openapi memakai
- *     Authorization: Bearer {access_token} + header beacukai-api-key.
+ *     Authorization: Bearer {access_token} + header Beacukai-Api-Key + id_platform.
  *
  * Alur token (access token CEISA berumur ~5 menit):
  *   1. getToken()             -> login penuh, simpan access_token + refresh_token + masa berlaku.
@@ -328,6 +328,186 @@ class CeisaService
     }
 
     /**
+     * Query status semua dokumen perusahaan dari CEISA.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws CeisaException
+     */
+    public function fetchAllStatuses(string $npwp): array
+    {
+        $token = $this->refreshTokenIfExpired();
+        $endpoint = config('ceisa.endpoints.status');
+
+        try {
+            $response = $this->baseRequest()
+                ->withToken($token)
+                ->get($endpoint, ['idPerusahaan' => $npwp]);
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                'Gagal menghubungi CEISA saat query semua status: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+
+        $data = $this->decode($response);
+        $this->guardAgainstErrorCode($data, $response);
+
+        return $data;
+    }
+
+    /**
+     * Download respon PDF dari CEISA.
+     *
+     * @throws CeisaException
+     */
+    public function downloadRespon(string $path): Response
+    {
+        $token = $this->refreshTokenIfExpired();
+        $endpoint = config('ceisa.endpoints.download_respon');
+
+        try {
+            return $this->baseRequest()
+                ->withToken($token)
+                ->accept('application/pdf')
+                ->get($endpoint, ['path' => $path]);
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                'Gagal download respon dari CEISA: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+    }
+
+    /**
+     * Cetak formulir dokumen pabean (PDF).
+     *
+     * @throws CeisaException
+     */
+    public function cetakFormulir(string $nomorAju): Response
+    {
+        $token = $this->refreshTokenIfExpired();
+        $endpoint = config('ceisa.endpoints.cetak_formulir');
+
+        try {
+            return $this->baseRequest()
+                ->withToken($token)
+                ->accept('application/pdf')
+                ->get($endpoint, ['nomorAju' => $nomorAju]);
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                'Gagal cetak formulir dari CEISA: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+    }
+
+    /**
+     * Download billing PDF dari CEISA.
+     *
+     * @throws CeisaException
+     */
+    public function downloadBilling(string $kodeBilling): Response
+    {
+        $token = $this->refreshTokenIfExpired();
+        $endpoint = config('ceisa.endpoints.billing');
+
+        try {
+            return $this->baseRequest()
+                ->withToken($token)
+                ->accept('application/pdf')
+                ->get($endpoint, ['kodeBilling' => $kodeBilling]);
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                'Gagal download billing dari CEISA: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+    }
+
+    /**
+     * Upload dokumen pelengkap (dokap) ke CEISA.
+     * Endpoint: POST /v2/openapi/file/dokumen (multipart/form-data).
+     *
+     * @param  string  $filePath  Absolute path ke file PDF
+     * @param  array<string, mixed>  $params  {nomorAju, seriDokumen, npwp}
+     * @return array<string, mixed>
+     *
+     * @throws CeisaException
+     */
+    public function uploadDokap(string $filePath, array $params): array
+    {
+        return $this->uploadFile(
+            config('ceisa.endpoints.upload_dokap'),
+            $filePath,
+            $params,
+            'Gagal upload dokumen pelengkap ke CEISA',
+        );
+    }
+
+    /**
+     * Upload gambar barang ke CEISA.
+     * Endpoint: POST /v2/openapi/file/barang (multipart/form-data).
+     *
+     * @param  string  $filePath  Absolute path ke file gambar
+     * @param  array<string, mixed>  $params  {keterangan, nomorAju, seriBarang, npwp}
+     * @return array<string, mixed>
+     *
+     * @throws CeisaException
+     */
+    public function uploadGambar(string $filePath, array $params): array
+    {
+        return $this->uploadFile(
+            config('ceisa.endpoints.upload_gambar'),
+            $filePath,
+            $params,
+            'Gagal upload gambar barang ke CEISA',
+        );
+    }
+
+    /**
+     * Upload helper untuk file multipart ke CEISA.
+     *
+     * @param  array<string, mixed>  $params
+     * @return array<string, mixed>
+     *
+     * @throws CeisaException
+     */
+    protected function uploadFile(string $endpoint, string $filePath, array $params, string $errorMessage): array
+    {
+        $token = $this->refreshTokenIfExpired();
+        $baseUrl = $this->credential->base_url ?: config('ceisa.base_url');
+
+        try {
+            $response = Http::baseUrl(rtrim($baseUrl, '/'))
+                ->timeout((int) config('ceisa.timeout', 30))
+                ->withHeaders($this->commonHeaders())
+                ->withToken($token)
+                ->attach('file', file_get_contents($filePath), basename($filePath))
+                ->post($endpoint, [
+                    'param' => json_encode($params),
+                ]);
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                $errorMessage.': '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+
+        $data = $this->decode($response);
+        $this->guardAgainstErrorCode($data, $response);
+
+        if (! $response->successful()) {
+            throw new CeisaException(
+                $errorMessage.' (HTTP '.$response->status().').',
+                context: $data,
+            );
+        }
+
+        return $data;
+    }
+
+    /**
      * Request dasar dengan base URL, timeout, dan header umum.
      */
     protected function baseRequest(): PendingRequest
@@ -336,12 +516,29 @@ class CeisaService
 
         return Http::baseUrl(rtrim($baseUrl, '/'))
             ->timeout((int) config('ceisa.timeout', 30))
-            ->withHeaders([
-                // Wajib pada SEMUA request CEISA 4.0 (auth maupun layanan).
-                config('ceisa.api_key_header', 'beacukai-api-key') => (string) $this->credential->api_key,
-            ])
+            ->withHeaders($this->commonHeaders())
             ->acceptJson()
             ->asJson();
+    }
+
+    /**
+     * Header umum wajib untuk SEMUA request CEISA 4.0.
+     *
+     * @return array<string, string>
+     */
+    protected function commonHeaders(): array
+    {
+        $headers = [
+            config('ceisa.api_key_header', 'Beacukai-Api-Key') => (string) $this->credential->api_key,
+        ];
+
+        // id_platform wajib pada semua request (dari credential user atau fallback config).
+        $idPlatform = $this->credential->id_platform ?: config('ceisa.id_platform');
+        if (! empty($idPlatform)) {
+            $headers['id_platform'] = (string) $idPlatform;
+        }
+
+        return $headers;
     }
 
     /**
