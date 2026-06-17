@@ -3,6 +3,7 @@
 use App\Http\Controllers\CeisaSettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,6 +13,9 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Pusat notifikasi DJBC (Respon / Formulir / Informasi)
+    Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
 
     // Daftar dokumen lengkap (filter, search, jalur)
     Route::get('/daftar-dokumen', [DocumentController::class, 'index'])->name('documents.index');

@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
                         {{ __('Buat Dokumen') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
+                        {{ __('Notifikasi') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
                         {{ __('Pengaturan CEISA') }}
                     </x-nav-link>
@@ -87,6 +90,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
                 {{ __('Buat Dokumen') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
+                {{ __('Notifikasi') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
                 {{ __('Pengaturan CEISA') }}

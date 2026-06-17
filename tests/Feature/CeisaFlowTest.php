@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Document;
 use App\Models\User;
+use App\Models\WebhookLog;
 use App\Services\CeisaService;
 use Database\Seeders\CeisaReferenceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -1054,6 +1055,38 @@ class CeisaFlowTest extends TestCase
 
         $arsip->refresh();
         $this->assertSame('PT Sudah Diperbaiki', data_get($arsip->payload, 'nama_perusahaan'));
+    }
+
+    public function test_notifications_page_groups_djbc_webhook_logs(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-N1', 'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        WebhookLog::create([
+            'document_id' => $doc->id, 'event' => 'SPPB Terbit', 'notification_type' => 'Respon',
+            'nomor_aju' => 'AJU-N1', 'payload' => ['status' => 'SPPB', 'message' => 'Barang dapat dikeluarkan'],
+            'received_at' => now(),
+        ]);
+
+        // Notifikasi milik user lain tidak boleh tampil.
+        $otherDoc = $this->authedUser()->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-OTHER', 'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
+        ]);
+        WebhookLog::create([
+            'document_id' => $otherDoc->id, 'event' => 'RAHASIA', 'notification_type' => 'Respon',
+            'nomor_aju' => 'AJU-OTHER', 'payload' => ['status' => 'X'], 'received_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('Pusat Notifikasi DJBC')
+            ->assertSee('SPPB Terbit')
+            ->assertDontSee('RAHASIA');
     }
 
     public function test_refresh_status_pulls_and_applies_from_ceisa(): void
