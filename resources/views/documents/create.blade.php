@@ -3,9 +3,15 @@
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
                 <h2 class="font-bold text-2xl text-slate-800 tracking-tight">
-                    {{ __('Perekaman Dokumen CEISA 4.0') }}
+                    {{ isset($editDocument) ? __('Ubah Dokumen CEISA 4.0') : __('Perekaman Dokumen CEISA 4.0') }}
                 </h2>
-                <p class="text-sm text-slate-500 mt-1">Sistem Input Kepabeanan Host-to-Host (H2H) M2B</p>
+                <p class="text-sm text-slate-500 mt-1">
+                    @isset($editDocument)
+                        Mengubah dokumen {{ $editDocument->nomor_aju ?? 'draft #'.$editDocument->id }} — Host-to-Host (H2H) M2B
+                    @else
+                        Sistem Input Kepabeanan Host-to-Host (H2H) M2B
+                    @endisset
+                </p>
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('dashboard') }}" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
@@ -82,8 +88,11 @@
                 
                 {{-- Form Section --}}
                 <div class="lg:col-span-2 space-y-6">
-                    <form method="POST" action="{{ route('documents.store') }}" id="ceisaDocForm" novalidate>
+                    <form method="POST" action="{{ isset($editDocument) ? route('documents.update', $editDocument) : route('documents.store') }}" id="ceisaDocForm" novalidate>
                         @csrf
+                        @isset($editDocument)
+                            @method('PUT')
+                        @endisset
                         <input type="hidden" name="doc_type" :value="doc_type" />
                         <input type="hidden" name="submit_action" id="submit_action" value="submit" />
 
@@ -1262,6 +1271,21 @@
                 // Repopulasi dari input lama bila submit gagal validasi server,
                 // agar data tidak hilang & user langsung melihat daftar error.
                 init() {
+                    // Mode edit: pre-fill dari payload dokumen yang ada.
+                    const editData = @json($editData ?? null);
+                    if (editData) {
+                        if (editData.doc_type) this.doc_type = editData.doc_type;
+                        if (Array.isArray(editData.barang) && editData.barang.length) {
+                            this.formData.barang = editData.barang.map(b => ({ ...this.formData.barang[0], ...b }));
+                        }
+                        for (const k in this.formData) {
+                            if (k === 'barang') continue;
+                            if (editData[k] !== undefined && editData[k] !== null && editData[k] !== '') {
+                                this.formData[k] = editData[k];
+                            }
+                        }
+                    }
+
                     const old = @json(old());
                     if (old && Object.keys(old).length) {
                         if (old.doc_type) this.doc_type = old.doc_type;

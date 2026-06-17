@@ -11,16 +11,34 @@ return [
     | Kredensial per-user (username, password, api_key) disimpan terenkripsi di
     | tabel ceisa_credentials. Nilai di sini adalah fallback/default level aplikasi.
     |
-    | Host gateway resmi (lihat openapi.beacukai.go.id / ceisa40.gitbook.io).
+    | Host gateway resmi (Beacukai Developer Portal / openapi.beacukai.go.id / ceisa40.gitbook.io).
     | Auth (login & refresh) di /nle-oauth/v1, layanan Pabean (dokumen, status) di /openapi.
+    |
+    | Environment gateway NLE-CEISA 4.0:
+    |   - Production         : https://apis-gw.beacukai.go.id
+    |   - Development/Staging: https://apisdev-gw.beacukai.go.id
     */
     'base_url' => rtrim(env('CEISA_BASE_URL', 'https://apis-gw.beacukai.go.id'), '/'),
 
     /*
-    | Header API Key wajib pada SEMUA request (auth maupun layanan): beacukai-api-key.
+    | Header API Key wajib pada SEMUA request (auth maupun layanan).
+    | Dokumentasi resmi tidak konsisten antar-versi soal nama header:
+    |   - PIA-CEISA40 gitbook menyebut "Beacukai-Api-Key"
+    |   - Beacukai Developer Portal (gateway NLE) menyebut "nle-api-key"
+    | Untuk memaksimalkan kompatibilitas onboarding, key dikirim pada SEMUA nama
+    | header di daftar ini (gateway mengabaikan header yang tak dikenal).
     | Nilai key disimpan per-user terenkripsi di kolom api_key tabel ceisa_credentials.
     */
-    'api_key_header' => env('CEISA_API_KEY_HEADER', 'Beacukai-Api-Key'),
+    'api_key_headers' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', env('CEISA_API_KEY_HEADERS', 'Beacukai-Api-Key,nle-api-key'))
+    ))),
+
+    /*
+    | Header Origin: domain asal sistem klien. Dilampirkan pada semua request
+    | sesuai standard headers Beacukai Developer Portal untuk H2H.
+    */
+    'origin' => env('CEISA_ORIGIN', env('APP_URL', 'https://ceisa.m2b.co.id')),
 
     'app_id' => env('CEISA_APP_ID'),
 
@@ -63,6 +81,16 @@ return [
     | Access Token CEISA 4.0 berumur ~5 menit.
     */
     'token_ttl_fallback' => env('CEISA_TOKEN_TTL_FALLBACK', 300),
+
+    /*
+    | Query parameter default saat submit dokumen ke {host}/openapi/document:
+    |   - isFinal=true  -> data langsung disubmit ke sistem Bea Cukai (dapat respons).
+    |     isFinal=false -> data hanya masuk portal web CEISA sebagai DRAFT (testing).
+    |   - isRevision    -> dipakai bila mengirim data perbaikan / BCF (khusus BC 3.0 & TPB).
+    | Catatan: "draft lokal" aplikasi ini TIDAK menyentuh CEISA sama sekali; ketika
+    | submit() dipanggil berarti pengiriman sungguhan -> default is_final true.
+    */
+    'submit_is_final_default' => env('CEISA_SUBMIT_IS_FINAL', true),
 
     'timeout' => env('CEISA_HTTP_TIMEOUT', 30),
 

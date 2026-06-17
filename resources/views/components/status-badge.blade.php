@@ -2,16 +2,59 @@
 
 @php
     $map = [
-        'draft' => ['Draft', 'bg-gray-100 text-gray-700'],
-        'submitting' => ['Mengirim', 'bg-blue-100 text-blue-700'],
-        'submitted' => ['Terkirim', 'bg-blue-100 text-blue-700'],
-        'accepted' => ['Diterima', 'bg-green-100 text-green-700'],
-        'rejected' => ['Ditolak', 'bg-red-100 text-red-700'],
-        'error' => ['Error', 'bg-red-100 text-red-700'],
+        'draft' => [
+            'label' => 'Draft', 
+            'bg' => 'bg-slate-50', 
+            'text' => 'text-slate-600', 
+            'border' => 'border-slate-200', 
+            'dot' => 'bg-slate-400'
+        ],
+        'submitting' => [
+            'label' => 'Mengirim', 
+            'bg' => 'bg-blue-50/70', 
+            'text' => 'text-blue-700', 
+            'border' => 'border-blue-200/60', 
+            'dot' => 'bg-blue-500 animate-pulse'
+        ],
+        'submitted' => [
+            'label' => 'Terkirim', 
+            'bg' => 'bg-blue-50/70', 
+            'text' => 'text-blue-700', 
+            'border' => 'border-blue-200/60', 
+            'dot' => 'bg-blue-500'
+        ],
+        'accepted' => [
+            'label' => 'Diterima', 
+            'bg' => 'bg-emerald-50/80', 
+            'text' => 'text-emerald-700', 
+            'border' => 'border-emerald-200/60', 
+            'dot' => 'bg-emerald-500'
+        ],
+        'rejected' => [
+            'label' => 'Ditolak', 
+            'bg' => 'bg-rose-50/80', 
+            'text' => 'text-rose-700', 
+            'border' => 'border-rose-200/60', 
+            'dot' => 'bg-rose-500'
+        ],
+        'error' => [
+            'label' => 'Error', 
+            'bg' => 'bg-rose-50/80', 
+            'text' => 'text-rose-700', 
+            'border' => 'border-rose-200/60', 
+            'dot' => 'bg-rose-500 animate-pulse'
+        ],
     ];
-    [$label, $classes] = $map[$status] ?? [ucfirst($status), 'bg-gray-100 text-gray-700'];
+    $s = $map[$status] ?? [
+        'label' => ucfirst($status), 
+        'bg' => 'bg-slate-50', 
+        'text' => 'text-slate-600', 
+        'border' => 'border-slate-200', 
+        'dot' => 'bg-slate-400'
+    ];
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium $classes"]) }}>
-    {{ $label }}
+<span {{ $attributes->merge(['class' => "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border {$s['bg']} {$s['text']} {$s['border']} shadow-sm"]) }}>
+    <span class="h-1.5 w-1.5 rounded-full {{ $s['dot'] }}"></span>
+    {{ $s['label'] }}
 </span>

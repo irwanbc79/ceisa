@@ -365,6 +365,49 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
+    public function test_submit_sends_is_final_query_and_persists_id_header(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'status' => 'OK',
+                'message' => 'Sukses, Data Berhasil Ditambahkan',
+                'idHeader' => 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+        ]);
+
+        $this->actingAs($user)
+            ->post('/dokumen/submit', $this->bc30Payload())
+            ->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertSame('a1b2c3d4-e5f6-7890-abcd-ef1234567890', $doc->id_header);
+        $this->assertSame(Document::STATUS_SUBMITTED, $doc->status);
+
+        // Submit sungguhan WAJIB membawa isFinal=true + header standar H2H.
+        Http::assertSent(function (Request $request) {
+            if (! str_contains($request->url(), '/openapi/document')) {
+                return false;
+            }
+
+            return str_contains($request->url(), 'isFinal=true')
+                && str_contains($request->url(), 'isRevision=false')
+                && $request->hasHeader('Beacukai-Api-Key', 'KEY-123')
+                && $request->hasHeader('nle-api-key', 'KEY-123')
+                && $request->hasHeader('Origin');
+        });
+    }
+
     public function test_user_can_archive_old_document(): void
     {
         $user = $this->authedUser();
@@ -816,9 +859,9 @@ class CeisaFlowTest extends TestCase
             'status' => Document::STATUS_ACCEPTED,
             'ceisa_response' => [
                 'data' => [
-                    'responPdf' => '/some/path/to/respon.pdf'
-                ]
-            ]
+                    'responPdf' => '/some/path/to/respon.pdf',
+                ],
+            ],
         ]);
 
         Http::fake([
@@ -883,9 +926,9 @@ class CeisaFlowTest extends TestCase
             'status' => Document::STATUS_ACCEPTED,
             'ceisa_response' => [
                 'data' => [
-                    'kodeBilling' => '98765432101'
-                ]
-            ]
+                    'kodeBilling' => '98765432101',
+                ],
+            ],
         ]);
 
         Http::fake([
@@ -898,5 +941,118 @@ class CeisaFlowTest extends TestCase
         $response->assertOk();
         $response->assertHeader('Content-Type', 'application/pdf');
         $this->assertSame('BILLING-PDF', $response->streamedContent());
+    }
+
+    public function test_user_can_edit_draft_document(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'payload' => ['header' => ['eksportir' => ['nama' => 'PT Lama']]],
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        // Halaman edit dapat diakses & ter-pre-fill.
+        $this->actingAs($user)->get(route('documents.edit', $doc))->assertOk();
+
+        // Simpan perubahan sebagai draft (tidak submit ke CEISA).
+        $this->actingAs($user)
+            ->put(route('documents.update', $doc), $this->bc30Payload([
+                'nama_eksportir' => 'PT Baru Jaya',
+                'submit_action' => 'draft',
+            ]))
+            ->assertRedirect(route('documents.show', $doc));
+
+        $doc->refresh();
+        $this->assertSame('PT Baru Jaya', data_get($doc->payload, 'header.eksportir.nama'));
+        $this->assertSame(Document::STATUS_DRAFT, $doc->status);
+        $this->assertSame(1, $user->documents()->count());
+    }
+
+    public function test_submitted_document_cannot_be_edited(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-LIVE', 'payload' => ['header' => []],
+            'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('documents.edit', $doc))
+            ->assertRedirect(route('documents.show', $doc))
+            ->assertSessionHas('error');
+    }
+
+    public function test_user_can_delete_draft_document(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'payload' => ['x' => 1], 'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('documents.destroy', $doc))
+            ->assertRedirect(route('documents.index'));
+
+        $this->assertSame(0, $user->documents()->count());
+    }
+
+    public function test_submitted_document_cannot_be_deleted(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-LIVE', 'payload' => ['x' => 1],
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('documents.destroy', $doc))
+            ->assertSessionHas('error');
+
+        $this->assertSame(1, $user->documents()->count());
+    }
+
+    public function test_user_cannot_delete_other_users_document(): void
+    {
+        $owner = $this->authedUser();
+        $doc = $owner->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'payload' => ['x' => 1], 'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $this->actingAs($this->authedUser())
+            ->delete(route('documents.destroy', $doc))
+            ->assertForbidden();
+
+        $this->assertSame(1, Document::count());
+    }
+
+    public function test_user_can_update_archived_document(): void
+    {
+        $user = $this->authedUser();
+        $arsip = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_ARSIP,
+            'nomor_aju' => 'ARSIP-9', 'payload' => ['nama_perusahaan' => 'PT Lama'],
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('documents.archive.update', $arsip), [
+                'doc_type' => 'BC30',
+                'nomor_aju' => 'ARSIP-9',
+                'status' => 'accepted',
+                'nama_perusahaan' => 'PT Sudah Diperbaiki',
+            ])
+            ->assertRedirect(route('documents.show', $arsip));
+
+        $arsip->refresh();
+        $this->assertSame('PT Sudah Diperbaiki', data_get($arsip->payload, 'nama_perusahaan'));
     }
 }

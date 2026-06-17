@@ -28,6 +28,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dokumen/lookup', [DocumentController::class, 'lookup'])->name('documents.lookup');
     Route::post('/dokumen/lookup', [DocumentController::class, 'lookupSearch'])->name('documents.lookup.search');
     Route::get('/dokumen/{document}', [DocumentController::class, 'show'])->name('documents.show');
+    Route::get('/dokumen/{document}/ubah', [DocumentController::class, 'edit'])->name('documents.edit');
+    Route::put('/dokumen/{document}', [DocumentController::class, 'update'])->name('documents.update');
+    Route::put('/dokumen/{document}/arsip', [DocumentController::class, 'updateArchive'])->name('documents.archive.update');
+    Route::delete('/dokumen/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
     Route::post('/dokumen/{document}/submit', [DocumentController::class, 'submit'])->name('documents.submit');
     Route::post('/dokumen/{document}/duplikasi', [DocumentController::class, 'duplicate'])->name('documents.duplicate');
     Route::post('/dokumen/{document}/validasi-ai', [DocumentController::class, 'validateAi'])->name('documents.validate');
