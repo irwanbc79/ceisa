@@ -3,12 +3,12 @@
 namespace App\Services\AI;
 
 /**
- * Kontrak satu provider LLM (Claude / Gemini / DeepSeek) untuk validasi hybrid.
+ * Kontrak satu provider LLM (Gemini / DeepSeek) untuk validasi hybrid.
  */
 interface AiProvider
 {
     /**
-     * Nama pendek provider (claude/gemini/deepseek) untuk pelacakan.
+     * Nama pendek provider (gemini/deepseek) untuk pelacakan.
      */
     public function name(): string;
 

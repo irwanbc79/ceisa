@@ -12,7 +12,7 @@ use App\Services\AI\HybridAiClient;
  * Dua lapisan:
  *   1. Aturan deterministik (selalu jalan): HS code, netto/jumlah, harga/kg,
  *      kelengkapan field — tidak butuh AI.
- *   2. Analisis AI hybrid (Claude/Gemini/DeepSeek via failover): mendeteksi
+ *   2. Analisis AI hybrid (Gemini/DeepSeek via failover): mendeteksi
  *      anomali yang sulit diaturkan (harga tak wajar vs historis, HS vs uraian,
  *      konsistensi data). Bila semua provider gagal, hasil aturan tetap tampil.
  */
@@ -47,7 +47,7 @@ class DocumentValidator
                 $aiError = $e->getMessage();
             }
         } elseif (config('ai.enabled')) {
-            $aiError = 'Belum ada provider AI yang dikonfigurasi (isi ANTHROPIC_API_KEY / GEMINI_API_KEY / DEEPSEEK_API_KEY).';
+            $aiError = 'Belum ada provider AI yang dikonfigurasi (isi GEMINI_API_KEY / DEEPSEEK_API_KEY).';
         }
 
         return [
