@@ -409,7 +409,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="pelabuhan_muat_bc30" value="Pelabuhan Muat Ekspor" />
-                                            <select id="pelabuhan_muat_bc30" name="pelabuhan_muat" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                            <select id="pelabuhan_muat_bc30" :name="doc_type === 'BC30' ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
                                                 <option value="">-- Pilih Pelabuhan Muat --</option>
                                                 <template x-for="p in references.ports" :key="p.code">
                                                     <option :value="p.code" x-text="p.label"></option>
@@ -437,7 +437,7 @@
                                     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="kode_valuta_bc30" value="Valuta" />
-                                            <select id="kode_valuta_bc30" name="kode_valuta" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                            <select id="kode_valuta_bc30" :name="doc_type === 'BC30' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
                                                 <option value="">-- Pilih Mata Uang --</option>
                                                 <template x-for="c in references.currencies" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
@@ -486,7 +486,7 @@
                                         </div>
                                         <div class="sm:col-span-2 lg:col-span-3">
                                             <x-input-label for="cara_pembayaran_bc30" value="Cara Pembayaran (Opsional)" />
-                                            <select id="cara_pembayaran_bc30" name="cara_pembayaran" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="cara_pembayaran_bc30" :name="doc_type === 'BC30' ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
                                                 <option value="">-- Pilih Cara Pembayaran --</option>
                                                 <template x-for="m in references.paymentMethods" :key="m.code">
                                                     <option :value="m.code" x-text="m.label"></option>
@@ -501,7 +501,7 @@
                             <div x-show="doc_type === 'BC20' || doc_type === 'BC24'" class="grid sm:grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label for="pelabuhan_muat" value="Pelabuhan Muat (Kode Referensi)" />
-                                    <select id="pelabuhan_muat" name="pelabuhan_muat" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                    <select id="pelabuhan_muat" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
                                         <option value="">-- Pilih Pelabuhan Muat --</option>
                                         <template x-for="p in references.ports" :key="p.code">
                                             <option :value="p.code" x-text="p.label"></option>
@@ -519,7 +519,7 @@
                                 </div>
                                 <div>
                                     <x-input-label for="kode_valuta" value="Mata Uang / Valuta (Referensi)" />
-                                    <select id="kode_valuta" name="kode_valuta" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                    <select id="kode_valuta" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
                                         <option value="">-- Pilih Mata Uang --</option>
                                         <template x-for="c in references.currencies" :key="c.code">
                                             <option :value="c.code" x-text="c.label"></option>
@@ -534,7 +534,7 @@
 
                                 <div class="sm:col-span-2">
                                     <x-input-label for="cara_pembayaran" value="Cara Pembayaran (Referensi)" />
-                                    <select id="cara_pembayaran" name="cara_pembayaran" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                    <select id="cara_pembayaran" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
                                         <option value="">-- Pilih Cara Pembayaran --</option>
                                         <template x-for="m in references.paymentMethods" :key="m.code">
                                             <option :value="m.code" x-text="m.label"></option>
@@ -547,7 +547,7 @@
                             <div x-show="doc_type === 'TPB'" class="grid sm:grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label for="kode_valuta_tpb" value="Mata Uang / Valuta (Referensi)" />
-                                    <select id="kode_valuta_tpb" name="kode_valuta" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
+                                    <select id="kode_valuta_tpb" :name="doc_type === 'TPB' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
                                         <option value="">-- Pilih Mata Uang --</option>
                                         <template x-for="c in references.currencies" :key="c.code">
                                             <option :value="c.code" x-text="c.label"></option>
