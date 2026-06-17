@@ -639,21 +639,6 @@ class CeisaPayloadBuilder
 
         return $out;
     }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function pengangkutImporDefault(): array
-    {
-        return [
-            'seriPengangkut' => 1,
-            'namaPengangkut' => 'MV CONTAINER',
-            'nomorPengangkut' => 'V-100',
-            'kodeBendera' => 'US',
-            'kodeCaraAngkut' => '1',
-        ];
-    }
-
     /**
      * Blok pengangkut impor dari data form (fallback default bila kosong).
      *

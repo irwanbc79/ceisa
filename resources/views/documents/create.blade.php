@@ -267,15 +267,15 @@
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_importir" value="Nama Importir" />
-                                            <input type="text" id="nama_importir" name="nama_importir" x-model="formData.nama_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_importir" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nama_importir' : ''" x-model="formData.nama_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
                                         </div>
                                         <div>
                                             <x-input-label for="npwp_importir" value="NPWP (15 Digit)" />
-                                            <input type="text" id="npwp_importir" name="npwp_importir" x-model="formData.npwp_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" required />
+                                            <input type="text" id="npwp_importir" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'npwp_importir' : ''" x-model="formData.npwp_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_importir" value="Alamat Importir Lengkap" />
-                                            <textarea id="alamat_importir" name="alamat_importir" x-model="formData.alamat_importir" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
+                                            <textarea id="alamat_importir" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'alamat_importir' : ''" x-model="formData.alamat_importir" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -284,11 +284,11 @@
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_pemasok" value="Nama Pemasok" />
-                                            <input type="text" id="nama_pemasok" name="nama_pemasok" x-model="formData.nama_pemasok" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_pemasok" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nama_pemasok' : ''" x-model="formData.nama_pemasok" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
                                         </div>
                                         <div>
                                             <x-input-label for="negara_pemasok" value="Negara Asal Pemasok (Kode Referensi)" />
-                                            <select id="negara_pemasok" name="negara_pemasok" x-model="formData.negara_pemasok" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                            <select id="negara_pemasok" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'negara_pemasok' : ''" x-model="formData.negara_pemasok" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
                                                 <option value="">-- Pilih Negara Asal --</option>
                                                 <template x-for="c in references.countries" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
@@ -306,15 +306,15 @@
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_tpb" value="Nama Pengusaha TPB" />
-                                            <input type="text" id="nama_tpb" name="nama_tpb" x-model="formData.nama_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_tpb" :name="doc_type === 'TPB' ? 'nama_tpb' : ''" x-model="formData.nama_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
                                         </div>
                                         <div>
                                             <x-input-label for="npwp_tpb" value="NPWP (15 Digit)" />
-                                            <input type="text" id="npwp_tpb" name="npwp_tpb" x-model="formData.npwp_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" required />
+                                            <input type="text" id="npwp_tpb" :name="doc_type === 'TPB' ? 'npwp_tpb' : ''" x-model="formData.npwp_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" :required="doc_type === 'TPB'" />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_tpb" value="Alamat Lokasi TPB" />
-                                            <textarea id="alamat_tpb" name="alamat_tpb" x-model="formData.alamat_tpb" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
+                                            <textarea id="alamat_tpb" :name="doc_type === 'TPB' ? 'alamat_tpb' : ''" x-model="formData.alamat_tpb" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -323,7 +323,7 @@
                                     <div class="grid sm:grid-cols-3 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="jenis_tpb" value="Jenis TPB (Referensi)" />
-                                            <select id="jenis_tpb" name="jenis_tpb" x-model="formData.jenis_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                            <select id="jenis_tpb" :name="doc_type === 'TPB' ? 'jenis_tpb' : ''" x-model="formData.jenis_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
                                                 <option value="">-- Pilih Jenis TPB --</option>
                                                 <template x-for="t in references.tpbTypes" :key="t.code">
                                                     <option :value="t.code" x-text="t.label"></option>
@@ -332,7 +332,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="tujuan_tpb" value="Tujuan Pengiriman (Referensi)" />
-                                            <select id="tujuan_tpb" name="tujuan_tpb" x-model="formData.tujuan_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                            <select id="tujuan_tpb" :name="doc_type === 'TPB' ? 'tujuan_tpb' : ''" x-model="formData.tujuan_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
                                                 <option value="">-- Pilih Tujuan --</option>
                                                 <template x-for="d in references.tpbDestinations" :key="d.code">
                                                     <option :value="d.code" x-text="d.label"></option>
@@ -341,7 +341,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="dokumen_referensi" value="No. Dokumen Referensi / Kontrak" />
-                                            <input type="text" id="dokumen_referensi" name="dokumen_referensi" x-model="formData.dokumen_referensi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="dokumen_referensi" :name="doc_type === 'TPB' ? 'dokumen_referensi' : ''" x-model="formData.dokumen_referensi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
                                         </div>
                                     </div>
                                 </div>
@@ -354,15 +354,15 @@
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_pemohon" value="Nama Pemohon / Perusahaan" />
-                                            <input type="text" id="nama_pemohon" name="nama_pemohon" x-model="formData.nama_pemohon" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_pemohon" :name="doc_type === 'RUSH' ? 'nama_pemohon' : ''" x-model="formData.nama_pemohon" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                         </div>
                                         <div>
                                             <x-input-label for="npwp_pemohon" value="NPWP Pemohon (15 Digit)" />
-                                            <input type="text" id="npwp_pemohon" name="npwp_pemohon" x-model="formData.npwp_pemohon" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" required />
+                                            <input type="text" id="npwp_pemohon" :name="doc_type === 'RUSH' ? 'npwp_pemohon' : ''" x-model="formData.npwp_pemohon" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" :required="doc_type === 'RUSH'" />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_pemohon" value="Alamat Lengkap Pemohon" />
-                                            <textarea id="alamat_pemohon" name="alamat_pemohon" x-model="formData.alamat_pemohon" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
+                                            <textarea id="alamat_pemohon" :name="doc_type === 'RUSH' ? 'alamat_pemohon' : ''" x-model="formData.alamat_pemohon" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -370,7 +370,7 @@
                                     <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Alasan Kebutuhan Rush Handling</h4>
                                     <div class="mt-3">
                                         <x-input-label for="alasan_segera" value="Pilih Kebutuhan Barang Segera (Referensi)" />
-                                        <select id="alasan_segera" name="alasan_segera" x-model="formData.alasan_segera" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                        <select id="alasan_segera" :name="doc_type === 'RUSH' ? 'alasan_segera' : ''" x-model="formData.alasan_segera" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
                                             <option value="">-- Pilih Alasan Utama --</option>
                                             <option value="Organ Tubuh Manusia / Darah / Jenazah">Organ Tubuh Manusia / Darah / Jenazah</option>
                                             <option value="Vaksin / Serum / Obat-obatan Kritis">Vaksin / Serum / Obat-obatan Kritis</option>
@@ -379,7 +379,7 @@
                                             <option value="Surat Kabar / Majalah / Berita Aktual">Surat Kabar / Majalah / Berita Aktual</option>
                                             <option value="Barang lain yang karena sifatnya membutuhkan penanganan segera">Lainnya (Tulis detail di bawah)</option>
                                         </select>
-                                        <input type="text" name="alasan_segera_custom" x-model="formData.alasan_segera" class="mt-2 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="Tulis alasan khusus bila tidak ada di daftar..." x-show="formData.alasan_segera === 'Barang lain yang karena sifatnya membutuhkan penanganan segera' || !['Organ Tubuh Manusia / Darah / Jenazah', 'Vaksin / Serum / Obat-obatan Kritis', 'Binatang Hidup (Live Animals)', 'Tumbuhan / Bibit Hidup (Live Plants)', 'Surat Kabar / Majalah / Berita Aktual', ''].includes(formData.alasan_segera)" />
+                                        <input type="text" :name="doc_type === 'RUSH' ? 'alasan_segera' : ''" x-model="formData.alasan_segera" class="mt-2 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="Tulis alasan khusus bila tidak ada di daftar..." x-show="formData.alasan_segera === 'Barang lain yang karena sifatnya membutuhkan penanganan segera' || !['Organ Tubuh Manusia / Darah / Jenazah', 'Vaksin / Serum / Obat-obatan Kritis', 'Binatang Hidup (Live Animals)', 'Tumbuhan / Bibit Hidup (Live Plants)', 'Surat Kabar / Majalah / Berita Aktual', ''].includes(formData.alasan_segera)" />
                                     </div>
                                 </div>
                             </div>
@@ -656,7 +656,7 @@
                                     </div>
                                     <div>
                                         <x-input-label for="nilai_barang" value="Nilai Total Barang TPB" />
-                                        <input type="number" step="0.01" min="0" id="nilai_barang" name="nilai_barang" x-model="formData.nilai_barang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
+                                        <input type="number" step="0.01" min="0" id="nilai_barang" :name="doc_type === 'TPB' ? 'nilai_barang' : ''" x-model="formData.nilai_barang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
                                     </div>
                                 </div>
                                 <div class="border-t border-slate-100 pt-4">
@@ -716,19 +716,19 @@
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     <div>
                                         <x-input-label for="nama_sarana_pengangkut" value="Sarana Pengangkut (Airlines / Carrier)" />
-                                        <input type="text" id="nama_sarana_pengangkut" name="nama_sarana_pengangkut" x-model="formData.nama_sarana_pengangkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="text" id="nama_sarana_pengangkut" :name="doc_type === 'RUSH' ? 'nama_sarana_pengangkut' : ''" x-model="formData.nama_sarana_pengangkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                     <div>
                                         <x-input-label for="nomor_flight" value="Nomor Flight / Voyage" />
-                                        <input type="text" id="nomor_flight" name="nomor_flight" x-model="formData.nomor_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="text" id="nomor_flight" :name="doc_type === 'RUSH' ? 'nomor_flight' : ''" x-model="formData.nomor_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                     <div>
                                         <x-input-label for="nomor_awb_bl" value="Nomor AWB (Air Waybill) / Bill of Lading" />
-                                        <input type="text" id="nomor_awb_bl" name="nomor_awb_bl" x-model="formData.nomor_awb_bl" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="text" id="nomor_awb_bl" :name="doc_type === 'RUSH' ? 'nomor_awb_bl' : ''" x-model="formData.nomor_awb_bl" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                     <div>
                                         <x-input-label for="tanggal_awb_bl" value="Tanggal AWB / BL" />
-                                        <input type="date" id="tanggal_awb_bl" name="tanggal_awb_bl" x-model="formData.tanggal_awb_bl" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="date" id="tanggal_awb_bl" :name="doc_type === 'RUSH' ? 'tanggal_awb_bl' : ''" x-model="formData.tanggal_awb_bl" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                 </div>
                                 <div class="border-t border-slate-100 pt-4">
@@ -736,11 +736,11 @@
                                     <div class="grid sm:grid-cols-2 gap-4">
                                         <div>
                                             <x-input-label for="jumlah_kemasan" value="Jumlah Kemasan" />
-                                            <input type="number" min="1" id="jumlah_kemasan" name="jumlah_kemasan" x-model="formData.jumlah_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                            <input type="number" min="1" id="jumlah_kemasan" :name="doc_type === 'RUSH' ? 'jumlah_kemasan' : ''" x-model="formData.jumlah_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                         </div>
                                         <div>
                                             <x-input-label for="jenis_kemasan" value="Jenis Kemasan (Referensi)" />
-                                            <select id="jenis_kemasan" name="jenis_kemasan" x-model="formData.jenis_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
+                                            <select id="jenis_kemasan" :name="doc_type === 'RUSH' ? 'jenis_kemasan' : ''" x-model="formData.jenis_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
                                                 <option value="">-- Pilih Jenis Kemasan --</option>
                                                 <template x-for="p in references.packages" :key="p.code">
                                                     <option :value="p.code" x-text="p.label"></option>
