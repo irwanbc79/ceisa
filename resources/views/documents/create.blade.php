@@ -541,6 +541,87 @@
                                     <input type="number" step="0.01" min="0" id="nilai_cif" name="nilai_cif" x-model="formData.nilai_cif" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
                                 </div>
 
+                                <div>
+                                    <x-input-label for="ndpbm_imp" value="NDPBM / Kurs Pajak" />
+                                    <input type="number" step="0.0001" min="0" id="ndpbm_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'ndpbm' : ''" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="incoterm_imp" value="Cara Penyerahan (Incoterm)" />
+                                    <select id="incoterm_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'incoterm' : ''" x-model="formData.incoterm" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                        <template x-for="t in references.incoterms" :key="t.code">
+                                            <option :value="t.code" x-text="t.label"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <x-input-label for="freight_imp" value="Freight (opsional)" />
+                                    <input type="number" step="0.01" min="0" id="freight_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'freight' : ''" x-model="formData.freight" placeholder="kosongkan = estimasi dari CIF" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="nilai_asuransi_imp" value="Nilai Asuransi (opsional)" />
+                                    <input type="number" step="0.01" min="0" id="nilai_asuransi_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nilai_asuransi' : ''" x-model="formData.nilai_asuransi" placeholder="kosongkan = estimasi dari CIF" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="bruto_imp" value="Berat Kotor / Bruto (Kg, opsional)" />
+                                    <input type="number" step="0.0001" min="0" id="bruto_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'bruto' : ''" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+
+                                {{-- Data Pengangkutan impor --}}
+                                <div class="sm:col-span-2 mt-1 pt-3 border-t border-slate-100">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Data Pengangkutan</p>
+                                </div>
+                                <div>
+                                    <x-input-label for="cara_angkut_imp" value="Cara Pengangkutan" />
+                                    <select id="cara_angkut_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_angkut' : ''" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                        <option value="Laut">Laut</option>
+                                        <option value="Udara">Udara</option>
+                                        <option value="Darat">Darat</option>
+                                        <option value="Kereta Api">Kereta Api</option>
+                                        <option value="Pos">Pos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <x-input-label for="kode_bendera_imp" value="Bendera Sarana (ISO 2 huruf)" />
+                                    <input type="text" maxlength="2" id="kode_bendera_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_bendera' : ''" x-model="formData.kode_bendera" placeholder="mis. SG" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm uppercase" />
+                                </div>
+                                <div>
+                                    <x-input-label for="nama_sarana_imp" value="Nama Sarana Pengangkut" />
+                                    <input type="text" id="nama_sarana_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nama_sarana' : ''" x-model="formData.nama_sarana" placeholder="mis. MV Ocean Star" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="voy_flight_imp" value="No. Voyage / Flight" />
+                                    <input type="text" id="voy_flight_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'voy_flight' : ''" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="kode_tps_imp" value="Kode TPS (Tempat Penimbunan Sementara)" />
+                                    <input type="text" id="kode_tps_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_tps' : ''" x-model="formData.kode_tps" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="tanggal_tiba_imp" value="Perkiraan Tanggal Tiba" />
+                                    <input type="date" id="tanggal_tiba_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'tanggal_tiba' : ''" x-model="formData.tanggal_tiba" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="nib_importir_imp" value="NIB Importir (opsional)" />
+                                    <input type="text" id="nib_importir_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nib_importir' : ''" x-model="formData.nib_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="jenis_api_imp" value="Jenis API (mis. 01)" />
+                                    <input type="text" maxlength="5" id="jenis_api_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'jenis_api' : ''" x-model="formData.jenis_api" placeholder="01" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+
+                                {{-- Pernyataan penanggung jawab (impor) --}}
+                                <div class="sm:col-span-2 mt-1 pt-3 border-t border-slate-100">
+                                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pernyataan Penanggung Jawab</p>
+                                </div>
+                                <div>
+                                    <x-input-label for="pernyataan_nama_imp" value="Nama Penanggung Jawab" />
+                                    <input type="text" id="pernyataan_nama_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pernyataan_nama' : ''" x-model="formData.pernyataan_nama" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+                                <div>
+                                    <x-input-label for="pernyataan_jabatan_imp" value="Jabatan" />
+                                    <input type="text" id="pernyataan_jabatan_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pernyataan_jabatan' : ''" x-model="formData.pernyataan_jabatan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                </div>
+
                                 <div class="sm:col-span-2">
                                     <x-input-label for="cara_pembayaran" value="Cara Pembayaran (Referensi)" />
                                     <select id="cara_pembayaran" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
@@ -1232,7 +1313,14 @@
                     alamat_importir: '',
                     nama_pemasok: '',
                     negara_pemasok: '',
-                    
+                    nib_importir: '',
+                    jenis_api: '',
+                    jenis_impor: '',
+                    cara_bayar: '',
+                    kode_bendera: '',
+                    kode_tps: '',
+                    tanggal_tiba: '',
+
                     // TPB
                     nama_tpb: '',
                     npwp_tpb: '',

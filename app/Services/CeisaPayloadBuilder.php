@@ -323,34 +323,37 @@ class CeisaPayloadBuilder
             'tanggalAju' => date('Y-m-d'),
 
             'kodeKantor' => $header['pengangkutan']['pelabuhan_bongkar'] ?? '040100',
-            'kodeJenisImpor' => '1',
-            'kodeCaraBayar' => '1',
+            'kodeJenisImpor' => $header['jenis_impor'] ?? '1',
+            'kodeCaraBayar' => $header['cara_bayar'] ?? '1',
             'kodeValuta' => $header['valuta'] ?? 'USD',
-            'ndpbm' => 15800.0,
-            'kodeIncoterm' => 'FOB',
+            'ndpbm' => isset($header['ndpbm']) ? (float) $header['ndpbm'] : 0.0,
+            'kodeIncoterm' => $header['incoterm'] ?? 'FOB',
             'kodePelMuat' => $header['pengangkutan']['pelabuhan_muat'] ?? '',
             'kodePelTujuan' => $header['pengangkutan']['pelabuhan_bongkar'] ?? '',
-            'kodeTps' => 'TPS001',
-            'kodeTutupPu' => '11',
+            'kodeTps' => $header['pengangkutan']['tps'] ?? '',
+            'kodeTutupPu' => $header['kode_tutup_pu'] ?? '11',
 
-            'tanggalTiba' => date('Y-m-d', strtotime('+3 days')),
+            'tanggalTiba' => $header['pengangkutan']['tanggal_tiba'] ?? date('Y-m-d', strtotime('+3 days')),
             'jumlahKontainer' => 0,
 
-            'fob' => isset($header['nilai_cif']) ? (float) $header['nilai_cif'] * 0.9 : 0.0,
-            'asuransi' => isset($header['nilai_cif']) ? (float) $header['nilai_cif'] * 0.01 : 0.0,
-            'freight' => isset($header['nilai_cif']) ? (float) $header['nilai_cif'] * 0.09 : 0.0,
+            // Nilai CIF dipecah: pakai nilai eksplisit bila ada, jika tidak baru estimasi proporsional.
+            'fob' => $this->cifComponent($header, 'fob', 0.9),
+            'asuransi' => $this->cifComponent($header, 'asuransi', 0.01),
+            'freight' => $this->cifComponent($header, 'freight', 0.09),
             'cif' => isset($header['nilai_cif']) ? (float) $header['nilai_cif'] : 0.0,
 
-            'bruto' => array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0) * 1.1,
+            'bruto' => isset($header['bruto'])
+                ? (float) $header['bruto']
+                : array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0) * 1.1,
             'netto' => array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0),
 
-            'namaTtd' => $header['importir']['nama'] ?? 'M2B Staff',
-            'jabatanTtd' => 'Manager',
-            'kotaTtd' => 'Jakarta',
+            'namaTtd' => $header['pernyataan']['nama'] ?? $header['importir']['nama'] ?? 'M2B Staff',
+            'jabatanTtd' => $header['pernyataan']['jabatan'] ?? 'Manager',
+            'kotaTtd' => $header['pernyataan']['kota'] ?? 'Jakarta',
             'tanggalTtd' => date('Y-m-d'),
 
-            'biayaTambahan' => 0.0,
-            'biayaPengurang' => 0.0,
+            'biayaTambahan' => isset($header['biaya_tambahan']) ? (float) $header['biaya_tambahan'] : 0.0,
+            'biayaPengurang' => isset($header['biaya_pengurang']) ? (float) $header['biaya_pengurang'] : 0.0,
 
             'entitas' => [],
             'barang' => [],
@@ -363,10 +366,25 @@ class CeisaPayloadBuilder
         $flat['entitas'] = $this->entitasBc20($header);
         $flat['barang'] = $this->barangBc20($barang, $header);
         $flat['kemasan'] = [$this->kemasanDefault()];
-        $flat['pengangkut'] = [$this->pengangkutImporDefault()];
+        $flat['pengangkut'] = [$this->pengangkutImpor($header)];
         $flat['dokumen'] = [$this->dokumenInvoice($nomorAju)];
 
         return $flat;
+    }
+
+    /**
+     * Komponen nilai (fob/asuransi/freight): pakai nilai eksplisit dari form
+     * bila diisi, jika tidak estimasi proporsional dari CIF.
+     *
+     * @param  array<string, mixed>  $header
+     */
+    private function cifComponent(array $header, string $key, float $ratio): float
+    {
+        if (isset($header[$key]) && $header[$key] !== '' && $header[$key] !== null) {
+            return (float) $header[$key];
+        }
+
+        return isset($header['nilai_cif']) ? (float) $header['nilai_cif'] * $ratio : 0.0;
     }
 
     /**
@@ -386,9 +404,9 @@ class CeisaPayloadBuilder
                 'alamatEntitas' => $header['importir']['alamat'] ?? '',
                 'nomorIdentitas' => $this->digits($npwp),
                 'kodeJenisIdentitas' => $this->jenisIdentitas($npwp),
-                'nibEntitas' => '1234567890',
-                'kodeJenisApi' => '01',
-                'kodeStatus' => '1',
+                'nibEntitas' => $header['importir']['nib'] ?? '',
+                'kodeJenisApi' => $header['importir']['jenis_api'] ?? '01',
+                'kodeStatus' => $header['importir']['status'] ?? '1',
             ];
             $entitas[] = [
                 'seriEntitas' => 2,
@@ -621,6 +639,25 @@ class CeisaPayloadBuilder
             'nomorPengangkut' => 'V-100',
             'kodeBendera' => 'US',
             'kodeCaraAngkut' => '1',
+        ];
+    }
+
+    /**
+     * Blok pengangkut impor dari data form (fallback default bila kosong).
+     *
+     * @param  array<string, mixed>  $header
+     * @return array<string, mixed>
+     */
+    private function pengangkutImpor(array $header): array
+    {
+        $p = $header['pengangkutan'] ?? [];
+
+        return [
+            'seriPengangkut' => 1,
+            'namaPengangkut' => $p['sarana_angkut'] ?? 'MV CONTAINER',
+            'nomorPengangkut' => $p['voy_flight'] ?? 'V-100',
+            'kodeBendera' => $p['bendera'] ?? 'US',
+            'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Laut'),
         ];
     }
 

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Document;
 use App\Models\User;
 use App\Models\WebhookLog;
+use App\Services\CeisaPayloadBuilder;
 use App\Services\CeisaService;
 use Database\Seeders\CeisaReferenceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -1055,6 +1056,56 @@ class CeisaFlowTest extends TestCase
 
         $arsip->refresh();
         $this->assertSame('PT Sudah Diperbaiki', data_get($arsip->payload, 'nama_perusahaan'));
+    }
+
+    public function test_bc20_carries_transport_and_transaction_fields(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/document*' => Http::response(['status' => 'OK', 'idHeader' => 'uuid-imp'], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '012345678901000',
+        ]);
+
+        $this->actingAs($user)->post('/dokumen/submit', [
+            'doc_type' => 'BC20',
+            'nama_importir' => 'PT Importir Jaya', 'npwp_importir' => '0123456789012000', 'alamat_importir' => 'Jakarta',
+            'nib_importir' => 'NIB-99', 'jenis_api' => '02',
+            'nama_pemasok' => 'Acme Inc', 'negara_pemasok' => 'SG',
+            'pelabuhan_muat' => 'SGSIN', 'pelabuhan_bongkar' => 'IDTPP',
+            'cara_angkut' => 'Udara', 'nama_sarana' => 'GA-880', 'voy_flight' => 'GA880', 'kode_bendera' => 'id',
+            'kode_tps' => 'TPS-XYZ', 'tanggal_tiba' => '2026-07-01',
+            'kode_valuta' => 'USD', 'ndpbm' => 16250, 'incoterm' => 'cif', 'nilai_cif' => 2000,
+            'freight' => 150, 'nilai_asuransi' => 20, 'bruto' => 88,
+            'pernyataan_nama' => 'Budi', 'pernyataan_jabatan' => 'Manajer Impor',
+            'barang' => [[
+                'hs_code' => '8471.30.20', 'uraian' => 'Laptop', 'jumlah_satuan' => 5,
+                'kode_satuan' => 'UNT', 'netto' => 10, 'nilai_cif' => 2000,
+            ]],
+        ])->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertEquals(16250, data_get($doc->payload, 'header.ndpbm'));
+        $this->assertSame('CIF', data_get($doc->payload, 'header.incoterm'));
+        $this->assertSame('GA-880', data_get($doc->payload, 'header.pengangkutan.sarana_angkut'));
+        $this->assertSame('ID', data_get($doc->payload, 'header.pengangkutan.bendera'));
+        $this->assertSame('NIB-99', data_get($doc->payload, 'header.importir.nib'));
+
+        // Builder memakai nilai form (bukan dummy 15800/FOB/MV CONTAINER).
+        $flat = CeisaPayloadBuilder::make()->build('BC20', $doc->payload, 'AJU-X');
+        $this->assertEqualsWithDelta(16250.0, $flat['ndpbm'], 0.01);
+        $this->assertSame('CIF', $flat['kodeIncoterm']);
+        $this->assertSame('TPS-XYZ', $flat['kodeTps']);
+        $this->assertSame('GA-880', $flat['pengangkut'][0]['namaPengangkut']);
+        $this->assertSame('ID', $flat['pengangkut'][0]['kodeBendera']);
+        $this->assertSame('4', $flat['pengangkut'][0]['kodeCaraAngkut']); // Udara
+        $this->assertEqualsWithDelta(150.0, $flat['freight'], 0.01);
+        $this->assertSame('Budi', $flat['namaTtd']);
+        $this->assertSame('NIB-99', $flat['entitas'][0]['nibEntitas']);
+        $this->assertSame('02', $flat['entitas'][0]['kodeJenisApi']);
     }
 
     public function test_settings_page_shows_token_countdown(): void
