@@ -21,10 +21,12 @@
 
             {{-- AI Validation Result Box --}}
             @if (session('ai_validation'))
-                @php($av = session('ai_validation'))
-                @php($all = array_merge($av['rule_findings'], $av['ai_findings']))
-                @php($errors = collect($all)->where('level', 'error')->count())
-                @php($warnings = collect($all)->where('level', 'warning')->count())
+                @php
+                    $av = session('ai_validation');
+                    $all = array_merge($av['rule_findings'], $av['ai_findings']);
+                    $errors = collect($all)->where('level', 'error')->count();
+                    $warnings = collect($all)->where('level', 'warning')->count();
+                @endphp
                 <div class="bg-white rounded-2xl shadow-sm border border-violet-100 overflow-hidden">
                     <div class="bg-violet-50 px-6 py-4 border-b border-violet-100 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -56,7 +58,9 @@
                         @else
                             <ul class="space-y-2">
                                 @foreach ($all as $item)
-                                    @php($c = ['error' => ['bg-rose-50','border-rose-100','text-rose-800','text-rose-500'], 'warning' => ['bg-amber-50','border-amber-100','text-amber-800','text-amber-500'], 'info' => ['bg-sky-50','border-sky-100','text-sky-800','text-sky-500']][$item['level']] ?? ['bg-slate-50','border-slate-100','text-slate-800','text-slate-500'])
+                                    @php
+                                        $c = ['error' => ['bg-rose-50','border-rose-100','text-rose-800','text-rose-500'], 'warning' => ['bg-amber-50','border-amber-100','text-amber-800','text-amber-500'], 'info' => ['bg-sky-50','border-sky-100','text-sky-800','text-sky-500']][$item['level']] ?? ['bg-slate-50','border-slate-100','text-slate-800','text-slate-500'];
+                                    @endphp
                                     <li class="flex items-start gap-3 rounded-xl border {{ $c[0] }} {{ $c[1] }} p-3 text-sm">
                                         <span class="mt-0.5 shrink-0 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded {{ $c[3] }} bg-white border {{ $c[1] }}">{{ $item['level'] }}</span>
                                         <span class="{{ $c[2] }}">
