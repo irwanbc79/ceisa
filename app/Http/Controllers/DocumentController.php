@@ -417,6 +417,118 @@ class DocumentController extends Controller
     }
 
     /**
+     * Unduh file respon PDF dari CEISA.
+     */
+    public function downloadRespon(Request $request, Document $document)
+    {
+        $this->authorizeOwnership($request, $document);
+        $credential = $request->user()->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        // Cari path di ceisa_response atau webhookLogs
+        $path = data_get($document->ceisa_response, 'data.responPdf')
+            ?? data_get($document->ceisa_response, 'data.pathRespon')
+            ?? data_get($document->ceisa_response, 'responPdf')
+            ?? data_get($document->ceisa_response, 'pathRespon')
+            ?? $document->webhookLogs->map(fn($log) => data_get($log->payload, 'data.responPdf') ?? data_get($log->payload, 'data.pathRespon') ?? data_get($log->payload, 'pathRespon'))->filter()->first();
+
+        if (!$path) {
+            $path = $request->query('path');
+        }
+
+        if (!$path) {
+            return back()->with('error', 'Path file respon tidak ditemukan di data dokumen. Pastikan webhook respon sudah masuk.');
+        }
+
+        try {
+            $service = CeisaService::forCredential($credential);
+            $response = $service->downloadRespon($path);
+
+            if ($response->successful()) {
+                return response()->streamDownload(function () use ($response) {
+                    echo $response->body();
+                }, "respon-ceisa-{$document->nomor_aju}.pdf", [
+                    'Content-Type' => 'application/pdf',
+                ]);
+            }
+
+            return back()->with('error', 'Gagal mengunduh respon dari CEISA (HTTP ' . $response->status() . ').');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengunduh: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cetak formulir dokumen pabean PDF dari CEISA.
+     */
+    public function cetakFormulir(Request $request, Document $document)
+    {
+        $this->authorizeOwnership($request, $document);
+        $credential = $request->user()->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        if (empty($document->nomor_aju)) {
+            return back()->with('error', 'Nomor aju dokumen kosong. Kirim dokumen terlebih dahulu.');
+        }
+
+        try {
+            $service = CeisaService::forCredential($credential);
+            $response = $service->cetakFormulir($document->nomor_aju);
+
+            if ($response->successful()) {
+                return response()->streamDownload(function () use ($response) {
+                    echo $response->body();
+                }, "formulir-ceisa-{$document->nomor_aju}.pdf", [
+                    'Content-Type' => 'application/pdf',
+                ]);
+            }
+
+            return back()->with('error', 'Gagal mencetak formulir dari CEISA (HTTP ' . $response->status() . ').');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mencetak: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Unduh PDF billing dari CEISA.
+     */
+    public function downloadBilling(Request $request, Document $document)
+    {
+        $this->authorizeOwnership($request, $document);
+        $credential = $request->user()->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        $kodeBilling = data_get($document->ceisa_response, 'data.kodeBilling')
+            ?? data_get($document->ceisa_response, 'kodeBilling')
+            ?? $document->webhookLogs->map(fn($log) => data_get($log->payload, 'data.kodeBilling') ?? data_get($log->payload, 'kodeBilling'))->filter()->first();
+
+        if (!$kodeBilling) {
+            $kodeBilling = $request->query('kode_billing');
+        }
+
+        if (!$kodeBilling) {
+            return back()->with('error', 'Kode billing tidak ditemukan di data dokumen.');
+        }
+
+        try {
+            $service = CeisaService::forCredential($credential);
+            $response = $service->downloadBilling($kodeBilling);
+
+            if ($response->successful()) {
+                return response()->streamDownload(function () use ($response) {
+                    echo $response->body();
+                }, "billing-ceisa-{$kodeBilling}.pdf", [
+                    'Content-Type' => 'application/pdf',
+                ]);
+            }
+
+            return back()->with('error', 'Gagal mengunduh billing dari CEISA (HTTP ' . $response->status() . ').');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengunduh billing: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Pastikan dokumen milik user yang sedang login.
      */
     protected function authorizeOwnership(Request $request, Document $document): void

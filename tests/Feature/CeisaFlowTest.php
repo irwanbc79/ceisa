@@ -796,4 +796,107 @@ class CeisaFlowTest extends TestCase
         $this->assertStringContainsString('PT M2B', $csv);
         $this->assertStringNotContainsString('IMPOR-CSV', $csv); // tersaring oleh filter BC30
     }
+
+    public function test_download_respon_pdf_from_ceisa(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+            'token' => 'VALID-TOKEN',
+            'token_expires_at' => now()->addMinutes(10),
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000001-PEB',
+            'payload' => ['x' => 1],
+            'status' => Document::STATUS_ACCEPTED,
+            'ceisa_response' => [
+                'data' => [
+                    'responPdf' => '/some/path/to/respon.pdf'
+                ]
+            ]
+        ]);
+
+        Http::fake([
+            '*/openapi/download-respon*' => Http::response('PDF-CONTENT', 200, ['Content-Type' => 'application/pdf']),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('documents.download-respon', $doc));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->assertSame('PDF-CONTENT', $response->streamedContent());
+    }
+
+    public function test_cetak_formulir_pdf_from_ceisa(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+            'token' => 'VALID-TOKEN',
+            'token_expires_at' => now()->addMinutes(10),
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000001-PEB',
+            'payload' => ['x' => 1],
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        Http::fake([
+            '*/openapi/respon/cetak-formulir*' => Http::response('FORM-PDF', 200, ['Content-Type' => 'application/pdf']),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('documents.cetak-formulir', $doc));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->assertSame('FORM-PDF', $response->streamedContent());
+    }
+
+    public function test_download_billing_pdf_from_ceisa(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+            'token' => 'VALID-TOKEN',
+            'token_expires_at' => now()->addMinutes(10),
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000001-PEB',
+            'payload' => ['x' => 1],
+            'status' => Document::STATUS_ACCEPTED,
+            'ceisa_response' => [
+                'data' => [
+                    'kodeBilling' => '98765432101'
+                ]
+            ]
+        ]);
+
+        Http::fake([
+            '*/openapi/respon/billing*' => Http::response('BILLING-PDF', 200, ['Content-Type' => 'application/pdf']),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get(route('documents.download-billing', $doc));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->assertSame('BILLING-PDF', $response->streamedContent());
+    }
 }
