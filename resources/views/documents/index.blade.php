@@ -127,11 +127,12 @@
                     <table class="min-w-full divide-y divide-slate-100 text-sm">
                         <thead class="bg-slate-50/70">
                             <tr class="text-left text-xs font-bold text-slate-400 uppercase tracking-wider">
-                                <th class="px-6 py-4">No. Aju</th>
-                                <th class="px-6 py-4">Jenis Dokumen</th>
-                                <th class="px-6 py-4">Pihak / Entitas</th>
+                                <th class="px-6 py-4">Nomor Pengajuan</th>
+                                <th class="px-6 py-4">Jenis</th>
+                                <th class="px-6 py-4">No. / Tgl Pendaftaran</th>
+                                <th class="px-6 py-4">Respon DJBC</th>
                                 <th class="px-6 py-4">Status & Jalur</th>
-                                <th class="px-6 py-4">Tanggal Dibuat</th>
+                                <th class="px-6 py-4">Perusahaan / Kantor Pabean</th>
                                 <th class="px-6 py-4"></th>
                             </tr>
                         </thead>
@@ -149,6 +150,7 @@
                                                 <span class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-500 border border-slate-200 uppercase tracking-wide">Arsip</span>
                                             @endif
                                         </div>
+                                        <div class="text-[10px] text-slate-400 font-sans mt-1">Dibuat {{ $doc->created_at->format('d/m/Y H:i') }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($doc->doc_type === 'BC30')
@@ -165,20 +167,52 @@
                                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-50 text-slate-700 border border-slate-150">{{ $doc->doc_type }}</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">
-                                        <div class="font-semibold text-slate-800 leading-snug">{{ $doc->partyName() ?? '—' }}</div>
-                                        @if ($doc->partyNpwp())
-                                            <div class="text-[10px] text-slate-400 font-mono mt-0.5 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md inline-block">NPWP: {{ $doc->partyNpwp() }}</div>
+                                    {{-- No. & Tgl Pendaftaran --}}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if ($doc->nomor_daftar)
+                                            <div class="font-mono text-xs font-bold text-slate-700">{{ $doc->nomor_daftar }}</div>
+                                            @if ($doc->tanggalDaftar())
+                                                <div class="text-[10px] text-slate-400 mt-0.5">{{ $doc->tanggalDaftar()->format('d/m/Y') }}</div>
+                                            @endif
+                                        @else
+                                            <span class="text-[11px] text-slate-300 font-medium italic">Belum terdaftar</span>
                                         @endif
                                     </td>
+                                    {{-- Respon DJBC (Nama + No. Surat + Tgl) --}}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php($resp = $doc->responseSummary())
+                                        @if ($resp)
+                                            @php($respClass = $resp['nama'] === 'SPPB' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : (($resp['nama'] === 'PENOLAKAN' || str_contains($resp['nama'], 'NPP') || str_contains($resp['nama'], 'TOLAK')) ? 'bg-rose-50 text-rose-700 border-rose-100' : 'bg-sky-50 text-sky-700 border-sky-100'))
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide border {{ $respClass }}">{{ $resp['nama'] }}</span>
+                                            @if ($resp['no_surat'])
+                                                <div class="text-[10px] text-slate-400 font-mono mt-0.5">{{ $resp['no_surat'] }}</div>
+                                            @endif
+                                            @if ($resp['tanggal'])
+                                                <div class="text-[10px] text-slate-400 mt-0.5">{{ $resp['tanggal']->format('d/m/Y H:i') }}</div>
+                                            @endif
+                                        @else
+                                            <span class="text-[11px] text-slate-300 font-medium italic">Menunggu respon</span>
+                                        @endif
+                                    </td>
+                                    {{-- Status & Jalur --}}
                                     <td class="px-6 py-4">
                                         <div class="flex flex-wrap items-center gap-1.5">
                                             <x-status-badge :status="$doc->status" />
                                             <x-jalur-badge :jalur="$doc->jalur" />
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-xs font-medium text-slate-400 whitespace-nowrap">
-                                        {{ $doc->created_at->format('d/m/Y H:i') }}
+                                    {{-- Perusahaan + Kantor Pabean --}}
+                                    <td class="px-6 py-4">
+                                        <div class="font-semibold text-slate-800 leading-snug">{{ $doc->partyName() ?? '—' }}</div>
+                                        @if ($doc->partyNpwp())
+                                            <div class="text-[10px] text-slate-400 font-mono mt-0.5 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-md inline-block">NPWP: {{ $doc->partyNpwp() }}</div>
+                                        @endif
+                                        @if ($doc->kantorPabeanLabel())
+                                            <div class="text-[10px] text-slate-500 mt-1 flex items-start gap-1">
+                                                <svg class="h-3 w-3 text-slate-300 mt-px flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" /></svg>
+                                                <span class="leading-tight">{{ $doc->kantorPabeanLabel() }}</span>
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 text-right whitespace-nowrap text-xs font-semibold">
                                         <div class="flex items-center justify-end gap-3.5">
@@ -223,7 +257,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-10 text-center text-slate-400">
+                                    <td colspan="7" class="px-6 py-10 text-center text-slate-400">
                                         Tidak ada dokumen yang cocok dengan saringan.
                                     </td>
                                 </tr>

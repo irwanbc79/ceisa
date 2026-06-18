@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Models\User;
 use App\Models\WebhookLog;
@@ -10,6 +11,7 @@ use App\Services\CeisaService;
 use Database\Seeders\CeisaReferenceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -759,6 +761,53 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('555555555555555', $docArsip->partyNpwp());
     }
 
+    public function test_daftar_dokumen_shows_ceisa_portal_columns(): void
+    {
+        $user = $this->authedUser();
+
+        CeisaReference::create([
+            'type' => 'kantor_pabean',
+            'code' => '011200',
+            'label' => '011200 - KPPBC TMP C Kuala Tanjung',
+            'active' => true,
+        ]);
+        Cache::forget('ceisa.kantor_pabean_map');
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_ACCEPTED,
+            'nomor_aju' => '000020MOT83720260615000033',
+            'nomor_daftar' => '018331',
+            'jalur' => Document::JALUR_HIJAU,
+            'payload' => [
+                'kantor_pabean' => '011200',
+                'header' => ['eksportir' => ['nama' => 'PT ATS Inti Sampoerna', 'npwp' => '111111111111111']],
+            ],
+            'ceisa_response' => [
+                'nama_respon' => 'SPPB',
+                'nomor_surat' => '018303/KBC.0201/2026',
+                'tanggal_daftar' => '2026-06-12',
+            ],
+            'response_at' => now(),
+        ]);
+
+        // Helper derivasi (ground-truth Portal CEISA 4.0)
+        $resp = $doc->responseSummary();
+        $this->assertSame('SPPB', $resp['nama']);
+        $this->assertSame('018303/KBC.0201/2026', $resp['no_surat']);
+        $this->assertSame('011200 - KPPBC TMP C Kuala Tanjung', $doc->kantorPabeanLabel());
+        $this->assertNotNull($doc->tanggalDaftar());
+
+        // Halaman Daftar Dokumen menampilkan kolom-kolom portal
+        $this->actingAs($user)
+            ->get(route('documents.index'))
+            ->assertOk()
+            ->assertSee('018331')                       // nomor pendaftaran
+            ->assertSee('SPPB')                          // nama respon
+            ->assertSee('018303/KBC.0201/2026')          // no. surat respon
+            ->assertSee('KPPBC TMP C Kuala Tanjung');    // label kantor pabean
+    }
+
     public function test_user_can_import_queried_document_from_ceisa_portal(): void
     {
         $user = $this->authedUser();
@@ -1208,7 +1257,7 @@ class CeisaFlowTest extends TestCase
         $docTpb = Document::where('doc_type', 'TPB')->first();
         $this->assertSame('040300', data_get($docTpb->payload, 'header.kode_kantor'));
         $this->assertSame('MV BINTANG', data_get($docTpb->payload, 'header.pengangkutan.sarana_angkut'));
-        
+
         $flatTpb = CeisaPayloadBuilder::make()->build('TPB', $docTpb->payload, 'AJU-TPB-1');
         $this->assertSame('040300', $flatTpb['kodeKantor']);
         $this->assertSame('MV BINTANG', $flatTpb['pengangkut'][0]['namaPengangkut']);

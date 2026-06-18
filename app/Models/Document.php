@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 class Document extends Model
 {
@@ -127,6 +129,125 @@ class Document extends Model
             self::JALUR_MERAH => ['label' => 'Jalur Merah', 'color' => 'rose'],
             default => null,
         };
+    }
+
+    /**
+     * Ringkasan respon DJBC terakhir (SPPB/BILLING/NPE) dari ceisa_response.
+     * Meniru kolom "Nama Respon (No. Surat)" di Portal CEISA 4.0.
+     *
+     * @return array{nama: string, no_surat: ?string, tanggal: ?Carbon}|null
+     */
+    public function responseSummary(): ?array
+    {
+        $resp = $this->ceisa_response;
+
+        if (empty($resp) && ! $this->response_at) {
+            return null;
+        }
+
+        $nama = data_get($resp, 'nama_respon')
+            ?? data_get($resp, 'namaRespon')
+            ?? data_get($resp, 'kode_respon')
+            ?? data_get($resp, 'kodeRespon')
+            ?? data_get($resp, 'jenis_respon')
+            ?? data_get($resp, 'response')
+            ?? data_get($resp, 'data.nama_respon')
+            ?? $this->inferResponseName();
+
+        if (! $nama) {
+            return null;
+        }
+
+        $noSurat = data_get($resp, 'nomor_surat')
+            ?? data_get($resp, 'no_surat')
+            ?? data_get($resp, 'nomorSurat')
+            ?? data_get($resp, 'nomor_respon')
+            ?? data_get($resp, 'nomorRespon')
+            ?? data_get($resp, 'data.nomor_surat');
+
+        return [
+            'nama' => strtoupper((string) $nama),
+            'no_surat' => $noSurat ? (string) $noSurat : null,
+            'tanggal' => $this->response_at,
+        ];
+    }
+
+    /**
+     * Tebak nama respon dari status bila CEISA tak mengirim label eksplisit.
+     */
+    private function inferResponseName(): ?string
+    {
+        return match ($this->status) {
+            self::STATUS_ACCEPTED => 'SPPB',
+            self::STATUS_REJECTED => 'PENOLAKAN',
+            self::STATUS_SUBMITTED => 'BILLING',
+            default => null,
+        };
+    }
+
+    /**
+     * Kode kantor pabean (KdKantor 6-digit) dari payload.
+     */
+    public function kantorPabeanCode(): ?string
+    {
+        $code = data_get($this->payload, 'kantor_pabean')
+            ?? data_get($this->payload, 'header.kantor_pabean')
+            ?? data_get($this->payload, 'header.kode_kantor');
+
+        return $code !== null && $code !== '' ? (string) $code : null;
+    }
+
+    /**
+     * Label kantor pabean (resolusi dari ceisa_references, di-cache → bebas N+1).
+     */
+    public function kantorPabeanLabel(): ?string
+    {
+        $code = $this->kantorPabeanCode();
+
+        if (! $code) {
+            return null;
+        }
+
+        return static::kantorPabeanMap()[$code] ?? $code;
+    }
+
+    /**
+     * Peta kode→label kantor pabean, dimuat sekali (cache 1 jam) agar bebas N+1.
+     *
+     * @return array<string, string>
+     */
+    public static function kantorPabeanMap(): array
+    {
+        return Cache::remember('ceisa.kantor_pabean_map', 3600, fn (): array => CeisaReference::query()
+            ->where('type', 'kantor_pabean')
+            ->pluck('label', 'code')
+            ->all());
+    }
+
+    /**
+     * Tanggal pendaftaran (saat DJBC menetapkan nomor daftar). Meniru
+     * kolom "No. & Tgl Pendaftaran" di Portal CEISA 4.0.
+     */
+    public function tanggalDaftar(): ?Carbon
+    {
+        if (! $this->nomor_daftar) {
+            return null;
+        }
+
+        $raw = data_get($this->ceisa_response, 'tanggal_daftar')
+            ?? data_get($this->ceisa_response, 'tgl_daftar')
+            ?? data_get($this->ceisa_response, 'tanggalDaftar')
+            ?? data_get($this->ceisa_response, 'data.tanggal_daftar');
+
+        if ($raw) {
+            try {
+                return Carbon::parse($raw);
+            } catch (\Throwable) {
+                // format tak terbaca → jatuh ke response_at
+            }
+        }
+
+        return $this->response_at;
     }
 
     /**
