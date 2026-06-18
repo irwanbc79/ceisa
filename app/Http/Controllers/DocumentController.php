@@ -100,6 +100,7 @@ class DocumentController extends Controller
             'source' => $request->input('source'),
             'from' => $request->input('from'),
             'to' => $request->input('to'),
+            'bumn' => $request->boolean('bumn'),
         ];
 
         $query = $request->user()->documents()
@@ -114,7 +115,8 @@ class DocumentController extends Controller
             ->when($filters['jalur'], fn ($q, $v) => $q->where('jalur', $v))
             ->when($filters['source'], fn ($q, $v) => $q->where('source', $v))
             ->when($filters['from'], fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
-            ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v));
+            ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
+            ->when($filters['bumn'], fn ($q) => $q->where('payload->bumn', true));
 
         return [$query, $filters];
     }

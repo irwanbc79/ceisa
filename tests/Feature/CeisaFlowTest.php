@@ -848,6 +848,42 @@ class CeisaFlowTest extends TestCase
             ->assertSee('SPPB');
     }
 
+    public function test_daftar_dokumen_action_bar_and_bumn_filter(): void
+    {
+        $user = $this->authedUser();
+
+        $bumn = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => ['bumn' => true, 'header' => ['eksportir' => ['nama' => 'PT BUMN Ekspor', 'npwp' => '111111111111111', 'nitku' => '0000000000000001']]],
+        ]);
+        $biasa = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => ['header' => ['eksportir' => ['nama' => 'PT Swasta Biasa', 'npwp' => '222222222222222']]],
+        ]);
+
+        // Action bar tampil (toggle & menu ala portal)
+        $this->actingAs($user)
+            ->get(route('documents.index'))
+            ->assertOk()
+            ->assertSee('NPWP 16')
+            ->assertSee('NITKU')
+            ->assertSee('BUMN Ekspor')
+            ->assertSee('Utilitas')
+            ->assertSee('Monitoring')
+            ->assertSee('Muat Ulang')
+            ->assertSee('PT BUMN Ekspor')
+            ->assertSee('PT Swasta Biasa');
+
+        // Filter BUMN hanya menampilkan entitas BUMN
+        $this->actingAs($user)
+            ->get(route('documents.index', ['bumn' => 1]))
+            ->assertOk()
+            ->assertSee('PT BUMN Ekspor')
+            ->assertDontSee('PT Swasta Biasa');
+    }
+
     public function test_user_can_import_queried_document_from_ceisa_portal(): void
     {
         $user = $this->authedUser();
