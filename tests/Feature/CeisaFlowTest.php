@@ -848,6 +848,29 @@ class CeisaFlowTest extends TestCase
             ->assertSee('SPPB');
     }
 
+    public function test_kantor_pabean_resolves_from_ekspor_kantor_muat(): void
+    {
+        $user = $this->authedUser();
+
+        CeisaReference::create([
+            'type' => 'kantor_pabean',
+            'code' => '050100',
+            'label' => '050100 - KPU BC Tipe A Tanjung Priok',
+            'active' => true,
+        ]);
+        Cache::forget('ceisa.kantor_pabean_map');
+
+        // Dokumen ekspor BC 3.0 menyimpan kode kantor di header.kantor_muat
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => ['header' => ['kantor_muat' => '050100', 'eksportir' => ['nama' => 'PT Ekspor']]],
+        ]);
+
+        $this->assertSame('050100', $doc->kantorPabeanCode());
+        $this->assertSame('050100 - KPU BC Tipe A Tanjung Priok', $doc->kantorPabeanLabel());
+    }
+
     public function test_daftar_dokumen_action_bar_and_bumn_filter(): void
     {
         $user = $this->authedUser();

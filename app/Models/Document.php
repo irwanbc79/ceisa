@@ -190,9 +190,10 @@ class Document extends Model
      */
     public function kantorPabeanCode(): ?string
     {
-        $code = data_get($this->payload, 'kantor_pabean')
+        $code = data_get($this->payload, 'kantor_pabean')          // arsip (manual)
             ?? data_get($this->payload, 'header.kantor_pabean')
-            ?? data_get($this->payload, 'header.kode_kantor');
+            ?? data_get($this->payload, 'header.kode_kantor')      // impor/TPB/Rush
+            ?? data_get($this->payload, 'header.kantor_muat');     // ekspor BC 3.0 (kantor muat = KdKantor)
 
         return $code !== null && $code !== '' ? (string) $code : null;
     }
