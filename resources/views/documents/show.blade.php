@@ -792,6 +792,9 @@
                             @endif
                         </div>
                     </div>
+
+                    {{-- Pelacakan Dokumen: Riwayat Status / Respon / Petugas (ala Portal CEISA 4.0) --}}
+                    <x-doc-tracking-tabs :document="$document" />
                 </div>
 
                 {{-- Column 2: Right 1/3 (Checklists, PDF Actions, Simulator, Webhook History) --}}

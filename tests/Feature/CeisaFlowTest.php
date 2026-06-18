@@ -808,6 +808,46 @@ class CeisaFlowTest extends TestCase
             ->assertSee('KPPBC TMP C Kuala Tanjung');    // label kantor pabean
     }
 
+    public function test_detail_dokumen_shows_tracking_tabs(): void
+    {
+        $user = $this->authedUser();
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_ACCEPTED,
+            'nomor_aju' => '000020MOT83720260615000033',
+            'nomor_daftar' => '018331',
+            'jalur' => Document::JALUR_HIJAU,
+            'payload' => ['header' => ['eksportir' => ['nama' => 'PT ATS Inti Sampoerna']]],
+            'ceisa_response' => ['nama_respon' => 'SPPB', 'nomor_surat' => '018303/KBC.0201/2026'],
+            'submitted_at' => now()->subDay(),
+            'response_at' => now(),
+        ]);
+
+        $doc->webhookLogs()->create([
+            'event' => 'BILLING',
+            'nomor_aju' => $doc->nomor_aju,
+            'payload' => ['nama_respon' => 'BILLING', 'nomor_surat' => 'BILL/2026/001'],
+            'received_at' => now()->subHours(2),
+        ]);
+
+        // Helper timeline & respon
+        $this->assertNotEmpty($doc->statusTimeline());
+        $this->assertSame('Perekaman Dokumen', $doc->statusTimeline()[0]['label']);
+        $namaRespon = array_column($doc->responseHistory(), 'nama');
+        $this->assertContains('SPPB', $namaRespon);
+        $this->assertContains('BILLING', $namaRespon);
+
+        $this->actingAs($user)
+            ->get(route('documents.show', $doc))
+            ->assertOk()
+            ->assertSee('Riwayat Status')
+            ->assertSee('Riwayat Respon')
+            ->assertSee('Riwayat Petugas')
+            ->assertSee('Perekaman Dokumen')
+            ->assertSee('SPPB');
+    }
+
     public function test_user_can_import_queried_document_from_ceisa_portal(): void
     {
         $user = $this->authedUser();
