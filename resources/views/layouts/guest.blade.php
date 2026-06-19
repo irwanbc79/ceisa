@@ -49,16 +49,16 @@
                 {{-- Stat row --}}
                 <div class="mt-12 grid grid-cols-3 gap-6 max-w-md">
                     <div>
-                        <p class="num-display text-4xl text-cream">99.9<span class="text-gold-400 text-2xl">%</span></p>
-                        <p class="text-[11px] uppercase tracking-widest text-cream/50 mt-1">Uptime gateway</p>
+                        <p class="num-display text-3xl text-cream">Pilot</p>
+                        <p class="text-[11px] uppercase tracking-widest text-cream/50 mt-1">Project resmi</p>
                     </div>
                     <div>
-                        <p class="num-display text-4xl text-cream">&lt;30<span class="text-gold-400 text-2xl">s</span></p>
-                        <p class="text-[11px] uppercase tracking-widest text-cream/50 mt-1">Response SPPB</p>
+                        <p class="num-display text-3xl text-cream">H2H<span class="text-gold-400 text-xl">·</span>5</p>
+                        <p class="text-[11px] uppercase tracking-widest text-cream/50 mt-1">Modul CEISA 4.0</p>
                     </div>
                     <div>
-                        <p class="num-display text-4xl text-cream">5<span class="text-gold-400 text-2xl">+</span></p>
-                        <p class="text-[11px] uppercase tracking-widest text-cream/50 mt-1">Jenis dokumen</p>
+                        <p class="num-display text-3xl text-cream">24<span class="text-gold-400 text-xl">/</span>7</p>
+                        <p class="text-[11px] uppercase tracking-widest text-cream/50 mt-1">Submit kapan saja</p>
                     </div>
                 </div>
             </div>

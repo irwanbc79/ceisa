@@ -18,8 +18,8 @@
             <x-flash />
 
             @if ($errors->any())
-                <div class="mb-6 rounded-xl bg-rose-50 border border-rose-200 p-4 shadow-sm text-sm text-rose-800 flex items-start gap-3">
-                    <svg class="h-5 w-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <div class="mb-6 rounded-xl bg-crimson-50 border border-crimson-200 p-4 shadow-sm text-sm text-crimson-700 flex items-start gap-3">
+                    <svg class="h-5 w-5 text-crimson-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                     </svg>
                     <div>
@@ -35,20 +35,20 @@
 
             {{-- Client-side validation banner (Alpine) --}}
             <div x-show="formError" x-transition style="display:none"
-                 class="mb-6 rounded-xl bg-rose-50 border border-rose-200 p-4 shadow-sm text-sm text-rose-800 flex items-start gap-3">
-                <svg class="h-5 w-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                 class="mb-6 rounded-xl bg-crimson-50 border border-crimson-200 p-4 shadow-sm text-sm text-crimson-700 flex items-start gap-3">
+                <svg class="h-5 w-5 text-crimson-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                 </svg>
                 <div><span class="font-semibold">Belum lengkap:</span> <span x-text="formError"></span></div>
             </div>
 
             {{-- Stepper Progress Bar --}}
-            <div class="mb-8 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+            <div class="mb-8 bg-white rounded-2xl p-6 shadow-sm border border-cream-200">
                 <div class="relative flex items-center justify-between">
                     {{-- Progress Line Background --}}
-                    <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-100 rounded"></div>
+                    <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-cream-200 rounded"></div>
                     {{-- Active Progress Line --}}
-                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-600 rounded transition-all duration-500"
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-ink-900 rounded transition-all duration-500"
                          :style="`width: ${((step - 1) / (steps.length - 1)) * 100}%`"></div>
 
                     {{-- Steps --}}
@@ -58,17 +58,17 @@
                                 class="relative z-10 flex flex-col items-center group focus:outline-none disabled:cursor-not-allowed">
                             <div class="h-10 w-10 rounded-full flex items-center justify-center font-semibold text-sm border-2 transition-all duration-300"
                                  :class="step === idx + 1 
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100 scale-110' 
+                                    ? 'bg-ink-900 border-ink-800 text-white shadow-lg shadow-indigo-100 scale-110' 
                                     : (step > idx + 1 
-                                        ? 'bg-emerald-500 border-emerald-500 text-white' 
-                                        : 'bg-white border-slate-200 text-slate-400 group-hover:border-slate-300')">
+                                        ? 'bg-sea-500 border-sea-500 text-white' 
+                                        : 'bg-white border-cream-300 text-ink-300 group-hover:border-cream-400')">
                                 <span x-show="step <= idx + 1" x-text="idx + 1"></span>
                                 <svg x-show="step > idx + 1" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                 </svg>
                             </div>
                             <span class="text-xs font-semibold mt-2 transition-colors duration-300"
-                                  :class="step === idx + 1 ? 'text-indigo-600 font-bold' : (step > idx + 1 ? 'text-emerald-600' : 'text-slate-400')"
+                                  :class="step === idx + 1 ? 'text-gold-700 font-bold' : (step > idx + 1 ? 'text-sea-600' : 'text-ink-300')"
                                   x-text="s.title"></span>
                         </button>
                     </template>
@@ -86,13 +86,13 @@
                         <input type="hidden" name="submit_action" id="submit_action" value="submit" />
 
                         {{-- Step 1: Portal Selection --}}
-                        <div x-show="step === 1" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+                        <div x-show="step === 1" class="bg-white rounded-2xl p-6 shadow-sm border border-cream-200 transition-all duration-300">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800">Pilih Jenis Layanan Portal</h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">Tentukan jenis dokumen kepabeanan yang ingin Anda rekam</p>
+                                    <h3 class="text-lg font-bold text-ink-800">Pilih Jenis Layanan Portal</h3>
+                                    <p class="text-xs text-ink-400 mt-0.5">Tentukan jenis dokumen kepabeanan yang ingin Anda rekam</p>
                                 </div>
-                                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap 1 dari 5</span>
+                                <span class="px-3 py-1 bg-gold-50 text-gold-800 text-xs font-bold rounded-full border border-gold-100">Tahap 1 dari 5</span>
                             </div>
 
                             <div class="grid gap-4 sm:grid-cols-2">
@@ -100,23 +100,23 @@
                                     <button type="button" @click="selectDocType(item.code)"
                                             class="flex items-start text-left p-5 border-2 rounded-2xl transition-all duration-300 hover:shadow-md group relative overflow-hidden"
                                             :class="doc_type === item.code 
-                                                ? 'border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600' 
-                                                : 'border-slate-100 bg-white hover:border-slate-300'">
+                                                ? 'border-ink-800 bg-gold-50/50 shadow-sm ring-1 ring-ink-700' 
+                                                : 'border-cream-200 bg-white hover:border-cream-400'">
                                         <div class="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
-                                             :class="doc_type === item.code ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-500 group-hover:bg-slate-100'">
+                                             :class="doc_type === item.code ? 'bg-ink-900 text-white' : 'bg-cream-100 text-ink-400 group-hover:bg-cream-200'">
                                             <span x-html="item.icon"></span>
                                         </div>
                                         <div class="ml-4">
-                                            <div class="font-bold text-slate-800 flex items-center gap-2">
+                                            <div class="font-bold text-ink-800 flex items-center gap-2">
                                                 <span x-text="item.label"></span>
                                                 <span class="text-[10px] uppercase px-1.5 py-0.5 font-extrabold rounded-md tracking-wider transition-colors"
                                                       :class="item.badgeClass" x-text="item.code"></span>
                                             </div>
-                                            <p class="text-xs text-slate-500 mt-1" x-text="item.description"></p>
+                                            <p class="text-xs text-ink-400 mt-1" x-text="item.description"></p>
                                         </div>
                                         
                                         {{-- Glow Effect --}}
-                                        <div class="absolute -right-10 -bottom-10 h-24 w-24 rounded-full bg-indigo-100/30 blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                                        <div class="absolute -right-10 -bottom-10 h-24 w-24 rounded-full bg-gold-100/30 blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                                              x-show="doc_type === item.code"></div>
                                     </button>
                                 </template>
@@ -124,11 +124,11 @@
                         </div>
 
                         {{-- Step 2: Entities/Parties --}}
-                        <div x-show="step === 2" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+                        <div x-show="step === 2" class="bg-white rounded-2xl p-6 shadow-sm border border-cream-200 transition-all duration-300">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800">Informasi Identitas Entitas</h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">Lengkapi identitas para pihak pelaku transaksi kepabeanan</p>
+                                    <h3 class="text-lg font-bold text-ink-800">Informasi Identitas Entitas</h3>
+                                    <p class="text-xs text-ink-400 mt-0.5">Lengkapi identitas para pihak pelaku transaksi kepabeanan</p>
                                 </div>
                                 <button type="button" @click="loadSampleData()"
                                         class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow-sm shadow-amber-100 transition-all">
@@ -142,12 +142,12 @@
                             {{-- BC 3.0 (Header Klasifikasi + Eksportir & Penerima) --}}
                             <div x-show="doc_type === 'BC30'" class="space-y-6">
                                 {{-- Data Header: klasifikasi ekspor sesuai CEISA 4.0 --}}
-                                <div class="border-b border-slate-100 pb-4">
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Data Header (Klasifikasi Ekspor)</h4>
+                                <div class="border-b border-cream-200 pb-4">
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Data Header (Klasifikasi Ekspor)</h4>
                                     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="kantor_muat" value="Kantor Muat" />
-                                            <select id="kantor_muat" name="kantor_muat" x-model="formData.kantor_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="kantor_muat" name="kantor_muat" x-model="formData.kantor_muat" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <option value="">-- Pilih Kantor Muat --</option>
                                                 <template x-for="k in references.kantorMuat" :key="k.code">
                                                     <option :value="k.code" x-text="k.label"></option>
@@ -156,7 +156,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="jenis_ekspor" value="Jenis Ekspor" />
-                                            <select id="jenis_ekspor" name="jenis_ekspor" x-model="formData.jenis_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="jenis_ekspor" name="jenis_ekspor" x-model="formData.jenis_ekspor" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <template x-for="j in references.jenisEkspor" :key="j.code">
                                                     <option :value="j.code" x-text="j.label"></option>
                                                 </template>
@@ -164,7 +164,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="kategori_ekspor" value="Kategori Ekspor" />
-                                            <select id="kategori_ekspor" name="kategori_ekspor" x-model="formData.kategori_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="kategori_ekspor" name="kategori_ekspor" x-model="formData.kategori_ekspor" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <template x-for="k in references.kategoriEkspor" :key="k.code">
                                                     <option :value="k.code" x-text="k.label"></option>
                                                 </template>
@@ -172,7 +172,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="cara_dagang" value="Cara Dagang" />
-                                            <select id="cara_dagang" name="cara_dagang" x-model="formData.cara_dagang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="cara_dagang" name="cara_dagang" x-model="formData.cara_dagang" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <template x-for="c in references.caraDagang" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
                                                 </template>
@@ -180,7 +180,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="cara_bayar" value="Cara Bayar" />
-                                            <select id="cara_bayar" name="cara_bayar" x-model="formData.cara_bayar" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="cara_bayar" name="cara_bayar" x-model="formData.cara_bayar" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <template x-for="c in references.caraBayar" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
                                                 </template>
@@ -189,14 +189,14 @@
                                         <div class="grid grid-cols-2 gap-3">
                                             <div>
                                                 <x-input-label for="komoditi" value="Komoditi" />
-                                                <select id="komoditi" name="komoditi" x-model="formData.komoditi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <select id="komoditi" name="komoditi" x-model="formData.komoditi" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                     <option value="NON_MIGAS">Non Migas</option>
                                                     <option value="MIGAS">Migas</option>
                                                 </select>
                                             </div>
                                             <div>
                                                 <x-input-label for="curah" value="Curah" />
-                                                <select id="curah" name="curah" x-model="formData.curah" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                                <select id="curah" name="curah" x-model="formData.curah" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                     <option value="NON_CURAH">Non Curah</option>
                                                     <option value="CURAH">Curah</option>
                                                 </select>
@@ -206,35 +206,35 @@
                                 </div>
 
                                 {{-- Entitas: Eksportir --}}
-                                <div class="border-b border-slate-100 pb-4">
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Identitas Eksportir</h4>
+                                <div class="border-b border-cream-200 pb-4">
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Identitas Eksportir</h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_eksportir" value="Nama Perusahaan Eksportir" />
-                                            <input type="text" id="nama_eksportir" name="nama_eksportir" x-model="formData.nama_eksportir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_eksportir" name="nama_eksportir" x-model="formData.nama_eksportir" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required />
                                         </div>
                                         <div>
                                             <x-input-label for="npwp_eksportir" value="NPWP (15 Digit)" />
-                                            <input type="text" id="npwp_eksportir" name="npwp_eksportir" x-model="formData.npwp_eksportir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" required />
+                                            <input type="text" id="npwp_eksportir" name="npwp_eksportir" x-model="formData.npwp_eksportir" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" placeholder="012345678901000" required />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_eksportir" value="Alamat Eksportir Lengkap" />
-                                            <textarea id="alamat_eksportir" name="alamat_eksportir" x-model="formData.alamat_eksportir" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
+                                            <textarea id="alamat_eksportir" name="alamat_eksportir" x-model="formData.alamat_eksportir" rows="2" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required></textarea>
                                         </div>
                                     </div>
                                 </div>
 
                                 {{-- Entitas: Penerima --}}
                                 <div>
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Identitas Penerima (Consignee)</h4>
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Identitas Penerima (Consignee)</h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_penerima" value="Nama Penerima" />
-                                            <input type="text" id="nama_penerima" name="nama_penerima" x-model="formData.nama_penerima" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_penerima" name="nama_penerima" x-model="formData.nama_penerima" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required />
                                         </div>
                                         <div>
                                             <x-input-label for="negara_tujuan" value="Negara Tujuan (Kode Referensi)" />
-                                            <select id="negara_tujuan" name="negara_tujuan" x-model="formData.negara_tujuan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                            <select id="negara_tujuan" name="negara_tujuan" x-model="formData.negara_tujuan" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required>
                                                 <option value="">-- Pilih Negara Tujuan --</option>
                                                 <template x-for="c in references.countries" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
@@ -243,7 +243,7 @@
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_penerima" value="Alamat Penerima (Opsional)" />
-                                            <textarea id="alamat_penerima" name="alamat_penerima" x-model="formData.alamat_penerima" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm"></textarea>
+                                            <textarea id="alamat_penerima" name="alamat_penerima" x-model="formData.alamat_penerima" rows="2" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -251,33 +251,33 @@
 
                             {{-- BC 2.0 / BC 2.4 (Importir & Pemasok) --}}
                             <div x-show="doc_type === 'BC20' || doc_type === 'BC24'" class="space-y-6">
-                                <div class="border-b border-slate-100 pb-4">
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider" x-text="doc_type === 'BC20' ? 'Identitas Importir BC 2.0' : 'Identitas Importir BC 2.4'"></h4>
+                                <div class="border-b border-cream-200 pb-4">
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider" x-text="doc_type === 'BC20' ? 'Identitas Importir BC 2.0' : 'Identitas Importir BC 2.4'"></h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_importir" value="Nama Importir" />
-                                            <input type="text" id="nama_importir" name="nama_importir" x-model="formData.nama_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_importir" name="nama_importir" x-model="formData.nama_importir" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required />
                                         </div>
                                         <div>
                                             <x-input-label for="npwp_importir" value="NPWP (15 Digit)" />
-                                            <input type="text" id="npwp_importir" name="npwp_importir" x-model="formData.npwp_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" required />
+                                            <input type="text" id="npwp_importir" name="npwp_importir" x-model="formData.npwp_importir" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" placeholder="012345678901000" required />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_importir" value="Alamat Importir Lengkap" />
-                                            <textarea id="alamat_importir" name="alamat_importir" x-model="formData.alamat_importir" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
+                                            <textarea id="alamat_importir" name="alamat_importir" x-model="formData.alamat_importir" rows="2" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Identitas Pemasok (Supplier)</h4>
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Identitas Pemasok (Supplier)</h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_pemasok" value="Nama Pemasok" />
-                                            <input type="text" id="nama_pemasok" name="nama_pemasok" x-model="formData.nama_pemasok" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_pemasok" name="nama_pemasok" x-model="formData.nama_pemasok" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required />
                                         </div>
                                         <div>
                                             <x-input-label for="negara_pemasok" value="Negara Asal Pemasok (Kode Referensi)" />
-                                            <select id="negara_pemasok" name="negara_pemasok" x-model="formData.negara_pemasok" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                            <select id="negara_pemasok" name="negara_pemasok" x-model="formData.negara_pemasok" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required>
                                                 <option value="">-- Pilih Negara Asal --</option>
                                                 <template x-for="c in references.countries" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
@@ -290,29 +290,29 @@
 
                             {{-- TPB (Pengusaha TPB & Fasilitas) --}}
                             <div x-show="doc_type === 'TPB'" class="space-y-6">
-                                <div class="border-b border-slate-100 pb-4">
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Pengusaha Tempat Penimbunan Berikat (TPB)</h4>
+                                <div class="border-b border-cream-200 pb-4">
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Pengusaha Tempat Penimbunan Berikat (TPB)</h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_tpb" value="Nama Pengusaha TPB" />
-                                            <input type="text" id="nama_tpb" name="nama_tpb" x-model="formData.nama_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_tpb" name="nama_tpb" x-model="formData.nama_tpb" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required />
                                         </div>
                                         <div>
                                             <x-input-label for="npwp_tpb" value="NPWP (15 Digit)" />
-                                            <input type="text" id="npwp_tpb" name="npwp_tpb" x-model="formData.npwp_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" required />
+                                            <input type="text" id="npwp_tpb" name="npwp_tpb" x-model="formData.npwp_tpb" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" placeholder="012345678901000" required />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_tpb" value="Alamat Lokasi TPB" />
-                                            <textarea id="alamat_tpb" name="alamat_tpb" x-model="formData.alamat_tpb" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
+                                            <textarea id="alamat_tpb" name="alamat_tpb" x-model="formData.alamat_tpb" rows="2" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Detail Fasilitas TPB</h4>
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Detail Fasilitas TPB</h4>
                                     <div class="grid sm:grid-cols-3 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="jenis_tpb" value="Jenis TPB (Referensi)" />
-                                            <select id="jenis_tpb" name="jenis_tpb" x-model="formData.jenis_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                            <select id="jenis_tpb" name="jenis_tpb" x-model="formData.jenis_tpb" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required>
                                                 <option value="">-- Pilih Jenis TPB --</option>
                                                 <template x-for="t in references.tpbTypes" :key="t.code">
                                                     <option :value="t.code" x-text="t.label"></option>
@@ -321,7 +321,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="tujuan_tpb" value="Tujuan Pengiriman (Referensi)" />
-                                            <select id="tujuan_tpb" name="tujuan_tpb" x-model="formData.tujuan_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
+                                            <select id="tujuan_tpb" name="tujuan_tpb" x-model="formData.tujuan_tpb" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required>
                                                 <option value="">-- Pilih Tujuan --</option>
                                                 <template x-for="d in references.tpbDestinations" :key="d.code">
                                                     <option :value="d.code" x-text="d.label"></option>
@@ -330,7 +330,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="dokumen_referensi" value="No. Dokumen Referensi / Kontrak" />
-                                            <input type="text" id="dokumen_referensi" name="dokumen_referensi" x-model="formData.dokumen_referensi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="dokumen_referensi" name="dokumen_referensi" x-model="formData.dokumen_referensi" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required />
                                         </div>
                                     </div>
                                 </div>
@@ -338,28 +338,28 @@
 
                             {{-- RUSH (Pemohon) --}}
                             <div x-show="doc_type === 'RUSH'" class="space-y-6">
-                                <div class="border-b border-slate-100 pb-4">
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Identitas Pemohon Rush Handling</h4>
+                                <div class="border-b border-cream-200 pb-4">
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Identitas Pemohon Rush Handling</h4>
                                     <div class="grid sm:grid-cols-2 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="nama_pemohon" value="Nama Pemohon / Perusahaan" />
-                                            <input type="text" id="nama_pemohon" name="nama_pemohon" x-model="formData.nama_pemohon" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
+                                            <input type="text" id="nama_pemohon" name="nama_pemohon" x-model="formData.nama_pemohon" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required />
                                         </div>
                                         <div>
                                             <x-input-label for="npwp_pemohon" value="NPWP Pemohon (15 Digit)" />
-                                            <input type="text" id="npwp_pemohon" name="npwp_pemohon" x-model="formData.npwp_pemohon" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="012345678901000" required />
+                                            <input type="text" id="npwp_pemohon" name="npwp_pemohon" x-model="formData.npwp_pemohon" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" placeholder="012345678901000" required />
                                         </div>
                                         <div class="sm:col-span-2">
                                             <x-input-label for="alamat_pemohon" value="Alamat Lengkap Pemohon" />
-                                            <textarea id="alamat_pemohon" name="alamat_pemohon" x-model="formData.alamat_pemohon" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
+                                            <textarea id="alamat_pemohon" name="alamat_pemohon" x-model="formData.alamat_pemohon" rows="2" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" required></textarea>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Alasan Kebutuhan Rush Handling</h4>
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Alasan Kebutuhan Rush Handling</h4>
                                     <div class="mt-3">
                                         <x-input-label for="alasan_segera" value="Pilih Kebutuhan Barang Segera (Referensi)" />
-                                        <select id="alasan_segera" name="alasan_segera" x-model="formData.alasan_segera" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                        <select id="alasan_segera" name="alasan_segera" x-model="formData.alasan_segera" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                             <option value="">-- Pilih Alasan Utama --</option>
                                             <option value="Organ Tubuh Manusia / Darah / Jenazah">Organ Tubuh Manusia / Darah / Jenazah</option>
                                             <option value="Vaksin / Serum / Obat-obatan Kritis">Vaksin / Serum / Obat-obatan Kritis</option>
@@ -368,30 +368,30 @@
                                             <option value="Surat Kabar / Majalah / Berita Aktual">Surat Kabar / Majalah / Berita Aktual</option>
                                             <option value="Barang lain yang karena sifatnya membutuhkan penanganan segera">Lainnya (Tulis detail di bawah)</option>
                                         </select>
-                                        <input type="text" name="alasan_segera_custom" x-model="formData.alasan_segera" class="mt-2 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="Tulis alasan khusus bila tidak ada di daftar..." x-show="formData.alasan_segera === 'Barang lain yang karena sifatnya membutuhkan penanganan segera' || !['Organ Tubuh Manusia / Darah / Jenazah', 'Vaksin / Serum / Obat-obatan Kritis', 'Binatang Hidup (Live Animals)', 'Tumbuhan / Bibit Hidup (Live Plants)', 'Surat Kabar / Majalah / Berita Aktual', ''].includes(formData.alasan_segera)" />
+                                        <input type="text" name="alasan_segera_custom" x-model="formData.alasan_segera" class="mt-2 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" placeholder="Tulis alasan khusus bila tidak ada di daftar..." x-show="formData.alasan_segera === 'Barang lain yang karena sifatnya membutuhkan penanganan segera' || !['Organ Tubuh Manusia / Darah / Jenazah', 'Vaksin / Serum / Obat-obatan Kritis', 'Binatang Hidup (Live Animals)', 'Tumbuhan / Bibit Hidup (Live Plants)', 'Surat Kabar / Majalah / Berita Aktual', ''].includes(formData.alasan_segera)" />
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Step 3: Logistics & Transactions --}}
-                        <div x-show="step === 3" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+                        <div x-show="step === 3" class="bg-white rounded-2xl p-6 shadow-sm border border-cream-200 transition-all duration-300">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800">Pengangkutan &amp; Transaksi</h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">Rincian sarana logistik dan nilai moneter dokumen</p>
+                                    <h3 class="text-lg font-bold text-ink-800">Pengangkutan &amp; Transaksi</h3>
+                                    <p class="text-xs text-ink-400 mt-0.5">Rincian sarana logistik dan nilai moneter dokumen</p>
                                 </div>
-                                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap 3 dari 5</span>
+                                <span class="px-3 py-1 bg-gold-50 text-gold-800 text-xs font-bold rounded-full border border-gold-100">Tahap 3 dari 5</span>
                             </div>
 
                             {{-- BC 3.0 — Pengangkut & Transaksi (CEISA 4.0) --}}
                             <div x-show="doc_type === 'BC30'" class="space-y-6">
-                                <div class="border-b border-slate-100 pb-4">
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Data Pengangkut</h4>
+                                <div class="border-b border-cream-200 pb-4">
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Data Pengangkut</h4>
                                     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="cara_angkut" value="Cara Pengangkutan" />
-                                            <select id="cara_angkut" name="cara_angkut" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="cara_angkut" name="cara_angkut" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <template x-for="c in references.caraAngkut" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
                                                 </template>
@@ -399,15 +399,15 @@
                                         </div>
                                         <div>
                                             <x-input-label for="nama_sarana" value="Nama Sarana Pengangkut" />
-                                            <input type="text" id="nama_sarana" name="nama_sarana" x-model="formData.nama_sarana" placeholder="mis. MV Sinar Jaya" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            <input type="text" id="nama_sarana" name="nama_sarana" x-model="formData.nama_sarana" placeholder="mis. MV Sinar Jaya" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" />
                                         </div>
                                         <div>
                                             <x-input-label for="voy_flight" value="No. Voyage / Flight" />
-                                            <input type="text" id="voy_flight" name="voy_flight" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            <input type="text" id="voy_flight" name="voy_flight" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" />
                                         </div>
                                         <div>
                                             <x-input-label for="pelabuhan_muat_bc30" value="Pelabuhan Muat Ekspor" />
-                                            <select id="pelabuhan_muat_bc30" :name="doc_type === 'BC30' ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                            <select id="pelabuhan_muat_bc30" :name="doc_type === 'BC30' ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
                                                 <option value="">-- Pilih Pelabuhan Muat --</option>
                                                 <template x-for="p in references.ports" :key="p.code">
                                                     <option :value="p.code" x-text="p.label"></option>
@@ -416,7 +416,7 @@
                                         </div>
                                         <div>
                                             <x-input-label for="pelabuhan_tujuan" value="Pelabuhan Tujuan" />
-                                            <select id="pelabuhan_tujuan" name="pelabuhan_tujuan" x-model="formData.pelabuhan_tujuan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                            <select id="pelabuhan_tujuan" name="pelabuhan_tujuan" x-model="formData.pelabuhan_tujuan" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
                                                 <option value="">-- Pilih Pelabuhan Tujuan --</option>
                                                 <template x-for="p in references.ports" :key="p.code">
                                                     <option :value="p.code" x-text="p.label"></option>
@@ -425,17 +425,17 @@
                                         </div>
                                         <div>
                                             <x-input-label for="tanggal_ekspor" value="Tanggal Perkiraan Ekspor" />
-                                            <input type="date" id="tanggal_ekspor" name="tanggal_ekspor" x-model="formData.tanggal_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            <input type="date" id="tanggal_ekspor" name="tanggal_ekspor" x-model="formData.tanggal_ekspor" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Data Transaksi</h4>
+                                    <h4 class="text-sm font-bold text-ink-700 uppercase tracking-wider">Data Transaksi</h4>
                                     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
                                         <div>
                                             <x-input-label for="kode_valuta_bc30" value="Valuta" />
-                                            <select id="kode_valuta_bc30" :name="doc_type === 'BC30' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                            <select id="kode_valuta_bc30" :name="doc_type === 'BC30' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
                                                 <option value="">-- Pilih Mata Uang --</option>
                                                 <template x-for="c in references.currencies" :key="c.code">
                                                     <option :value="c.code" x-text="c.label"></option>
@@ -444,11 +444,11 @@
                                         </div>
                                         <div>
                                             <x-input-label for="ndpbm" value="NDPBM / Kurs (ke IDR)" />
-                                            <input type="number" step="0.0001" min="0" id="ndpbm" name="ndpbm" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                            <input type="number" step="0.0001" min="0" id="ndpbm" name="ndpbm" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
                                         </div>
                                         <div>
                                             <x-input-label for="incoterm" value="Cara Penyerahan (Incoterm)" />
-                                            <select id="incoterm" name="incoterm" x-model="formData.incoterm" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
+                                            <select id="incoterm" name="incoterm" x-model="formData.incoterm" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
                                                 <template x-for="i in references.incoterms" :key="i.code">
                                                     <option :value="i.code" x-text="i.label"></option>
                                                 </template>
@@ -456,35 +456,35 @@
                                         </div>
                                         <div>
                                             <x-input-label for="nilai_fob" value="Nilai FOB Total" />
-                                            <input type="number" step="0.01" min="0" id="nilai_fob" name="nilai_fob" x-model="formData.nilai_fob" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
-                                            <p class="text-[10px] text-slate-400 mt-1">Auto-terisi dari total Pos Barang bila dikosongkan.</p>
+                                            <input type="number" step="0.01" min="0" id="nilai_fob" name="nilai_fob" x-model="formData.nilai_fob" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                            <p class="text-[10px] text-ink-300 mt-1">Auto-terisi dari total Pos Barang bila dikosongkan.</p>
                                         </div>
                                         <div>
                                             <x-input-label for="freight" value="Freight (Opsional)" />
-                                            <input type="number" step="0.01" min="0" id="freight" name="freight" x-model="formData.freight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            <input type="number" step="0.01" min="0" id="freight" name="freight" x-model="formData.freight" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" />
                                         </div>
                                         <div>
                                             <x-input-label for="bruto" value="Berat Kotor / Bruto (KGM)" />
-                                            <input type="number" step="0.01" min="0" id="bruto" name="bruto" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                            <input type="number" step="0.01" min="0" id="bruto" name="bruto" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
                                         </div>
                                         <div>
                                             <x-input-label for="asuransi_jenis" value="Asuransi" />
-                                            <select id="asuransi_jenis" name="asuransi_jenis" x-model="formData.asuransi_jenis" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="asuransi_jenis" name="asuransi_jenis" x-model="formData.asuransi_jenis" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <option value="DN">Dalam Negeri</option>
                                                 <option value="LN">Luar Negeri</option>
                                             </select>
                                         </div>
                                         <div>
                                             <x-input-label for="nilai_asuransi" value="Nilai Asuransi (Opsional)" />
-                                            <input type="number" step="0.01" min="0" id="nilai_asuransi" name="nilai_asuransi" x-model="formData.nilai_asuransi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            <input type="number" step="0.01" min="0" id="nilai_asuransi" name="nilai_asuransi" x-model="formData.nilai_asuransi" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" />
                                         </div>
                                         <div>
                                             <x-input-label for="bank_devisa" value="Bank Devisa (Opsional)" />
-                                            <input type="text" id="bank_devisa" name="bank_devisa" x-model="formData.bank_devisa" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                            <input type="text" id="bank_devisa" name="bank_devisa" x-model="formData.bank_devisa" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" />
                                         </div>
                                         <div class="sm:col-span-2 lg:col-span-3">
                                             <x-input-label for="cara_pembayaran_bc30" value="Cara Pembayaran (Opsional)" />
-                                            <select id="cara_pembayaran_bc30" :name="doc_type === 'BC30' ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                            <select id="cara_pembayaran_bc30" :name="doc_type === 'BC30' ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                                 <option value="">-- Pilih Cara Pembayaran --</option>
                                                 <template x-for="m in references.paymentMethods" :key="m.code">
                                                     <option :value="m.code" x-text="m.label"></option>
@@ -499,7 +499,7 @@
                             <div x-show="doc_type === 'BC20' || doc_type === 'BC24'" class="grid sm:grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label for="pelabuhan_muat" value="Pelabuhan Muat (Kode Referensi)" />
-                                    <select id="pelabuhan_muat" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
+                                    <select id="pelabuhan_muat" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
                                         <option value="">-- Pilih Pelabuhan Muat --</option>
                                         <template x-for="p in references.ports" :key="p.code">
                                             <option :value="p.code" x-text="p.label"></option>
@@ -508,7 +508,7 @@
                                 </div>
                                 <div>
                                     <x-input-label for="pelabuhan_bongkar" value="Pelabuhan Bongkar (Kode Referensi)" />
-                                    <select id="pelabuhan_bongkar" name="pelabuhan_bongkar" x-model="formData.pelabuhan_bongkar" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type !== 'BC30'">
+                                    <select id="pelabuhan_bongkar" name="pelabuhan_bongkar" x-model="formData.pelabuhan_bongkar" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type !== 'BC30'">
                                         <option value="">-- Pilih Pelabuhan Bongkar --</option>
                                         <template x-for="p in references.ports" :key="p.code">
                                             <option :value="p.code" x-text="p.label"></option>
@@ -517,7 +517,7 @@
                                 </div>
                                 <div>
                                     <x-input-label for="kode_valuta" value="Mata Uang / Valuta (Referensi)" />
-                                    <select id="kode_valuta" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
+                                    <select id="kode_valuta" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
                                         <option value="">-- Pilih Mata Uang --</option>
                                         <template x-for="c in references.currencies" :key="c.code">
                                             <option :value="c.code" x-text="c.label"></option>
@@ -527,12 +527,12 @@
                                 
                                 <div x-show="doc_type === 'BC20' || doc_type === 'BC24'">
                                     <x-input-label for="nilai_cif" value="Nilai CIF Total (Cost, Insurance, Freight)" />
-                                    <input type="number" step="0.01" min="0" id="nilai_cif" name="nilai_cif" x-model="formData.nilai_cif" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
+                                    <input type="number" step="0.01" min="0" id="nilai_cif" name="nilai_cif" x-model="formData.nilai_cif" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
                                 </div>
 
                                 <div class="sm:col-span-2">
                                     <x-input-label for="cara_pembayaran" value="Cara Pembayaran (Referensi)" />
-                                    <select id="cara_pembayaran" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
+                                    <select id="cara_pembayaran" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm">
                                         <option value="">-- Pilih Cara Pembayaran --</option>
                                         <template x-for="m in references.paymentMethods" :key="m.code">
                                             <option :value="m.code" x-text="m.label"></option>
@@ -545,7 +545,7 @@
                             <div x-show="doc_type === 'TPB'" class="grid sm:grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label for="kode_valuta_tpb" value="Mata Uang / Valuta (Referensi)" />
-                                    <select id="kode_valuta_tpb" :name="doc_type === 'TPB' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
+                                    <select id="kode_valuta_tpb" :name="doc_type === 'TPB' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
                                         <option value="">-- Pilih Mata Uang --</option>
                                         <template x-for="c in references.currencies" :key="c.code">
                                             <option :value="c.code" x-text="c.label"></option>
@@ -554,7 +554,7 @@
                                 </div>
                                 <div>
                                     <x-input-label for="nilai_barang" value="Nilai Total Barang TPB" />
-                                    <input type="number" step="0.01" min="0" id="nilai_barang" name="nilai_barang" x-model="formData.nilai_barang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
+                                    <input type="number" step="0.01" min="0" id="nilai_barang" name="nilai_barang" x-model="formData.nilai_barang" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
                                 </div>
                             </div>
 
@@ -563,31 +563,31 @@
                                 <div class="grid sm:grid-cols-2 gap-4">
                                     <div>
                                         <x-input-label for="nama_sarana_pengangkut" value="Sarana Pengangkut (Airlines / Carrier)" />
-                                        <input type="text" id="nama_sarana_pengangkut" name="nama_sarana_pengangkut" x-model="formData.nama_sarana_pengangkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="text" id="nama_sarana_pengangkut" name="nama_sarana_pengangkut" x-model="formData.nama_sarana_pengangkut" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                     <div>
                                         <x-input-label for="nomor_flight" value="Nomor Flight / Voyage" />
-                                        <input type="text" id="nomor_flight" name="nomor_flight" x-model="formData.nomor_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="text" id="nomor_flight" name="nomor_flight" x-model="formData.nomor_flight" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                     <div>
                                         <x-input-label for="nomor_awb_bl" value="Nomor AWB (Air Waybill) / Bill of Lading" />
-                                        <input type="text" id="nomor_awb_bl" name="nomor_awb_bl" x-model="formData.nomor_awb_bl" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="text" id="nomor_awb_bl" name="nomor_awb_bl" x-model="formData.nomor_awb_bl" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                     <div>
                                         <x-input-label for="tanggal_awb_bl" value="Tanggal AWB / BL" />
-                                        <input type="date" id="tanggal_awb_bl" name="tanggal_awb_bl" x-model="formData.tanggal_awb_bl" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                        <input type="date" id="tanggal_awb_bl" name="tanggal_awb_bl" x-model="formData.tanggal_awb_bl" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                     </div>
                                 </div>
-                                <div class="border-t border-slate-100 pt-4">
-                                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Informasi Kemasan</h4>
+                                <div class="border-t border-cream-200 pt-4">
+                                    <h4 class="text-xs font-bold text-ink-400 uppercase tracking-wider mb-2">Informasi Kemasan</h4>
                                     <div class="grid sm:grid-cols-2 gap-4">
                                         <div>
                                             <x-input-label for="jumlah_kemasan" value="Jumlah Kemasan" />
-                                            <input type="number" min="1" id="jumlah_kemasan" name="jumlah_kemasan" x-model="formData.jumlah_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+                                            <input type="number" min="1" id="jumlah_kemasan" name="jumlah_kemasan" x-model="formData.jumlah_kemasan" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
                                         </div>
                                         <div>
                                             <x-input-label for="jenis_kemasan" value="Jenis Kemasan (Referensi)" />
-                                            <select id="jenis_kemasan" name="jenis_kemasan" x-model="formData.jenis_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
+                                            <select id="jenis_kemasan" name="jenis_kemasan" x-model="formData.jenis_kemasan" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
                                                 <option value="">-- Pilih Jenis Kemasan --</option>
                                                 <template x-for="p in references.packages" :key="p.code">
                                                     <option :value="p.code" x-text="p.label"></option>
@@ -600,47 +600,47 @@
                         </div>
 
                         {{-- Step 4: Items (Dynamic Grid) --}}
-                        <div x-show="step === 4" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+                        <div x-show="step === 4" class="bg-white rounded-2xl p-6 shadow-sm border border-cream-200 transition-all duration-300">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800">Detail Pos Barang</h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">Input pos-pos komoditas barang ekspor / impor secara terperinci</p>
+                                    <h3 class="text-lg font-bold text-ink-800">Detail Pos Barang</h3>
+                                    <p class="text-xs text-ink-400 mt-0.5">Input pos-pos komoditas barang ekspor / impor secara terperinci</p>
                                 </div>
                                 <button type="button" @click="addItem()"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-indigo-100">
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ink-900 hover:bg-ink-800 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-indigo-100">
                                     + Tambah Barang
                                 </button>
                             </div>
 
                             <div class="space-y-4">
                                 <template x-for="(item, index) in formData.barang" :key="index">
-                                    <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50 hover:border-slate-300 transition-all relative group">
-                                        <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
-                                            <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">Barang #<span x-text="index + 1"></span></span>
+                                    <div class="border border-cream-200 rounded-xl p-4 bg-cream-100/50 hover:border-cream-400 transition-all relative group">
+                                        <div class="flex items-center justify-between border-b border-cream-200 pb-2 mb-3">
+                                            <span class="text-xs font-extrabold text-gold-700 bg-gold-50 px-2 py-0.5 rounded uppercase tracking-wider">Barang #<span x-text="index + 1"></span></span>
                                             <button type="button" @click="removeItem(index)" x-show="formData.barang.length > 1"
-                                                    class="text-xs text-rose-600 hover:underline">Hapus Pos</button>
+                                                    class="text-xs text-crimson-600 hover:underline">Hapus Pos</button>
                                         </div>
                                         
                                         <div class="grid sm:grid-cols-3 gap-3">
                                             <div class="sm:col-span-1">
-                                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Kode HS (Harmonized System)</label>
+                                                <label class="block text-[11px] font-bold text-ink-400 uppercase">Kode HS (Harmonized System)</label>
                                                 <input type="text" :name="`barang[${index}][hs_code]`" x-model="item.hs_code"
-                                                       class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" placeholder="6109100000" required />
+                                                       class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" placeholder="6109100000" required />
                                             </div>
                                             <div class="sm:col-span-2">
-                                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Uraian Barang Lengkap</label>
+                                                <label class="block text-[11px] font-bold text-ink-400 uppercase">Uraian Barang Lengkap</label>
                                                 <input type="text" :name="`barang[${index}][uraian]`" x-model="item.uraian"
-                                                       class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                                                       class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" required />
                                             </div>
                                             <div>
-                                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Jumlah Satuan</label>
+                                                <label class="block text-[11px] font-bold text-ink-400 uppercase">Jumlah Satuan</label>
                                                 <input type="number" step="0.01" min="0" :name="`barang[${index}][jumlah_satuan]`" x-model="item.jumlah_satuan"
-                                                       class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                                                       class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" required />
                                             </div>
                                             <div>
-                                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Kode Satuan (Referensi)</label>
+                                                <label class="block text-[11px] font-bold text-ink-400 uppercase">Kode Satuan (Referensi)</label>
                                                 <select :name="`barang[${index}][kode_satuan]`" x-model="item.kode_satuan"
-                                                        class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required>
+                                                        class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" required>
                                                     <option value="">-- Pilih Satuan --</option>
                                                     <template x-for="u in references.units" :key="u.code">
                                                         <option :value="u.code" x-text="u.label"></option>
@@ -648,29 +648,29 @@
                                                 </select>
                                             </div>
                                             <div>
-                                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Netto (KGM / Kilogram)</label>
+                                                <label class="block text-[11px] font-bold text-ink-400 uppercase">Netto (KGM / Kilogram)</label>
                                                 <input type="number" step="0.01" min="0" :name="`barang[${index}][netto]`" x-model="item.netto"
-                                                       class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                                                       class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" required />
                                             </div>
                                             
                                             {{-- Field tambahan khusus BC 3.0 ekspor --}}
                                             <template x-if="doc_type === 'BC30'">
-                                                <div class="sm:col-span-3 grid sm:grid-cols-3 gap-3 border-t border-dashed border-slate-200 pt-3 mt-1">
+                                                <div class="sm:col-span-3 grid sm:grid-cols-3 gap-3 border-t border-dashed border-cream-300 pt-3 mt-1">
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Merk (Opsional)</label>
-                                                        <input type="text" :name="`barang[${index}][merk]`" x-model="item.merk" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Merk (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][merk]`" x-model="item.merk" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" />
                                                     </div>
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Tipe (Opsional)</label>
-                                                        <input type="text" :name="`barang[${index}][tipe]`" x-model="item.tipe" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Tipe (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][tipe]`" x-model="item.tipe" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" />
                                                     </div>
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Ukuran (Opsional)</label>
-                                                        <input type="text" :name="`barang[${index}][ukuran]`" x-model="item.ukuran" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Ukuran (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][ukuran]`" x-model="item.ukuran" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" />
                                                     </div>
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Negara Asal Barang</label>
-                                                        <select :name="`barang[${index}][negara_asal]`" x-model="item.negara_asal" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm">
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Negara Asal Barang</label>
+                                                        <select :name="`barang[${index}][negara_asal]`" x-model="item.negara_asal" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm">
                                                             <option value="">-- Pilih --</option>
                                                             <template x-for="c in references.countries" :key="c.code">
                                                                 <option :value="c.code" x-text="c.label"></option>
@@ -678,20 +678,20 @@
                                                         </select>
                                                     </div>
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Daerah Asal (Opsional)</label>
-                                                        <input type="text" :name="`barang[${index}][daerah_asal]`" x-model="item.daerah_asal" placeholder="mis. Jawa Barat" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Daerah Asal (Opsional)</label>
+                                                        <input type="text" :name="`barang[${index}][daerah_asal]`" x-model="item.daerah_asal" placeholder="mis. Jawa Barat" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" />
                                                     </div>
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Volume (m³, Opsional)</label>
-                                                        <input type="number" step="0.0001" min="0" :name="`barang[${index}][volume]`" x-model="item.volume" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Volume (m³, Opsional)</label>
+                                                        <input type="number" step="0.0001" min="0" :name="`barang[${index}][volume]`" x-model="item.volume" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" />
                                                     </div>
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Jumlah Kemasan</label>
-                                                        <input type="number" step="0.01" min="0" :name="`barang[${index}][jumlah_kemasan]`" x-model="item.jumlah_kemasan" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Jumlah Kemasan</label>
+                                                        <input type="number" step="0.01" min="0" :name="`barang[${index}][jumlah_kemasan]`" x-model="item.jumlah_kemasan" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" />
                                                     </div>
                                                     <div>
-                                                        <label class="block text-[11px] font-bold text-slate-500 uppercase">Jenis Kemasan</label>
-                                                        <select :name="`barang[${index}][kode_kemasan]`" x-model="item.kode_kemasan" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm">
+                                                        <label class="block text-[11px] font-bold text-ink-400 uppercase">Jenis Kemasan</label>
+                                                        <select :name="`barang[${index}][kode_kemasan]`" x-model="item.kode_kemasan" class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm">
                                                             <option value="">-- Pilih --</option>
                                                             <template x-for="p in references.packages" :key="p.code">
                                                                 <option :value="p.code" x-text="p.label"></option>
@@ -703,13 +703,13 @@
 
                                             {{-- Dynamic Monetary Value for Item --}}
                                             <div class="sm:col-span-3">
-                                                <label class="block text-[11px] font-bold text-slate-500 uppercase"
+                                                <label class="block text-[11px] font-bold text-ink-400 uppercase"
                                                        x-text="doc_type === 'BC30' ? 'Nilai FOB Barang' : (doc_type === 'BC20' || doc_type === 'BC24' ? 'Nilai CIF Barang' : 'Nilai Barang')"></label>
                                                 
                                                 <input type="number" step="0.01" min="0"
                                                        :name="doc_type === 'BC30' ? `barang[${index}][nilai_fob]` : (doc_type === 'BC20' || doc_type === 'BC24' ? `barang[${index}][nilai_cif]` : `barang[${index}][nilai_barang]`)"
                                                        x-model="item[doc_type === 'BC30' ? 'nilai_fob' : (doc_type === 'BC20' || doc_type === 'BC24' ? 'nilai_cif' : 'nilai_barang')]"
-                                                       class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                                                       class="mt-1 block w-full rounded-lg border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-xs shadow-sm" required />
                                             </div>
                                         </div>
                                     </div>
@@ -717,95 +717,95 @@
                             </div>
 
                             {{-- Live Summary Totals --}}
-                            <div class="mt-6 border-t border-slate-100 pt-4 bg-indigo-50/30 rounded-xl p-4 flex flex-wrap gap-6 text-sm">
+                            <div class="mt-6 border-t border-cream-200 pt-4 bg-gold-50/30 rounded-xl p-4 flex flex-wrap gap-6 text-sm">
                                 <div>
-                                    <span class="text-slate-500">Total Pos Barang:</span>
-                                    <span class="font-bold text-slate-800 ml-1" x-text="formData.barang.length"></span>
+                                    <span class="text-ink-400">Total Pos Barang:</span>
+                                    <span class="font-bold text-ink-800 ml-1" x-text="formData.barang.length"></span>
                                 </div>
                                 <div>
-                                    <span class="text-slate-500">Total Netto:</span>
-                                    <span class="font-bold text-slate-800 ml-1" x-text="calculateTotalNetto() + ' kg'"></span>
+                                    <span class="text-ink-400">Total Netto:</span>
+                                    <span class="font-bold text-ink-800 ml-1" x-text="calculateTotalNetto() + ' kg'"></span>
                                 </div>
                                 <div>
-                                    <span class="text-slate-500">Total Nilai Barang:</span>
-                                    <span class="font-bold text-indigo-700 ml-1" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
+                                    <span class="text-ink-400">Total Nilai Barang:</span>
+                                    <span class="font-bold text-gold-800 ml-1" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Step 5: Review & Send --}}
-                        <div x-show="step === 5" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+                        <div x-show="step === 5" class="bg-white rounded-2xl p-6 shadow-sm border border-cream-200 transition-all duration-300">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 class="text-lg font-bold text-slate-800">Review Data &amp; Submit</h3>
-                                    <p class="text-xs text-slate-500 mt-0.5">Konfirmasi seluruh isian sebelum didaftarkan ke Bea Cukai</p>
+                                    <h3 class="text-lg font-bold text-ink-800">Review Data &amp; Submit</h3>
+                                    <p class="text-xs text-ink-400 mt-0.5">Konfirmasi seluruh isian sebelum didaftarkan ke Bea Cukai</p>
                                 </div>
-                                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">Siap Submit</span>
+                                <span class="px-3 py-1 bg-sea-50 text-sea-700 text-xs font-bold rounded-full border border-sea-100">Siap Submit</span>
                             </div>
 
                             <div class="space-y-6">
                                 {{-- Summary Cards --}}
-                                <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Rangkuman Header Dokumen</h4>
+                                <div class="bg-cream-100 rounded-xl p-5 border border-cream-200">
+                                    <h4 class="text-xs font-bold text-ink-300 uppercase tracking-wider mb-3">Rangkuman Header Dokumen</h4>
                                     <dl class="grid sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
                                         <div>
-                                            <dt class="text-slate-500">Tipe Dokumen:</dt>
-                                            <dd class="font-bold text-slate-800" x-text="docTypes.find(d => d.code === doc_type)?.label || doc_type"></dd>
+                                            <dt class="text-ink-400">Tipe Dokumen:</dt>
+                                            <dd class="font-bold text-ink-800" x-text="docTypes.find(d => d.code === doc_type)?.label || doc_type"></dd>
                                         </div>
                                         <div>
-                                            <dt class="text-slate-500">Valuta &amp; Nilai:</dt>
-                                            <dd class="font-bold text-indigo-700" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></dd>
+                                            <dt class="text-ink-400">Valuta &amp; Nilai:</dt>
+                                            <dd class="font-bold text-gold-800" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></dd>
                                         </div>
                                         
                                         {{-- Conditional review labels --}}
                                         <template x-if="doc_type === 'BC30'">
-                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-slate-200/50 pt-2">
+                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-cream-300/50 pt-2">
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Eksportir:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="formData.nama_eksportir || '—'"></span>
+                                                    <span class="text-xs text-ink-300 block">Eksportir:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="formData.nama_eksportir || '—'"></span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Penerima:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="formData.nama_penerima || '—'"></span>
+                                                    <span class="text-xs text-ink-300 block">Penerima:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="formData.nama_penerima || '—'"></span>
                                                 </div>
                                             </div>
                                         </template>
 
                                         <template x-if="doc_type === 'BC20' || doc_type === 'BC24'">
-                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-slate-200/50 pt-2">
+                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-cream-300/50 pt-2">
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Importir:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="formData.nama_importir || '—'"></span>
+                                                    <span class="text-xs text-ink-300 block">Importir:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="formData.nama_importir || '—'"></span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Pemasok:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="formData.nama_pemasok || '—'"></span>
+                                                    <span class="text-xs text-ink-300 block">Pemasok:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="formData.nama_pemasok || '—'"></span>
                                                 </div>
                                             </div>
                                         </template>
 
                                         <template x-if="doc_type === 'TPB'">
-                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-slate-200/50 pt-2">
+                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-cream-300/50 pt-2">
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Pengusaha TPB:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="formData.nama_tpb || '—'"></span>
+                                                    <span class="text-xs text-ink-300 block">Pengusaha TPB:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="formData.nama_tpb || '—'"></span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Fasilitas / Ref:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="`${formData.jenis_tpb || '—'} / ${formData.dokumen_referensi || '—'}`"></span>
+                                                    <span class="text-xs text-ink-300 block">Fasilitas / Ref:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="`${formData.jenis_tpb || '—'} / ${formData.dokumen_referensi || '—'}`"></span>
                                                 </div>
                                             </div>
                                         </template>
 
                                         <template x-if="doc_type === 'RUSH'">
-                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-slate-200/50 pt-2">
+                                            <div class="sm:col-span-2 grid sm:grid-cols-2 gap-3 mt-1 border-t border-cream-300/50 pt-2">
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Pemohon:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="formData.nama_pemohon || '—'"></span>
+                                                    <span class="text-xs text-ink-300 block">Pemohon:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="formData.nama_pemohon || '—'"></span>
                                                 </div>
                                                 <div>
-                                                    <span class="text-xs text-slate-400 block">Sarana &amp; AWB/BL:</span>
-                                                    <span class="font-semibold text-slate-700 text-xs" x-text="`${formData.nama_sarana_pengangkut || '—'} / ${formData.nomor_awb_bl || '—'}`"></span>
+                                                    <span class="text-xs text-ink-300 block">Sarana &amp; AWB/BL:</span>
+                                                    <span class="font-semibold text-ink-700 text-xs" x-text="`${formData.nama_sarana_pengangkut || '—'} / ${formData.nomor_awb_bl || '—'}`"></span>
                                                 </div>
                                             </div>
                                         </template>
@@ -814,29 +814,29 @@
 
                                 {{-- Pernyataan (BC 3.0) --}}
                                 <template x-if="doc_type === 'BC30'">
-                                    <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pernyataan Penanggung Jawab</h4>
+                                    <div class="bg-cream-100 rounded-xl p-5 border border-cream-200">
+                                        <h4 class="text-xs font-bold text-ink-300 uppercase tracking-wider mb-3">Pernyataan Penanggung Jawab</h4>
                                         <div class="grid sm:grid-cols-3 gap-4">
                                             <div>
                                                 <x-input-label for="pernyataan_nama" value="Nama Penanggung Jawab" />
-                                                <input type="text" id="pernyataan_nama" name="pernyataan_nama" x-model="formData.pernyataan_nama" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                                <input type="text" id="pernyataan_nama" name="pernyataan_nama" x-model="formData.pernyataan_nama" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
                                             </div>
                                             <div>
                                                 <x-input-label for="pernyataan_jabatan" value="Jabatan" />
-                                                <input type="text" id="pernyataan_jabatan" name="pernyataan_jabatan" x-model="formData.pernyataan_jabatan" placeholder="mis. Direktur" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                                                <input type="text" id="pernyataan_jabatan" name="pernyataan_jabatan" x-model="formData.pernyataan_jabatan" placeholder="mis. Direktur" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
                                             </div>
                                             <div>
                                                 <x-input-label for="pernyataan_kota" value="Kota (Opsional)" />
-                                                <input type="text" id="pernyataan_kota" name="pernyataan_kota" x-model="formData.pernyataan_kota" placeholder="mis. Jakarta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                                                <input type="text" id="pernyataan_kota" name="pernyataan_kota" x-model="formData.pernyataan_kota" placeholder="mis. Jakarta" class="mt-1 block w-full rounded-xl border-cream-300 focus:border-gold-500 focus:ring-gold-500 text-sm shadow-sm" />
                                             </div>
                                         </div>
-                                        <p class="text-[11px] text-slate-500 mt-3">Dengan ini menyatakan bahwa data yang diisi adalah benar dan bertanggung jawab penuh sesuai ketentuan kepabeanan.</p>
+                                        <p class="text-[11px] text-ink-400 mt-3">Dengan ini menyatakan bahwa data yang diisi adalah benar dan bertanggung jawab penuh sesuai ketentuan kepabeanan.</p>
                                     </div>
                                 </template>
 
                                 {{-- Validation Guard Message --}}
-                                <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-900 flex items-start gap-2.5">
-                                    <svg class="h-4 w-4 shrink-0 text-indigo-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <div class="rounded-xl border border-gold-100 bg-gold-50/50 p-4 text-xs text-ink-900 flex items-start gap-2.5">
+                                    <svg class="h-4 w-4 shrink-0 text-gold-700 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                     </svg>
                                     <div>
@@ -847,33 +847,33 @@
                         </div>
 
                         {{-- Footer Buttons --}}
-                        <div class="mt-6 flex items-center justify-between border-t border-slate-200/50 pt-4">
+                        <div class="mt-6 flex items-center justify-between border-t border-cream-300/50 pt-4">
                             <button type="button" @click="prevStep()" x-show="step > 1"
-                                    class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-bold rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-sm">
+                                    class="px-4 py-2 border border-cream-300 text-ink-500 text-sm font-bold rounded-xl bg-white hover:bg-cream-100 transition-colors shadow-sm">
                                 Sebelumnya
                             </button>
                             <div class="ml-auto flex items-center gap-3">
-                                <a href="{{ route('dashboard') }}" class="text-slate-500 hover:text-slate-800 text-sm transition-colors">Batal</a>
+                                <a href="{{ route('dashboard') }}" class="text-ink-400 hover:text-ink-800 text-sm transition-colors">Batal</a>
                                 
                                 <button type="button" @click="nextStep()" x-show="step < steps.length"
-                                        class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
+                                        class="px-5 py-2.5 bg-ink-900 hover:bg-ink-800 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
                                     Lanjutkan &rarr;
                                 </button>
                                 
                                 <button type="button" @click="openDraftPreview()" x-show="step === steps.length"
-                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-100">
+                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink-700 hover:bg-ink-800 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-100">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                                     Preview
                                 </button>
 
                                 <button type="button" @click="submitForm('draft')" x-show="step === steps.length"
-                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all shadow-sm">
+                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-cream-400 hover:bg-cream-100 text-ink-700 text-sm font-bold rounded-xl transition-all shadow-sm">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
                                     Simpan Draft
                                 </button>
 
                                 <button type="button" @click="submitForm('submit')" x-show="step === steps.length"
-                                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
+                                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-ink-900 hover:bg-ink-800 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>
                                     Kirim ke CEISA
                                 </button>
@@ -884,34 +884,34 @@
 
                 {{-- JSON Real-time Preview Panel (Sidebar) --}}
                 <div class="lg:col-span-1 space-y-4 lg:sticky lg:top-6">
-                    <div class="bg-slate-900 text-slate-300 rounded-2xl shadow-xl overflow-hidden border border-slate-800">
+                    <div class="bg-ink-900 text-ink-200 rounded-2xl shadow-xl overflow-hidden border border-ink-700">
                         {{-- Collapsible Header --}}
                         <button type="button" @click="showJson = !showJson" 
-                                class="w-full bg-slate-950 px-4 py-3 border-b border-slate-800 flex items-center justify-between hover:bg-slate-900/50 transition-colors focus:outline-none">
+                                class="w-full bg-ink-950 px-4 py-3 border-b border-ink-700 flex items-center justify-between hover:bg-ink-900/50 transition-colors focus:outline-none">
                             <div class="flex items-center gap-2">
-                                <div class="h-2 w-2 rounded-full transition-colors duration-300" :class="showJson ? 'bg-emerald-500 animate-pulse' : 'bg-slate-500'"></div>
-                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">CEISA JSON Payload</span>
+                                <div class="h-2 w-2 rounded-full transition-colors duration-300" :class="showJson ? 'bg-sea-500 animate-pulse' : 'bg-ink-500'"></div>
+                                <span class="text-[11px] font-bold text-ink-300 uppercase tracking-wider">CEISA JSON Payload</span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span class="text-[10px] bg-slate-800 text-indigo-400 px-2 py-0.5 rounded font-mono" x-text="doc_type"></span>
-                                <svg class="h-4 w-4 text-slate-400 transition-transform duration-200" :class="showJson ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <span class="text-[10px] bg-ink-800 text-gold-400 px-2 py-0.5 rounded font-mono" x-text="doc_type"></span>
+                                <svg class="h-4 w-4 text-ink-300 transition-transform duration-200" :class="showJson ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </div>
                         </button>
                         
                         <div class="p-4" x-show="showJson" x-transition>
-                            <p class="text-[10px] text-slate-500 mb-3">Payload di bawah disusun secara dinamis sesuai struktur Bea Cukai (DJBC):</p>
-                            <pre class="text-[11px] font-mono leading-relaxed overflow-x-auto text-emerald-400 max-h-[480px] scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent select-all font-semibold" 
+                            <p class="text-[10px] text-ink-400 mb-3">Payload di bawah disusun secara dinamis sesuai struktur Bea Cukai (DJBC):</p>
+                            <pre class="text-[11px] font-mono leading-relaxed overflow-x-auto text-sea-300 max-h-[480px] scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent select-all font-semibold" 
                                  x-text="JSON.stringify(generateLivePayload(), null, 2)"></pre>
                         </div>
                     </div>
                     
                     {{-- Quick Portal Info Cards --}}
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 text-xs text-slate-500">
-                        <h4 class="font-bold text-slate-700 uppercase tracking-wider mb-2">Informasi Validasi Bea Cukai</h4>
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-cream-200 text-xs text-ink-400">
+                        <h4 class="font-bold text-ink-700 uppercase tracking-wider mb-2">Informasi Validasi Bea Cukai</h4>
                         <ul class="space-y-1.5 list-disc pl-4">
-                            <li>Struktur JSON ini didesain sesuai schema API di <code class="text-slate-800 font-bold font-mono">openapi.beacukai.go.id</code>.</li>
+                            <li>Struktur JSON ini didesain sesuai schema API di <code class="text-ink-800 font-bold font-mono">openapi.beacukai.go.id</code>.</li>
                             <li>Pastikan NPWP berstatus aktif di DJBC agar lolos pre-validation.</li>
                             <li>Nilai mata uang (Valuta) wajib mengikuti standar ISO 3 digit.</li>
                         </ul>
@@ -927,25 +927,25 @@
              ===================================================================== --}}
     <div x-show="showDraftModal" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-900/70 backdrop-blur-sm"
          @keydown.escape.window="showDraftModal = false">
 
         <div x-show="showDraftModal" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-             class="bg-white w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl border border-slate-100"
+             class="bg-white w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl border border-cream-200"
              @click.stop>
 
             {{-- Modal Header --}}
-            <div class="sticky top-0 z-10 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+            <div class="sticky top-0 z-10 bg-white border-b border-cream-200 px-6 py-4 flex items-center justify-between">
                 <div>
-                    <h3 class="font-extrabold text-slate-900 text-base tracking-tight">Preview Dokumen Draft</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Periksa kembali sebelum disimpan ke sistem M2B</p>
+                    <h3 class="font-extrabold text-ink-900 text-base tracking-tight">Preview Dokumen Draft</h3>
+                    <p class="text-xs text-ink-300 mt-0.5">Periksa kembali sebelum disimpan ke sistem M2B</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full border border-amber-200">
                         <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                         DRAFT — Belum Dikirim ke CEISA
                     </span>
-                    <button type="button" @click="showDraftModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50 transition-colors">
+                    <button type="button" @click="showDraftModal = false" class="text-ink-300 hover:text-ink-500 p-1 rounded-lg hover:bg-cream-100 transition-colors">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
                     </button>
                 </div>
@@ -954,64 +954,64 @@
             {{-- Document Preview Body — Bergaya Resmi Bea Cukai --}}
             <div class="p-6">
                 {{-- Official Header --}}
-                <div class="border border-slate-300 rounded-xl overflow-hidden font-mono text-xs">
+                <div class="border border-cream-400 rounded-xl overflow-hidden font-mono text-xs">
 
                     {{-- Government Header --}}
-                    <div class="bg-slate-50 border-b border-slate-200 p-4 flex items-start justify-between gap-4">
-                        <div class="text-[10px] leading-relaxed text-slate-600">
-                            <p class="font-bold text-slate-800 uppercase tracking-wide">KEMENTERIAN KEUANGAN REPUBLIK INDONESIA</p>
+                    <div class="bg-cream-100 border-b border-cream-300 p-4 flex items-start justify-between gap-4">
+                        <div class="text-[10px] leading-relaxed text-ink-500">
+                            <p class="font-bold text-ink-800 uppercase tracking-wide">KEMENTERIAN KEUANGAN REPUBLIK INDONESIA</p>
                             <p class="font-semibold uppercase">Direktorat Jenderal Bea dan Cukai</p>
-                            <p class="mt-2 font-bold text-base text-slate-900 uppercase tracking-wide" x-text="getDocTypeLabel()"></p>
+                            <p class="mt-2 font-bold text-base text-ink-900 uppercase tracking-wide" x-text="getDocTypeLabel()"></p>
                         </div>
                         {{-- QR Placeholder --}}
-                        <div class="shrink-0 h-16 w-16 bg-slate-200 rounded border border-slate-300 flex items-center justify-center">
-                            <svg class="h-8 w-8 text-slate-400" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/><path d="M5 5h3v3H5V5zm0 11h3v3H5v-3zm11-11h3v3h-3V5zm0 11h3v3h-3v-3z"/></svg>
+                        <div class="shrink-0 h-16 w-16 bg-cream-300 rounded border border-cream-400 flex items-center justify-center">
+                            <svg class="h-8 w-8 text-ink-300" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm0 11h7v7H3v-7zm11-11h7v7h-7V3zm0 11h7v7h-7v-7z"/><path d="M5 5h3v3H5V5zm0 11h3v3H5v-3zm11-11h3v3h-3V5zm0 11h3v3h-3v-3z"/></svg>
                         </div>
                     </div>
 
                     {{-- Document Info Grid --}}
-                    <div class="p-4 border-b border-slate-200">
+                    <div class="p-4 border-b border-cream-300">
                         <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px]">
                             <div>
-                                <span class="text-slate-500">Nomor Pengajuan</span>
+                                <span class="text-ink-400">Nomor Pengajuan</span>
                                 <span class="ml-2 font-bold text-amber-700">: [DRAFT — Belum Digenerate]</span>
                             </div>
                             <div>
-                                <span class="text-slate-500">Tanggal Input</span>
+                                <span class="text-ink-400">Tanggal Input</span>
                                 <span class="ml-2 font-semibold" x-text="': ' + todayFormatted()"></span>
                             </div>
                             <div>
-                                <span class="text-slate-500">Jenis Dokumen</span>
-                                <span class="ml-2 font-bold text-indigo-700" x-text="': ' + doc_type"></span>
+                                <span class="text-ink-400">Jenis Dokumen</span>
+                                <span class="ml-2 font-bold text-gold-800" x-text="': ' + doc_type"></span>
                             </div>
                             <div>
-                                <span class="text-slate-500">Status</span>
+                                <span class="text-ink-400">Status</span>
                                 <span class="ml-2 font-bold text-amber-600">: DRAFT LOKAL</span>
                             </div>
                         </div>
                     </div>
 
                     {{-- Parties Section --}}
-                    <div class="p-4 border-b border-slate-200 bg-slate-50/50">
+                    <div class="p-4 border-b border-cream-300 bg-cream-100/50">
                         <div class="grid grid-cols-2 gap-6">
                             {{-- Main Party --}}
                             <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5"
+                                <p class="text-[10px] font-bold text-ink-300 uppercase tracking-wider mb-1.5"
                                    x-text="doc_type === 'BC30' ? 'EKSPORTIR / PPJK' : (doc_type === 'RUSH' ? 'PEMOHON / PPJK' : 'IMPORTIR / PPJK')"></p>
                                 <div class="space-y-1 text-[11px]">
-                                    <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">Nama</span><span class="font-bold text-slate-800" x-text="': ' + getPartyName()"></span></div>
-                                    <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">NPWP</span><span class="font-mono font-semibold" x-text="': ' + getPartyNPWP()"></span></div>
-                                    <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">PPJK</span><span class="font-bold text-indigo-700">: PT. MORA MULTI BERKAH</span></div>
+                                    <div class="flex gap-2"><span class="text-ink-400 w-16 shrink-0">Nama</span><span class="font-bold text-ink-800" x-text="': ' + getPartyName()"></span></div>
+                                    <div class="flex gap-2"><span class="text-ink-400 w-16 shrink-0">NPWP</span><span class="font-mono font-semibold" x-text="': ' + getPartyNPWP()"></span></div>
+                                    <div class="flex gap-2"><span class="text-ink-400 w-16 shrink-0">PPJK</span><span class="font-bold text-gold-800">: PT. MORA MULTI BERKAH</span></div>
                                 </div>
                             </div>
                             {{-- Counter Party --}}
                             <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5"
+                                <p class="text-[10px] font-bold text-ink-300 uppercase tracking-wider mb-1.5"
                                    x-text="doc_type === 'BC30' ? 'PENERIMA / CONSIGNEE' : 'PEMASOK / SUPPLIER'"></p>
                                 <div class="space-y-1 text-[11px]">
-                                    <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">Nama</span><span class="font-bold text-slate-800" x-text="': ' + getCounterPartyName()"></span></div>
+                                    <div class="flex gap-2"><span class="text-ink-400 w-16 shrink-0">Nama</span><span class="font-bold text-ink-800" x-text="': ' + getCounterPartyName()"></span></div>
                                     <template x-if="doc_type === 'BC30' || doc_type === 'BC20' || doc_type === 'BC24'">
-                                        <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">Negara</span>
+                                        <div class="flex gap-2"><span class="text-ink-400 w-16 shrink-0">Negara</span>
                                             <span class="font-semibold" x-text="': ' + (doc_type === 'BC30' ? (formData.negara_tujuan || '—') : (formData.negara_pemasok || '—'))"></span>
                                         </div>
                                     </template>
@@ -1021,56 +1021,56 @@
                     </div>
 
                     {{-- Logistics & Value --}}
-                    <div class="p-4 border-b border-slate-200">
+                    <div class="p-4 border-b border-cream-300">
                         <div class="grid grid-cols-3 gap-4 text-[11px]">
                             <div>
-                                <span class="text-slate-500 block">Pelabuhan Muat</span>
-                                <span class="font-bold text-slate-800" x-text="formData.pelabuhan_muat || (formData.nama_sarana_pengangkut || '—')"></span>
+                                <span class="text-ink-400 block">Pelabuhan Muat</span>
+                                <span class="font-bold text-ink-800" x-text="formData.pelabuhan_muat || (formData.nama_sarana_pengangkut || '—')"></span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block" x-text="doc_type === 'RUSH' ? 'No. Flight/AWB' : 'Pelabuhan Bongkar'"></span>
-                                <span class="font-bold text-slate-800" x-text="doc_type === 'RUSH' ? (formData.nomor_flight || '—') : (formData.pelabuhan_bongkar || '—')"></span>
+                                <span class="text-ink-400 block" x-text="doc_type === 'RUSH' ? 'No. Flight/AWB' : 'Pelabuhan Bongkar'"></span>
+                                <span class="font-bold text-ink-800" x-text="doc_type === 'RUSH' ? (formData.nomor_flight || '—') : (formData.pelabuhan_bongkar || '—')"></span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Mata Uang (Valuta)</span>
-                                <span class="font-bold text-slate-800" x-text="formData.kode_valuta || 'USD'"></span>
+                                <span class="text-ink-400 block">Mata Uang (Valuta)</span>
+                                <span class="font-bold text-ink-800" x-text="formData.kode_valuta || 'USD'"></span>
                             </div>
                             <div class="col-span-2">
-                                <span class="text-slate-500 block" x-text="getValueLabel()"></span>
-                                <span class="font-bold text-lg text-indigo-700" x-text="getTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
+                                <span class="text-ink-400 block" x-text="getValueLabel()"></span>
+                                <span class="font-bold text-lg text-gold-800" x-text="getTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
                             </div>
                             <div>
-                                <span class="text-slate-500 block">Cara Pembayaran</span>
-                                <span class="font-semibold text-slate-700" x-text="formData.cara_pembayaran || '—'"></span>
+                                <span class="text-ink-400 block">Cara Pembayaran</span>
+                                <span class="font-semibold text-ink-700" x-text="formData.cara_pembayaran || '—'"></span>
                             </div>
                         </div>
                     </div>
 
                     {{-- Items Table --}}
                     <div class="p-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">DAFTAR POS BARANG</p>
-                        <table class="w-full text-[10px] border-collapse border border-slate-300">
-                            <thead class="bg-slate-100">
+                        <p class="text-[10px] font-bold text-ink-300 uppercase tracking-wider mb-2">DAFTAR POS BARANG</p>
+                        <table class="w-full text-[10px] border-collapse border border-cream-400">
+                            <thead class="bg-cream-200">
                                 <tr>
-                                    <th class="border border-slate-300 px-2 py-1.5 text-left">No</th>
-                                    <th class="border border-slate-300 px-2 py-1.5 text-left">Kode HS</th>
-                                    <th class="border border-slate-300 px-2 py-1.5 text-left">Uraian Barang</th>
-                                    <th class="border border-slate-300 px-2 py-1.5 text-right">Jml Satuan</th>
-                                    <th class="border border-slate-300 px-2 py-1.5 text-center">Sat</th>
-                                    <th class="border border-slate-300 px-2 py-1.5 text-right">Netto (KG)</th>
-                                    <th class="border border-slate-300 px-2 py-1.5 text-right">Nilai</th>
+                                    <th class="border border-cream-400 px-2 py-1.5 text-left">No</th>
+                                    <th class="border border-cream-400 px-2 py-1.5 text-left">Kode HS</th>
+                                    <th class="border border-cream-400 px-2 py-1.5 text-left">Uraian Barang</th>
+                                    <th class="border border-cream-400 px-2 py-1.5 text-right">Jml Satuan</th>
+                                    <th class="border border-cream-400 px-2 py-1.5 text-center">Sat</th>
+                                    <th class="border border-cream-400 px-2 py-1.5 text-right">Netto (KG)</th>
+                                    <th class="border border-cream-400 px-2 py-1.5 text-right">Nilai</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template x-for="(item, idx) in formData.barang" :key="idx">
-                                    <tr class="even:bg-slate-50/50">
-                                        <td class="border border-slate-300 px-2 py-1.5 text-center font-semibold" x-text="idx + 1"></td>
-                                        <td class="border border-slate-300 px-2 py-1.5 font-mono font-bold text-indigo-700" x-text="item.hs_code || '—'"></td>
-                                        <td class="border border-slate-300 px-2 py-1.5" x-text="item.uraian || '—'"></td>
-                                        <td class="border border-slate-300 px-2 py-1.5 text-right" x-text="item.jumlah_satuan || 0"></td>
-                                        <td class="border border-slate-300 px-2 py-1.5 text-center font-bold" x-text="item.kode_satuan || '—'"></td>
-                                        <td class="border border-slate-300 px-2 py-1.5 text-right" x-text="item.netto || 0"></td>
-                                        <td class="border border-slate-300 px-2 py-1.5 text-right font-semibold"
+                                    <tr class="even:bg-cream-100/50">
+                                        <td class="border border-cream-400 px-2 py-1.5 text-center font-semibold" x-text="idx + 1"></td>
+                                        <td class="border border-cream-400 px-2 py-1.5 font-mono font-bold text-gold-800" x-text="item.hs_code || '—'"></td>
+                                        <td class="border border-cream-400 px-2 py-1.5" x-text="item.uraian || '—'"></td>
+                                        <td class="border border-cream-400 px-2 py-1.5 text-right" x-text="item.jumlah_satuan || 0"></td>
+                                        <td class="border border-cream-400 px-2 py-1.5 text-center font-bold" x-text="item.kode_satuan || '—'"></td>
+                                        <td class="border border-cream-400 px-2 py-1.5 text-right" x-text="item.netto || 0"></td>
+                                        <td class="border border-cream-400 px-2 py-1.5 text-right font-semibold"
                                             x-text="(parseFloat(item[doc_type === 'BC30' ? 'nilai_fob' : (doc_type === 'BC20' || doc_type === 'BC24' ? 'nilai_cif' : 'nilai_barang')] || 0)).toLocaleString('id-ID')"></td>
                                     </tr>
                                 </template>
@@ -1078,8 +1078,8 @@
                         </table>
 
                         {{-- Footer Note --}}
-                        <div class="mt-4 pt-4 border-t border-slate-200 text-[10px] text-slate-400 leading-relaxed">
-                            <p class="font-semibold text-slate-500">Catatan:</p>
+                        <div class="mt-4 pt-4 border-t border-cream-300 text-[10px] text-ink-300 leading-relaxed">
+                            <p class="font-semibold text-ink-400">Catatan:</p>
                             <p>Dokumen ini merupakan pratinjau <strong class="text-amber-600">DRAFT LOKAL</strong> yang belum disubmit ke portal CEISA 4.0 Bea Cukai (DJBC). Nomor Aju akan digenerate setelah dokumen dikirim secara resmi via gateway H2H.</p>
                             <p class="mt-1">PPJK: PT. MORA MULTI BERKAH — Sistem H2H CEISA 4.0</p>
                         </div>
@@ -1088,20 +1088,20 @@
             </div>
 
             {{-- Action Buttons --}}
-            <div class="sticky bottom-0 bg-white border-t border-slate-100 px-6 py-4 flex items-center justify-between gap-3">
+            <div class="sticky bottom-0 bg-white border-t border-cream-200 px-6 py-4 flex items-center justify-between gap-3">
                 <button type="button" @click="showDraftModal = false"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-slate-700 text-sm font-bold rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-sm">
+                        class="inline-flex items-center gap-2 px-5 py-2.5 border border-cream-300 text-ink-700 text-sm font-bold rounded-xl bg-white hover:bg-cream-100 transition-colors shadow-sm">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
                     Edit Kembali
                 </button>
                 <div class="flex items-center gap-3">
                     <button type="button" @click="submitForm('submit')"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-indigo-100">
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink-900 hover:bg-ink-800 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-indigo-100">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>
                         Kirim ke CEISA Sekarang
                     </button>
                     <button type="button" @click="confirmSaveDraft()"
-                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-200">
+                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-ink-800 hover:bg-ink-900 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-200">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
                         Konfirmasi Simpan Draft
                     </button>
@@ -1133,7 +1133,7 @@
                         code: 'BC30',
                         label: 'BC 3.0 (Ekspor)',
                         description: 'Pemberitahuan Ekspor Barang (PEB) untuk pelaporan komoditas ke luar negeri.',
-                        badgeClass: 'bg-indigo-100 text-indigo-800',
+                        badgeClass: 'bg-gold-100 text-ink-800',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                                </svg>`
@@ -1142,7 +1142,7 @@
                         code: 'BC20',
                         label: 'BC 2.0 (Impor)',
                         description: 'Pemberitahuan Impor Barang (PIB) untuk penyelesaian kewajiban pabean barang masuk.',
-                        badgeClass: 'bg-emerald-100 text-emerald-800',
+                        badgeClass: 'bg-sea-100 text-sea-700',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                                </svg>`
@@ -1151,7 +1151,7 @@
                         code: 'BC24',
                         label: 'BC 2.4 (Impor TPB)',
                         description: 'Impor Barang yang dimasukkan untuk ditimbun di Tempat Penimbunan Berikat.',
-                        badgeClass: 'bg-blue-100 text-blue-800',
+                        badgeClass: 'bg-sea-100 text-sea-700',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                </svg>`
@@ -1160,7 +1160,7 @@
                         code: 'TPB',
                         label: 'Portal TPB',
                         description: 'Perekaman dokumen TPB (BC 2.3, BC 2.5, BC 2.7, BC 4.0) khusus logistik berikat.',
-                        badgeClass: 'bg-violet-100 text-violet-800',
+                        badgeClass: 'bg-ink-50 text-ink-700',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h18" />
                                </svg>`
@@ -1169,7 +1169,7 @@
                         code: 'RUSH',
                         label: 'Rush Handling',
                         description: 'Pengajuan persetujuan pengeluaran barang segera karena sifatnya yang mendesak.',
-                        badgeClass: 'bg-rose-100 text-rose-800',
+                        badgeClass: 'bg-crimson-100 text-crimson-700',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                </svg>`

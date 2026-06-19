@@ -79,15 +79,15 @@
                     <a href="#alur" class="btn-ghost-dark !px-6 !py-3.5 !text-base">Lihat alur H2H</a>
                 </div>
 
-                <div class="mt-12 flex items-center gap-6 text-[11px] font-mono uppercase tracking-[0.18em] text-cream/40">
+                <div class="mt-12 flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] font-mono uppercase tracking-[0.18em] text-cream/40">
                     <span class="flex items-center gap-2">
-                        <span class="relative flex h-2 w-2"><span class="absolute h-full w-full rounded-full bg-sea-500 opacity-60 animate-ping"></span><span class="relative h-2 w-2 rounded-full bg-sea-500"></span></span>
-                        Gateway online
+                        <span class="relative flex h-2 w-2"><span class="absolute h-full w-full rounded-full bg-gold-400 opacity-60 animate-ping"></span><span class="relative h-2 w-2 rounded-full bg-gold-400"></span></span>
+                        Pilot phase · Q1 2026
                     </span>
                     <span>·</span>
-                    <span>TLS 1.3</span>
+                    <span>Sandbox-tested</span>
                     <span>·</span>
-                    <span>ISO 27001 ready</span>
+                    <span>TLS 1.3 secured</span>
                 </div>
             </div>
 
@@ -150,7 +150,7 @@
 
                             <div class="pt-3 border-t border-cream-300 flex items-center justify-between">
                                 <span class="pill-sea"><span class="dot bg-sea-500"></span>Jalur Hijau</span>
-                                <span class="text-[10px] font-mono text-ink-400">Respon · 24 dtk</span>
+                                <span class="text-[10px] font-mono text-ink-400">Contoh dokumen · demo</span>
                             </div>
                         </div>
                     </article>
@@ -166,8 +166,7 @@
 
         {{-- Trust logos ticker --}}
         <div class="relative mt-20 max-w-7xl mx-auto px-6 lg:px-10">
-            <p class="text-center text-[10px] font-mono uppercase tracking-[0.35em] text-cream/40 mb-6">Mendukung modul resmi CEISA 4.0</p>
-            <div class="overflow-hidden mask-fade-x">
+            <p class="text-center text-[10px] font-mono uppercase tracking-[0.35em] text-cream/40 mb-6">Mendukung modul resmi CEISA 4.0</p>            <div class="overflow-hidden mask-fade-x">
                 <div class="ticker text-cream/30 font-display text-2xl font-light italic whitespace-nowrap">
                     @for ($i = 0; $i < 2; $i++)
                         <span class="px-6">BC 2.0 · Impor</span>
@@ -387,15 +386,15 @@
             <div class="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-px bg-cream-300 rounded-2xl overflow-hidden border border-cream-300">
                 @php
                 $kpis = [
-                    ['99.9%', 'Uptime Gateway', 'Production'],
-                    ['<30s',  'Median Respon SPPB', 'Real-time'],
-                    ['100%',  'Payload terenkripsi', 'AES-256 + TLS 1.3'],
-                    ['5',     'Modul CEISA aktif', 'BC 2.0 · 2.4 · 3.0 · TPB · Rush'],
+                    ['Pilot',   'Pilot project resmi',  'morabangun.com · 2026'],
+                    ['H2H',     'Modul CEISA 4.0 aktif', 'BC 2.0 · 2.4 · 3.0 · TPB · Rush'],
+                    ['AES-256', 'Enkripsi end-to-end',   'TLS 1.3 + signed payload'],
+                    ['24/7',    'Tanpa antrian operator','Submit kapan saja'],
                 ];
                 @endphp
                 @foreach ($kpis as [$n, $label, $sub])
                     <div class="bg-white p-7 hover:bg-cream-100 transition-colors">
-                        <p class="num-display text-5xl text-ink-900">{{ $n }}</p>
+                        <p class="num-display text-4xl lg:text-5xl text-ink-900">{{ $n }}</p>
                         <p class="mt-3 text-xs font-bold uppercase tracking-widest text-ink-700">{{ $label }}</p>
                         <p class="text-[11px] text-ink-400 mt-1 font-mono">{{ $sub }}</p>
                     </div>
