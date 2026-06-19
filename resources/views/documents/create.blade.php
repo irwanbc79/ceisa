@@ -1,21 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 w-full">
             <div>
-                <h2 class="font-bold text-2xl text-slate-800 tracking-tight">
-                    {{ __('Perekaman Dokumen CEISA 4.0') }}
-                </h2>
-                <p class="text-sm text-slate-500 mt-1">Sistem Input Kepabeanan Host-to-Host (H2H) M2B</p>
+                <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-ink-400">Workspace · Compose</p>
+                <h1 class="font-display text-2xl sm:text-3xl font-semibold text-ink-900 tracking-tightest leading-none mt-1">Perekaman Dokumen CEISA 4.0</h1>
+                <p class="text-xs text-ink-400 mt-1.5">Sistem Input Kepabeanan Host-to-Host (H2H) · M2B Customs</p>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('dashboard') }}" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
-                    Kembali
-                </a>
-            </div>
+            <a href="{{ route('dashboard') }}" class="btn-ghost">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"/></svg>
+                Kembali
+            </a>
         </div>
     </x-slot>
 
-    <div class="py-12 bg-slate-50 min-h-screen" x-data="documentWizard()">
+    <div class="-mx-4 sm:-mx-6 lg:-mx-10 -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-10 pt-6 sm:pt-8 pb-12 bg-cream" x-data="documentWizard()">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <x-flash />
 

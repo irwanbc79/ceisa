@@ -2,16 +2,17 @@
 
 @php
     $map = [
-        'draft' => ['Draft', 'bg-gray-100 text-gray-700'],
-        'submitting' => ['Mengirim', 'bg-blue-100 text-blue-700'],
-        'submitted' => ['Terkirim', 'bg-blue-100 text-blue-700'],
-        'accepted' => ['Diterima', 'bg-green-100 text-green-700'],
-        'rejected' => ['Ditolak', 'bg-red-100 text-red-700'],
-        'error' => ['Error', 'bg-red-100 text-red-700'],
+        'draft'      => ['Draft',     'pill-ink',     'bg-ink-400'],
+        'submitting' => ['Mengirim',  'pill-gold',    'bg-gold-500'],
+        'submitted'  => ['Terkirim',  'pill-gold',    'bg-gold-500'],
+        'accepted'   => ['Diterima',  'pill-sea',     'bg-sea-500'],
+        'rejected'   => ['Ditolak',   'pill-crimson', 'bg-crimson-500'],
+        'error'      => ['Error',     'pill-crimson', 'bg-crimson-500'],
     ];
-    [$label, $classes] = $map[$status] ?? [ucfirst($status), 'bg-gray-100 text-gray-700'];
+    [$label, $classes, $dotColor] = $map[$status] ?? [ucfirst($status), 'pill-ink', 'bg-ink-300'];
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium $classes"]) }}>
+<span {{ $attributes->merge(['class' => $classes]) }}>
+    <span class="dot {{ $dotColor }}"></span>
     {{ $label }}
 </span>

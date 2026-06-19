@@ -1,21 +1,22 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
             <div>
-                <h2 class="font-bold text-2xl text-slate-800 tracking-tight">
-                    Rincian Dokumen <span class="text-indigo-600 font-extrabold">{{ $document->doc_type }}</span>
-                    <span class="text-slate-400 font-normal text-sm ml-2">ID #{{ $document->id }}</span>
-                </h2>
-                <p class="text-xs text-slate-500 mt-1">Status pengiriman ke Bea Cukai Indonesia</p>
+                <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-ink-400">Workspace · Dokumen</p>
+                <h1 class="font-display text-2xl sm:text-3xl font-semibold text-ink-900 tracking-tightest leading-none mt-1">
+                    Rincian <em class="text-gold-700 not-italic">{{ $document->doc_type }}</em>
+                    <span class="text-ink-300 font-normal text-sm ml-2 font-mono">#{{ $document->id }}</span>
+                </h1>
+                <p class="text-xs text-ink-400 mt-1.5">Status pengiriman ke Bea Cukai Indonesia</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2">
                 <x-status-badge :status="$document->status" />
-                <x-jalur-badge :jalur="$document->jalur" class="px-2.5 py-1 text-xs" />
+                <x-jalur-badge :jalur="$document->jalur" />
             </div>
         </div>
     </x-slot>
 
-    <div class="py-12 bg-slate-50 min-h-screen">
+    <div class="-mx-4 sm:-mx-6 lg:-mx-10 -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-10 pt-6 sm:pt-8 pb-12 bg-cream">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <x-flash />
 
