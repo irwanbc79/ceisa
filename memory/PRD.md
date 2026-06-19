@@ -18,17 +18,15 @@
 - ✅ Marketing landing (`welcome.blade.php`): full hero + ticket card mock + module grid + 4-step H2H flow + dark code sample + benefits + KPI strip + CTA + footer. Root route updated to show this for guests.
 - ✅ Auth: login, register, forgot/reset/confirm password, verify-email — all redesigned editorial
 - ✅ Dashboard (`dashboard.blade.php`): editorial KPI hero with SVG donut ring chart, quick actions, recent docs table
-- ✅ Documents: `index.blade.php` (KPI rekap + filter bar + table), `lookup.blade.php` (real-time query UI), `arsip.blade.php` (manual import form)
+- ✅ Documents: `index.blade.php` (KPI rekap + filter bar + table), `lookup.blade.php` (real-time query UI), `arsip.blade.php` (manual import form), `create.blade.php` & `show.blade.php` (full wizard polish to ink/gold/sea/cream tokens)
 - ✅ Settings: `settings/ceisa.blade.php` (credential form refined)
 - ✅ Profile: `profile/edit.blade.php` + 3 partials (info, password, delete)
 - ✅ Components: primary/secondary/danger buttons, text-input, label, input-error, nav-link, responsive-nav-link, dropdown, dropdown-link, status-badge, jalur-badge, flash, auth-session-status
-- ✅ Headers updated in `documents/create.blade.php` & `documents/show.blade.php` (full body kept intact)
-- ✅ Build verified: `yarn build` produces `public/build/assets/app-*.css` (81 kB)
+- ✅ Soft-launch metrics (Jan 2026): all marketing claims replaced with qualitative labels (Pilot Phase · Q1 2026 · Sandbox-tested · TLS 1.3 · AES-256 · 24/7). No fabricated KPI numbers.
+- ✅ Build verified: `yarn build` produces `public/build/assets/app-*.css` (~88 kB)
 - ✅ Smoke-tested end-to-end with PHP local server + Playwright screenshots
 
 ## Backlog · P1
-- Polish wizard internals in `documents/create.blade.php` (still uses indigo/slate utility colors; replace with ink/gold/sea/cream tokens)
-- Polish `documents/show.blade.php` body (status timeline, response cards) with new tokens
 - Empty-state illustrations for documents index (custom SVG instead of generic icon)
 - Mobile (sm) refinement for sidebar transition timings
 - Dark mode toggle (currently light only)
