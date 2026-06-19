@@ -25,7 +25,9 @@ class DocumentController extends Controller
     {
         [$query, $filters] = $this->filteredDocuments($request);
 
-        // Rekap agregat (mengikuti filter aktif) dalam satu query.
+        // Rekap agregat (mengikuti filter aktif) dalam satu query. Sekaligus
+        // jadi sumber total paginasi agar paginator tidak menjalankan query
+        // COUNT terpisah yang redundan (total sudah ada di rekap).
         $agg = (clone $query)
             ->selectRaw('count(*) as total')
             ->selectRaw('sum(case when status = ? then 1 else 0 end) as accepted', [Document::STATUS_ACCEPTED])
@@ -40,7 +42,16 @@ class DocumentController extends Controller
             'merah' => (int) $agg->merah,
         ];
 
-        $documents = $query->latest()->paginate(20)->withQueryString();
+        $perPage = 20;
+        $page = (int) $request->input('page', 1);
+        $documents = $query->latest()->forPage($page, $perPage)->get();
+        $documents = new \Illuminate\Pagination\LengthAwarePaginator(
+            $documents,
+            $rekap['total'],
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()],
+        );
 
         return view('documents.index', [
             'documents' => $documents,

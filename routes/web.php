@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/dokumen/{document}/validasi-ai', [DocumentController::class, 'validateAi'])->name('documents.validate');
     Route::get('/dokumen/{document}/download-respon', [DocumentController::class, 'downloadRespon'])->name('documents.download-respon');
     Route::get('/dokumen/{document}/cetak-formulir', [DocumentController::class, 'cetakFormulir'])->name('documents.cetak-formulir');
+    Route::get('/dokumen/{document}/detail-v2', [DocumentController::class, 'detailV2'])->name('documents.detail-v2');
     Route::get('/dokumen/{document}/download-billing', [DocumentController::class, 'downloadBilling'])->name('documents.download-billing');
 
     // Pengaturan kredensial CEISA
