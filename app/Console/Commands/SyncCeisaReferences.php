@@ -11,35 +11,19 @@ use Throwable;
 /**
  * Sinkronisasi tabel referensi (ceisa_references) dari Reference Code resmi CEISA 4.0.
  *
- * Sumber kebenaran: 59 tabel referensi di openapi.beacukai.go.id (Referensi Kantor,
- * Negara, Pelabuhan, Satuan, Kemasan, dll). Memerlukan kredensial H2H yang valid
- * (login menghasilkan token) milik user --user atau user pertama yang punya kredensial.
+ * Sumber kebenaran: tabel referensi di openapi.beacukai.go.id (Negara, Pelabuhan,
+ * Valuta/Kurs, Satuan, Kemasan, Kantor Pabean, HS Code, dll). Master data WAJIB
+ * disinkron berkala (cron harian) agar payload Impor/Ekspor tidak terkena error
+ * validasi karena referensi kedaluwarsa.
  *
- * CATATAN: pemetaan endpoint per-tipe referensi BELUM diisi karena path resource
- * spesifik berada di Swagger JSON 'openapi' (Pabean) yang butuh auth untuk diunduh.
- * Isi array $endpoints di bawah setelah Swagger tersedia, lalu command siap dipakai.
+ * Path resource per-tipe dibaca dari config('ceisa.reference_endpoints') sehingga
+ * dapat diisi via .env tanpa ubah kode. Tipe tanpa path otomatis dilewati.
  */
 class SyncCeisaReferences extends Command
 {
     protected $signature = 'ceisa:sync-references {--user= : ID user pemilik kredensial H2H} {--type=* : Batasi tipe referensi tertentu}';
 
-    protected $description = 'Sinkron tabel referensi CEISA (negara, kantor pabean, pelabuhan, dll) dari API resmi DJBC';
-
-    /**
-     * Pemetaan tipe referensi internal -> path resource API CEISA.
-     * Lengkapi nilai path setelah Swagger JSON "openapi" (Pabean) tersedia.
-     *
-     * @var array<string, string|null>
-     */
-    private array $endpoints = [
-        'negara' => null,         // mis. /v2/openapi/referensi/negara
-        'kantor_pabean' => null,  // Referensi Kantor
-        'pelabuhan' => null,
-        'satuan' => null,         // Referensi Satuan Barang
-        'kemasan' => null,        // Referensi Jenis Kemasan
-        'valuta' => null,         // Referensi Valuta
-        'incoterm' => null,       // Referensi Incoterm
-    ];
+    protected $description = 'Sinkron tabel referensi CEISA (negara, kantor pabean, pelabuhan, kurs, dll) dari API resmi DJBC';
 
     public function handle(): int
     {
@@ -51,32 +35,42 @@ class SyncCeisaReferences extends Command
             return self::FAILURE;
         }
 
+        $endpoints = (array) config('ceisa.reference_endpoints', []);
+        $only = (array) $this->option('type');
+
         $targets = array_filter(
-            $this->endpoints,
-            fn (?string $path, string $type) => $path !== null
-                && (empty($this->option('type')) || in_array($type, (array) $this->option('type'), true)),
+            $endpoints,
+            fn (mixed $path, string $type) => filled($path) && (empty($only) || in_array($type, $only, true)),
             ARRAY_FILTER_USE_BOTH,
         );
 
         if (empty($targets)) {
-            $this->warn('Belum ada endpoint referensi yang dipetakan.');
-            $this->line('Lengkapi properti $endpoints di '.static::class.' setelah Swagger JSON "openapi" (Pabean) tersedia.');
-            $this->line('Sementara itu, data referensi dasar tetap tersedia via CeisaReferenceSeeder (php artisan db:seed --class=CeisaReferenceSeeder).');
+            $this->warn('Belum ada endpoint referensi yang dipetakan di config ceisa.reference_endpoints.');
+            $this->line('Isi via .env (CEISA_REF_NEGARA, CEISA_REF_PELABUHAN, dst) saat path Swagger "openapi" (Pabean) diketahui.');
+            $this->line('Sementara itu, data dasar tetap tersedia via: php artisan db:seed --class=CeisaReferenceSeeder');
 
             return self::SUCCESS;
         }
 
         $service = CeisaService::forCredential($credential);
+        $totalUpserted = 0;
+        $hadError = false;
 
         foreach ($targets as $type => $path) {
             try {
-                $this->syncType($service, $type, $path);
+                $count = $this->syncType($service, $type, (string) $path);
+                $totalUpserted += $count;
+                $this->info("✓ {$type}: {$count} baris disinkron dari {$path}");
             } catch (Throwable $e) {
-                $this->error("Gagal sinkron {$type}: {$e->getMessage()}");
+                $hadError = true;
+                $this->error("✗ Gagal sinkron {$type}: {$e->getMessage()}");
             }
         }
 
-        return self::SUCCESS;
+        $this->newLine();
+        $this->line("Selesai. Total {$totalUpserted} baris referensi disinkron.");
+
+        return $hadError ? self::FAILURE : self::SUCCESS;
     }
 
     private function resolveCredential(): ?CeisaCredential
@@ -89,13 +83,95 @@ class SyncCeisaReferences extends Command
     }
 
     /**
-     * Ambil satu tipe referensi dari CEISA lalu upsert ke ceisa_references.
-     * Implementasi pemanggilan HTTP menyusul saat path & bentuk respons diketahui.
+     * Ambil satu tipe referensi dari CEISA, normalisasi {code,label,meta}, upsert idempoten.
      */
-    private function syncType(CeisaService $service, string $type, string $path): void
+    private function syncType(CeisaService $service, string $type, string $path): int
     {
-        // TODO: panggil $service untuk GET $path, normalisasi {code,label}, lalu:
-        // CeisaReference::upsert([...], ['type','code'], ['label','sort','active','updated_at']);
-        $this->line("(stub) siap sinkron '{$type}' dari {$path} — implementasi HTTP menyusul.");
+        $rows = $service->fetchReference($path);
+
+        $records = [];
+        $sort = 0;
+        foreach ($rows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $code = $this->extractCode($row);
+            $label = $this->extractLabel($row) ?? $code;
+
+            if (! filled($code)) {
+                continue;
+            }
+
+            $records[$code] = [
+                'type' => $type,
+                'code' => (string) $code,
+                'label' => (string) $label,
+                'meta' => json_encode($row, JSON_UNESCAPED_UNICODE),
+                'sort' => $sort++,
+                'active' => true,
+                'updated_at' => now(),
+                'created_at' => now(),
+            ];
+        }
+
+        if (empty($records)) {
+            return 0;
+        }
+
+        CeisaReference::upsert(
+            array_values($records),
+            ['type', 'code'],
+            ['label', 'meta', 'sort', 'active', 'updated_at'],
+        );
+
+        return count($records);
+    }
+
+    /**
+     * Temukan kolom kode dari satu baris referensi (mendukung penamaan beragam CEISA).
+     *
+     * @param  array<string, mixed>  $row
+     */
+    private function extractCode(array $row): ?string
+    {
+        foreach (['kode', 'code', 'id', 'value'] as $k) {
+            if (filled($row[$k] ?? null) && is_scalar($row[$k])) {
+                return (string) $row[$k];
+            }
+        }
+
+        // Penamaan spesifik: kodeNegara, kodeKantor, kodePelabuhan, posTarif, dll.
+        foreach ($row as $k => $v) {
+            $lk = strtolower((string) $k);
+            if (is_scalar($v) && filled($v) && (str_starts_with($lk, 'kode') || $lk === 'postarif' || $lk === 'hscode')) {
+                return (string) $v;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Temukan kolom label/uraian dari satu baris referensi.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    private function extractLabel(array $row): ?string
+    {
+        foreach (['uraian', 'nama', 'label', 'keterangan', 'deskripsi', 'description', 'name'] as $k) {
+            if (filled($row[$k] ?? null) && is_scalar($row[$k])) {
+                return (string) $row[$k];
+            }
+        }
+
+        foreach ($row as $k => $v) {
+            $lk = strtolower((string) $k);
+            if (is_scalar($v) && filled($v) && (str_starts_with($lk, 'uraian') || str_starts_with($lk, 'nama'))) {
+                return (string) $v;
+            }
+        }
+
+        return null;
     }
 }

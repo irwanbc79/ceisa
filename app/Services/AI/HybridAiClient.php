@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Klien AI hybrid: mencoba beberapa provider sesuai urutan konfigurasi dan
  * memakai yang pertama terkonfigurasi & sukses (failover). Cocok agar fitur
- * tetap jalan meski salah satu penyedia (Claude/Gemini/DeepSeek) bermasalah.
+ * tetap jalan meski salah satu penyedia (Gemini/DeepSeek) bermasalah.
  */
 class HybridAiClient
 {
@@ -28,7 +28,6 @@ class HybridAiClient
         $maxTokens = (int) config('ai.max_tokens', 1500);
 
         $factories = [
-            'claude' => ClaudeProvider::class,
             'gemini' => GeminiProvider::class,
             'deepseek' => DeepSeekProvider::class,
         ];
