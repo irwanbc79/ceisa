@@ -1,47 +1,49 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <p class="eyebrow text-gold-700">Welcome back</p>
+    <h1 class="font-display text-4xl lg:text-5xl font-light tracking-tightest leading-tight mt-5 text-ink-900">
+        Masuk ke <em class="font-semibold not-italic">gateway H2H</em><br>Anda.
+    </h1>
+    <p class="mt-3 text-ink-500 leading-relaxed">Workspace M2B Customs · CEISA 4.0</p>
 
-    <form method="POST" action="{{ route('login') }}">
+    <x-auth-session-status class="mt-6" :status="session('status')" />
+
+    <form method="POST" action="{{ route('login') }}" class="mt-10 space-y-5">
         @csrf
 
-        <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <x-text-input id="email" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" placeholder="anda@perusahaan.co.id" />
+            <x-input-error :messages="$errors->get('email')" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
+        <div>
             <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <x-text-input id="password" type="password" name="password" required autocomplete="current-password" placeholder="••••••••••" />
+            <x-input-error :messages="$errors->get('password')" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+        <div class="flex items-center justify-between">
+            <label for="remember_me" class="inline-flex items-center cursor-pointer">
+                <input id="remember_me" type="checkbox" class="rounded border-cream-400 text-ink-900 focus:ring-ink-700/20" name="remember">
+                <span class="ms-2 text-sm text-ink-600">Ingat saya 30 hari</span>
             </label>
-        </div>
 
-        <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
+                <a class="text-sm font-semibold text-ink-700 hover:text-gold-700 link-gold" href="{{ route('password.request') }}">
+                    Lupa password?
                 </a>
             @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
+
+        <button type="submit" class="btn-primary w-full !py-3 !text-base mt-2">
+            Masuk ke Dashboard
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+        </button>
+
+        <div class="divider-gold pt-3"><span class="text-[10px] font-mono uppercase tracking-widest">atau</span></div>
+
+        <p class="text-center text-sm text-ink-500">
+            Belum punya akun H2H? <a href="{{ route('register') }}" class="font-bold text-ink-900 link-gold">Daftar gratis</a>
+        </p>
     </form>
 </x-guest-layout>
