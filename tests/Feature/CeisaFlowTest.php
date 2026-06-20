@@ -2,12 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Models\User;
+use App\Models\WebhookLog;
+use App\Services\CeisaPayloadBuilder;
 use App\Services\CeisaService;
 use Database\Seeders\CeisaReferenceSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -365,6 +369,121 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
+    public function test_submit_document_with_custom_nomor_aju_saves_it(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'error_code' => 0,
+                'nomor_aju' => '04010020260617012345678912',
+                'status' => 'DITERIMA',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $payload = $this->bc30Payload();
+        $payload['nomor_aju'] = '04010020260617012345678912';
+
+        $this->actingAs($user)
+            ->post('/dokumen/submit', $payload)
+            ->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertNotNull($doc);
+        $this->assertSame('04010020260617012345678912', $doc->nomor_aju);
+    }
+
+    public function test_submit_revision_sends_is_revision_query_to_ceisa(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'status' => 'OK',
+                'nomor_aju' => '04010020260617012345678912',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '04010020260617012345678912',
+            'source' => Document::SOURCE_H2H,
+            'payload' => $this->bc30Payload(),
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $this->actingAs($user)
+            ->post("/dokumen/{$doc->id}/kirim-pembetulan")
+            ->assertRedirect();
+
+        $this->assertSame(Document::STATUS_SUBMITTED, $doc->fresh()->status);
+
+        Http::assertSent(function (Request $request) {
+            return str_contains($request->url(), 'isRevision=true');
+        });
+    }
+
+    public function test_submit_sends_is_final_query_and_persists_id_header(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'status' => 'OK',
+                'message' => 'Sukses, Data Berhasil Ditambahkan',
+                'idHeader' => 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+        ]);
+
+        $this->actingAs($user)
+            ->post('/dokumen/submit', $this->bc30Payload())
+            ->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertSame('a1b2c3d4-e5f6-7890-abcd-ef1234567890', $doc->id_header);
+        $this->assertSame(Document::STATUS_SUBMITTED, $doc->status);
+
+        // Submit sungguhan WAJIB membawa isFinal=true + header standar H2H.
+        Http::assertSent(function (Request $request) {
+            if (! str_contains($request->url(), '/openapi/document')) {
+                return false;
+            }
+
+            return str_contains($request->url(), 'isFinal=true')
+                && str_contains($request->url(), 'isRevision=false')
+                && $request->hasHeader('Beacukai-Api-Key', 'KEY-123')
+                && $request->hasHeader('nle-api-key', 'KEY-123')
+                && $request->hasHeader('Origin');
+        });
+    }
+
     public function test_user_can_archive_old_document(): void
     {
         $user = $this->authedUser();
@@ -642,6 +761,152 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('555555555555555', $docArsip->partyNpwp());
     }
 
+    public function test_daftar_dokumen_shows_ceisa_portal_columns(): void
+    {
+        $user = $this->authedUser();
+
+        CeisaReference::create([
+            'type' => 'kantor_pabean',
+            'code' => '011200',
+            'label' => '011200 - KPPBC TMP C Kuala Tanjung',
+            'active' => true,
+        ]);
+        Cache::forget('ceisa.kantor_pabean_map');
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_ACCEPTED,
+            'nomor_aju' => '000020MOT83720260615000033',
+            'nomor_daftar' => '018331',
+            'jalur' => Document::JALUR_HIJAU,
+            'payload' => [
+                'kantor_pabean' => '011200',
+                'header' => ['eksportir' => ['nama' => 'PT ATS Inti Sampoerna', 'npwp' => '111111111111111']],
+            ],
+            'ceisa_response' => [
+                'nama_respon' => 'SPPB',
+                'nomor_surat' => '018303/KBC.0201/2026',
+                'tanggal_daftar' => '2026-06-12',
+            ],
+            'response_at' => now(),
+        ]);
+
+        // Helper derivasi (ground-truth Portal CEISA 4.0)
+        $resp = $doc->responseSummary();
+        $this->assertSame('SPPB', $resp['nama']);
+        $this->assertSame('018303/KBC.0201/2026', $resp['no_surat']);
+        $this->assertSame('011200 - KPPBC TMP C Kuala Tanjung', $doc->kantorPabeanLabel());
+        $this->assertNotNull($doc->tanggalDaftar());
+
+        // Halaman Daftar Dokumen menampilkan kolom-kolom portal
+        $this->actingAs($user)
+            ->get(route('documents.index'))
+            ->assertOk()
+            ->assertSee('018331')                       // nomor pendaftaran
+            ->assertSee('SPPB')                          // nama respon
+            ->assertSee('018303/KBC.0201/2026')          // no. surat respon
+            ->assertSee('KPPBC TMP C Kuala Tanjung');    // label kantor pabean
+    }
+
+    public function test_detail_dokumen_shows_tracking_tabs(): void
+    {
+        $user = $this->authedUser();
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_ACCEPTED,
+            'nomor_aju' => '000020MOT83720260615000033',
+            'nomor_daftar' => '018331',
+            'jalur' => Document::JALUR_HIJAU,
+            'payload' => ['header' => ['eksportir' => ['nama' => 'PT ATS Inti Sampoerna']]],
+            'ceisa_response' => ['nama_respon' => 'SPPB', 'nomor_surat' => '018303/KBC.0201/2026'],
+            'submitted_at' => now()->subDay(),
+            'response_at' => now(),
+        ]);
+
+        $doc->webhookLogs()->create([
+            'event' => 'BILLING',
+            'nomor_aju' => $doc->nomor_aju,
+            'payload' => ['nama_respon' => 'BILLING', 'nomor_surat' => 'BILL/2026/001'],
+            'received_at' => now()->subHours(2),
+        ]);
+
+        // Helper timeline & respon
+        $this->assertNotEmpty($doc->statusTimeline());
+        $this->assertSame('Perekaman Dokumen', $doc->statusTimeline()[0]['label']);
+        $namaRespon = array_column($doc->responseHistory(), 'nama');
+        $this->assertContains('SPPB', $namaRespon);
+        $this->assertContains('BILLING', $namaRespon);
+
+        $this->actingAs($user)
+            ->get(route('documents.show', $doc))
+            ->assertOk()
+            ->assertSee('Riwayat Status')
+            ->assertSee('Riwayat Respon')
+            ->assertSee('Riwayat Petugas')
+            ->assertSee('Perekaman Dokumen')
+            ->assertSee('SPPB');
+    }
+
+    public function test_kantor_pabean_resolves_from_ekspor_kantor_muat(): void
+    {
+        $user = $this->authedUser();
+
+        CeisaReference::create([
+            'type' => 'kantor_pabean',
+            'code' => '050100',
+            'label' => '050100 - KPU BC Tipe A Tanjung Priok',
+            'active' => true,
+        ]);
+        Cache::forget('ceisa.kantor_pabean_map');
+
+        // Dokumen ekspor BC 3.0 menyimpan kode kantor di header.kantor_muat
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => ['header' => ['kantor_muat' => '050100', 'eksportir' => ['nama' => 'PT Ekspor']]],
+        ]);
+
+        $this->assertSame('050100', $doc->kantorPabeanCode());
+        $this->assertSame('050100 - KPU BC Tipe A Tanjung Priok', $doc->kantorPabeanLabel());
+    }
+
+    public function test_daftar_dokumen_action_bar_and_bumn_filter(): void
+    {
+        $user = $this->authedUser();
+
+        $bumn = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => ['bumn' => true, 'header' => ['eksportir' => ['nama' => 'PT BUMN Ekspor', 'npwp' => '111111111111111', 'nitku' => '0000000000000001']]],
+        ]);
+        $biasa = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_DRAFT,
+            'payload' => ['header' => ['eksportir' => ['nama' => 'PT Swasta Biasa', 'npwp' => '222222222222222']]],
+        ]);
+
+        // Action bar tampil (toggle & menu ala portal)
+        $this->actingAs($user)
+            ->get(route('documents.index'))
+            ->assertOk()
+            ->assertSee('NPWP 16')
+            ->assertSee('NITKU')
+            ->assertSee('BUMN Ekspor')
+            ->assertSee('Utilitas')
+            ->assertSee('Monitoring')
+            ->assertSee('Muat Ulang')
+            ->assertSee('PT BUMN Ekspor')
+            ->assertSee('PT Swasta Biasa');
+
+        // Filter BUMN hanya menampilkan entitas BUMN
+        $this->actingAs($user)
+            ->get(route('documents.index', ['bumn' => 1]))
+            ->assertOk()
+            ->assertSee('PT BUMN Ekspor')
+            ->assertDontSee('PT Swasta Biasa');
+    }
+
     public function test_user_can_import_queried_document_from_ceisa_portal(): void
     {
         $user = $this->authedUser();
@@ -816,9 +1081,9 @@ class CeisaFlowTest extends TestCase
             'status' => Document::STATUS_ACCEPTED,
             'ceisa_response' => [
                 'data' => [
-                    'responPdf' => '/some/path/to/respon.pdf'
-                ]
-            ]
+                    'responPdf' => '/some/path/to/respon.pdf',
+                ],
+            ],
         ]);
 
         Http::fake([
@@ -883,9 +1148,9 @@ class CeisaFlowTest extends TestCase
             'status' => Document::STATUS_ACCEPTED,
             'ceisa_response' => [
                 'data' => [
-                    'kodeBilling' => '98765432101'
-                ]
-            ]
+                    'kodeBilling' => '98765432101',
+                ],
+            ],
         ]);
 
         Http::fake([
@@ -898,5 +1163,352 @@ class CeisaFlowTest extends TestCase
         $response->assertOk();
         $response->assertHeader('Content-Type', 'application/pdf');
         $this->assertSame('BILLING-PDF', $response->streamedContent());
+    }
+
+    public function test_user_can_edit_draft_document(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'payload' => ['header' => ['eksportir' => ['nama' => 'PT Lama']]],
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        // Halaman edit dapat diakses & ter-pre-fill.
+        $this->actingAs($user)->get(route('documents.edit', $doc))->assertOk();
+
+        // Simpan perubahan sebagai draft (tidak submit ke CEISA).
+        $this->actingAs($user)
+            ->put(route('documents.update', $doc), $this->bc30Payload([
+                'nama_eksportir' => 'PT Baru Jaya',
+                'submit_action' => 'draft',
+            ]))
+            ->assertRedirect(route('documents.show', $doc));
+
+        $doc->refresh();
+        $this->assertSame('PT Baru Jaya', data_get($doc->payload, 'header.eksportir.nama'));
+        $this->assertSame(Document::STATUS_DRAFT, $doc->status);
+        $this->assertSame(1, $user->documents()->count());
+    }
+
+    public function test_submitted_document_cannot_be_edited(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-LIVE', 'payload' => ['header' => []],
+            'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('documents.edit', $doc))
+            ->assertRedirect(route('documents.show', $doc))
+            ->assertSessionHas('error');
+    }
+
+    public function test_user_can_delete_draft_document(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'payload' => ['x' => 1], 'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('documents.destroy', $doc))
+            ->assertRedirect(route('documents.index'));
+
+        $this->assertSame(0, $user->documents()->count());
+    }
+
+    public function test_submitted_document_cannot_be_deleted(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-LIVE', 'payload' => ['x' => 1],
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('documents.destroy', $doc))
+            ->assertSessionHas('error');
+
+        $this->assertSame(1, $user->documents()->count());
+    }
+
+    public function test_user_cannot_delete_other_users_document(): void
+    {
+        $owner = $this->authedUser();
+        $doc = $owner->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'payload' => ['x' => 1], 'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $this->actingAs($this->authedUser())
+            ->delete(route('documents.destroy', $doc))
+            ->assertForbidden();
+
+        $this->assertSame(1, Document::count());
+    }
+
+    public function test_user_can_update_archived_document(): void
+    {
+        $user = $this->authedUser();
+        $arsip = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_ARSIP,
+            'nomor_aju' => 'ARSIP-9', 'payload' => ['nama_perusahaan' => 'PT Lama'],
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('documents.archive.update', $arsip), [
+                'doc_type' => 'BC30',
+                'nomor_aju' => 'ARSIP-9',
+                'status' => 'accepted',
+                'nama_perusahaan' => 'PT Sudah Diperbaiki',
+            ])
+            ->assertRedirect(route('documents.show', $arsip));
+
+        $arsip->refresh();
+        $this->assertSame('PT Sudah Diperbaiki', data_get($arsip->payload, 'nama_perusahaan'));
+    }
+
+    public function test_bc20_carries_transport_and_transaction_fields(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/document*' => Http::response(['status' => 'OK', 'idHeader' => 'uuid-imp'], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '012345678901000',
+        ]);
+
+        $this->actingAs($user)->post('/dokumen/submit', [
+            'doc_type' => 'BC20',
+            'nama_importir' => 'PT Importir Jaya', 'npwp_importir' => '0123456789012000', 'alamat_importir' => 'Jakarta',
+            'nib_importir' => 'NIB-99', 'jenis_api' => '02',
+            'nama_pemasok' => 'Acme Inc', 'negara_pemasok' => 'SG',
+            'pelabuhan_muat' => 'SGSIN', 'pelabuhan_bongkar' => 'IDTPP',
+            'cara_angkut' => 'Udara', 'nama_sarana' => 'GA-880', 'voy_flight' => 'GA880', 'kode_bendera' => 'id',
+            'kode_tps' => 'TPS-XYZ', 'tanggal_tiba' => '2026-07-01',
+            'kode_valuta' => 'USD', 'ndpbm' => 16250, 'incoterm' => 'cif', 'nilai_cif' => 2000,
+            'freight' => 150, 'nilai_asuransi' => 20, 'bruto' => 88,
+            'pernyataan_nama' => 'Budi', 'pernyataan_jabatan' => 'Manajer Impor',
+            'barang' => [[
+                'hs_code' => '8471.30.20', 'uraian' => 'Laptop', 'jumlah_satuan' => 5,
+                'kode_satuan' => 'UNT', 'netto' => 10, 'nilai_cif' => 2000,
+            ]],
+        ])->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertEquals(16250, data_get($doc->payload, 'header.ndpbm'));
+        $this->assertSame('CIF', data_get($doc->payload, 'header.incoterm'));
+        $this->assertSame('GA-880', data_get($doc->payload, 'header.pengangkutan.sarana_angkut'));
+        $this->assertSame('ID', data_get($doc->payload, 'header.pengangkutan.bendera'));
+        $this->assertSame('NIB-99', data_get($doc->payload, 'header.importir.nib'));
+
+        // Builder memakai nilai form (bukan dummy 15800/FOB/MV CONTAINER).
+        $flat = CeisaPayloadBuilder::make()->build('BC20', $doc->payload, 'AJU-X');
+        $this->assertEqualsWithDelta(16250.0, $flat['ndpbm'], 0.01);
+        $this->assertSame('CIF', $flat['kodeIncoterm']);
+        $this->assertSame('TPS-XYZ', $flat['kodeTps']);
+        $this->assertSame('GA-880', $flat['pengangkut'][0]['namaPengangkut']);
+        $this->assertSame('ID', $flat['pengangkut'][0]['kodeBendera']);
+        $this->assertSame('4', $flat['pengangkut'][0]['kodeCaraAngkut']); // Udara
+        $this->assertEqualsWithDelta(150.0, $flat['freight'], 0.01);
+        $this->assertSame('Budi', $flat['namaTtd']);
+        $this->assertSame('NIB-99', $flat['entitas'][0]['nibEntitas']);
+        $this->assertSame('02', $flat['entitas'][0]['kodeJenisApi']);
+    }
+
+    public function test_tpb_and_rush_carry_transport_and_office_fields(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/document*' => Http::response(['status' => 'OK', 'idHeader' => 'uuid-tpb-rush'], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '012345678901000',
+        ]);
+
+        // 1. Submit TPB
+        $this->actingAs($user)->post('/dokumen/submit', [
+            'doc_type' => 'TPB',
+            'nama_tpb' => 'PT TPB Berikat', 'npwp_tpb' => '333333333333333', 'alamat_tpb' => 'Cikarang',
+            'jenis_tpb' => 'Kawasan Berikat', 'tujuan_tpb' => 'Pemasukan', 'dokumen_referensi' => 'REF-123',
+            'kode_valuta' => 'USD', 'nilai_barang' => 5000,
+            'kode_kantor' => '040300', 'cara_angkut' => 'Laut', 'nama_sarana' => 'MV BINTANG', 'voy_flight' => 'V-99', 'kode_bendera' => 'sg',
+            'barang' => [[
+                'hs_code' => '8471.30.20', 'uraian' => 'Laptop', 'jumlah_satuan' => 5,
+                'kode_satuan' => 'UNT', 'netto' => 10, 'nilai_barang' => 5000,
+            ]],
+        ])->assertRedirect();
+
+        $docTpb = Document::where('doc_type', 'TPB')->first();
+        $this->assertSame('040300', data_get($docTpb->payload, 'header.kode_kantor'));
+        $this->assertSame('MV BINTANG', data_get($docTpb->payload, 'header.pengangkutan.sarana_angkut'));
+
+        $flatTpb = CeisaPayloadBuilder::make()->build('TPB', $docTpb->payload, 'AJU-TPB-1');
+        $this->assertSame('040300', $flatTpb['kodeKantor']);
+        $this->assertSame('MV BINTANG', $flatTpb['pengangkut'][0]['namaPengangkut']);
+        $this->assertSame('SG', $flatTpb['pengangkut'][0]['kodeBendera']);
+        $this->assertSame('1', $flatTpb['pengangkut'][0]['kodeCaraAngkut']);
+
+        // 2. Submit RUSH
+        $this->actingAs($user)->post('/dokumen/submit', [
+            'doc_type' => 'RUSH',
+            'nama_pemohon' => 'PT Rush Express', 'npwp_pemohon' => '444444444444444', 'alamat_pemohon' => 'Bandara Soetta',
+            'nama_sarana_pengangkut' => 'Singapore Airlines', 'nomor_flight' => 'SQ-123',
+            'nomor_awb_bl' => 'AWB-999', 'tanggal_awb_bl' => '2026-07-02',
+            'alasan_segera' => 'Vaksin', 'jumlah_kemasan' => 5, 'jenis_kemasan' => 'BX',
+            'kode_kantor' => '050100', 'kode_bendera' => 'sg', 'cara_angkut' => 'Udara',
+            'barang' => [[
+                'hs_code' => '3002.20.00', 'uraian' => 'Vaksin', 'jumlah_satuan' => 1000,
+                'kode_satuan' => 'VLS', 'netto' => 50, 'nilai_barang' => 15000,
+            ]],
+        ])->assertRedirect();
+
+        $docRush = Document::where('doc_type', 'RUSH')->first();
+        $this->assertSame('050100', data_get($docRush->payload, 'header.kode_kantor'));
+        $this->assertSame('Singapore Airlines', data_get($docRush->payload, 'header.pengangkutan.sarana'));
+        $this->assertSame('SG', data_get($docRush->payload, 'header.pengangkutan.bendera'));
+
+        $flatRush = CeisaPayloadBuilder::make()->build('RUSH', $docRush->payload, 'AJU-RUSH-1');
+        $this->assertSame('050100', $flatRush['kodeKantor']);
+        $this->assertSame('Singapore Airlines', $flatRush['pengangkut'][0]['namaPengangkut']);
+        $this->assertSame('SG', $flatRush['pengangkut'][0]['kodeBendera']);
+        $this->assertSame('4', $flatRush['pengangkut'][0]['kodeCaraAngkut']);
+    }
+
+    public function test_settings_page_shows_token_countdown(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+            'token' => 'TOK-LIVE', 'token_expires_at' => now()->addMinutes(5),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('settings.ceisa.edit'))
+            ->assertOk()
+            ->assertSee('Status token akses')
+            ->assertSee('ceisaTokenCountdown', false);
+    }
+
+    public function test_notifications_page_groups_djbc_webhook_logs(): void
+    {
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-N1', 'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        WebhookLog::create([
+            'document_id' => $doc->id, 'event' => 'SPPB Terbit', 'notification_type' => 'Respon',
+            'nomor_aju' => 'AJU-N1', 'payload' => ['status' => 'SPPB', 'message' => 'Barang dapat dikeluarkan'],
+            'received_at' => now(),
+        ]);
+
+        // Notifikasi milik user lain tidak boleh tampil.
+        $otherDoc = $this->authedUser()->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-OTHER', 'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
+        ]);
+        WebhookLog::create([
+            'document_id' => $otherDoc->id, 'event' => 'RAHASIA', 'notification_type' => 'Respon',
+            'nomor_aju' => 'AJU-OTHER', 'payload' => ['status' => 'X'], 'received_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('notifications.index'))
+            ->assertOk()
+            ->assertSee('Pusat Notifikasi DJBC')
+            ->assertSee('SPPB Terbit')
+            ->assertDontSee('RAHASIA');
+    }
+
+    public function test_refresh_status_pulls_and_applies_from_ceisa(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/status/*' => Http::response([
+                'status' => 'SPPB DITERBITKAN',
+                'jalur' => 'HIJAU',
+                'nomor_daftar' => 'REG-99',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-1', 'id_header' => 'uuid-1',
+            'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('documents.refresh-status', $doc))
+            ->assertRedirect();
+
+        $doc->refresh();
+        $this->assertSame(Document::STATUS_ACCEPTED, $doc->status);
+        $this->assertSame(Document::JALUR_HIJAU, $doc->jalur);
+        $this->assertSame('REG-99', $doc->nomor_daftar);
+
+        // idHeader ikut dikirim sebagai query saat menarik status.
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/openapi/status/AJU-1')
+            && str_contains($r->url(), 'idHeader=uuid-1'));
+    }
+
+    public function test_sync_references_command_upserts_from_ceisa(): void
+    {
+        config(['ceisa.reference_endpoints' => ['negara' => '/v2/openapi/referensi/negara']]);
+
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*referensi/negara*' => Http::response([
+                'data' => [
+                    ['kodeNegara' => 'SG', 'uraianNegara' => 'Singapura'],
+                    ['kodeNegara' => 'ID', 'uraianNegara' => 'Indonesia'],
+                ],
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $this->artisan('ceisa:sync-references', ['--type' => ['negara']])
+            ->assertExitCode(0);
+
+        $this->assertDatabaseHas('ceisa_references', ['type' => 'negara', 'code' => 'SG', 'label' => 'Singapura', 'active' => true]);
+        $this->assertDatabaseHas('ceisa_references', ['type' => 'negara', 'code' => 'ID', 'label' => 'Indonesia']);
+    }
+
+    public function test_sync_references_command_skips_when_no_endpoints_mapped(): void
+    {
+        config(['ceisa.reference_endpoints' => []]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+        ]);
+
+        $this->artisan('ceisa:sync-references')
+            ->expectsOutputToContain('Belum ada endpoint referensi')
+            ->assertExitCode(0);
     }
 }

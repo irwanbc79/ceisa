@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\WebhookLog;
+use App\Services\CeisaStatusMapper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -134,50 +135,13 @@ class WebhookController extends Controller
     }
 
     /**
-     * Petakan status CEISA ke status internal dokumen.
+     * Petakan status CEISA ke status internal dokumen (delegasi ke CeisaStatusMapper
+     * agar konsisten dengan penarikan status manual / polling).
      *
      * @param  array<string, mixed>  $payload
      */
     protected function applyStatus(Document $document, array $payload): void
     {
-        $raw = strtoupper((string) (data_get($payload, 'status') ?? data_get($payload, 'data.status') ?? ''));
-
-        $status = match (true) {
-            str_contains($raw, 'TERIMA'), str_contains($raw, 'ACCEPT'), str_contains($raw, 'SPPB') => Document::STATUS_ACCEPTED,
-            str_contains($raw, 'TOLAK'), str_contains($raw, 'REJECT'), str_contains($raw, 'NPP') => Document::STATUS_REJECTED,
-            default => $document->status === Document::STATUS_SUBMITTING ? Document::STATUS_SUBMITTED : $document->status,
-        };
-
-        $document->forceFill([
-            'status' => $status,
-            'jalur' => $this->extractJalur($payload) ?? $document->jalur,
-            'nomor_daftar' => data_get($payload, 'nomor_daftar') ?? data_get($payload, 'data.nomor_daftar') ?? $document->nomor_daftar,
-            'ceisa_response' => $payload,
-            'response_at' => now(),
-        ])->save();
-    }
-
-    /**
-     * Ambil jalur pemeriksaan (H/K/M) dari payload notifikasi.
-     *
-     * @param  array<string, mixed>  $payload
-     */
-    protected function extractJalur(array $payload): ?string
-    {
-        $raw = strtoupper((string) (
-            data_get($payload, 'jalur')
-            ?? data_get($payload, 'data.jalur')
-            ?? data_get($payload, 'kode_jalur')
-            ?? data_get($payload, 'data.kode_jalur')
-            ?? ''
-        ));
-
-        return match (true) {
-            $raw === '' => null,
-            str_contains($raw, 'HIJAU'), $raw === 'H' => Document::JALUR_HIJAU,
-            str_contains($raw, 'KUNING'), $raw === 'K' => Document::JALUR_KUNING,
-            str_contains($raw, 'MERAH'), $raw === 'M' => Document::JALUR_MERAH,
-            default => null,
-        };
+        CeisaStatusMapper::apply($document, $payload);
     }
 }

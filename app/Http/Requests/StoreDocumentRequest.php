@@ -26,6 +26,7 @@ class StoreDocumentRequest extends FormRequest
 
         $rules = [
             'doc_type' => ['required', 'in:BC20,BC24,TPB,BC30,RUSH'],
+            'nomor_aju' => ['nullable', 'string', 'size:26', 'regex:/^[A-Za-z0-9]+$/'],
         ];
 
         if ($docType === 'BC30') {
@@ -91,19 +92,42 @@ class StoreDocumentRequest extends FormRequest
                 'nama_importir' => ['required', 'string', 'max:255'],
                 'npwp_importir' => ['required', 'string', 'max:25'],
                 'alamat_importir' => ['required', 'string', 'max:500'],
+                'nib_importir' => ['nullable', 'string', 'max:30'],
+                'jenis_api' => ['nullable', 'string', 'max:5'],
 
                 // Data pemasok
                 'nama_pemasok' => ['required', 'string', 'max:255'],
                 'negara_pemasok' => ['required', 'string', 'size:2'],
 
+                // Data Header impor (kode jenis impor / cara bayar CEISA)
+                'jenis_impor' => ['nullable', 'string', 'max:5'],
+                'cara_bayar' => ['nullable', 'string', 'max:5'],
+
                 // Pengangkutan
                 'pelabuhan_muat' => ['required', 'string', 'max:10'],
                 'pelabuhan_bongkar' => ['required', 'string', 'max:10'],
+                'cara_angkut' => ['nullable', 'string', 'max:50'],
+                'nama_sarana' => ['nullable', 'string', 'max:255'],
+                'voy_flight' => ['nullable', 'string', 'max:50'],
+                'kode_bendera' => ['nullable', 'string', 'size:2'],
+                'kode_tps' => ['nullable', 'string', 'max:20'],
+                'tanggal_tiba' => ['nullable', 'date'],
 
                 // Nilai transaksi
                 'kode_valuta' => ['required', 'string', 'size:3'],
+                'ndpbm' => ['nullable', 'numeric', 'min:0'],
+                'incoterm' => ['nullable', 'string', 'max:5'],
                 'nilai_cif' => ['required', 'numeric', 'min:0'],
+                'freight' => ['nullable', 'numeric', 'min:0'],
+                'asuransi_jenis' => ['nullable', 'in:DN,LN'],
+                'nilai_asuransi' => ['nullable', 'numeric', 'min:0'],
+                'bruto' => ['nullable', 'numeric', 'min:0'],
                 'cara_pembayaran' => ['nullable', 'string', 'max:50'],
+
+                // Pernyataan (penanggung jawab)
+                'pernyataan_nama' => ['nullable', 'string', 'max:255'],
+                'pernyataan_jabatan' => ['nullable', 'string', 'max:100'],
+                'pernyataan_kota' => ['nullable', 'string', 'max:100'],
             ], $this->barangRules('nilai_cif'));
         } elseif ($docType === 'TPB') {
             $rules = array_merge($rules, [
@@ -120,6 +144,13 @@ class StoreDocumentRequest extends FormRequest
                 // Transaksi
                 'kode_valuta' => ['required', 'string', 'size:3'],
                 'nilai_barang' => ['required', 'numeric', 'min:0'],
+
+                // Pengangkutan & Kantor (dynamic fallbacks)
+                'kode_kantor' => ['nullable', 'string', 'max:10'],
+                'cara_angkut' => ['nullable', 'string', 'max:50'],
+                'nama_sarana' => ['nullable', 'string', 'max:255'],
+                'voy_flight' => ['nullable', 'string', 'max:50'],
+                'kode_bendera' => ['nullable', 'string', 'size:2'],
             ], $this->barangRules('nilai_barang'));
         } elseif ($docType === 'RUSH') {
             $rules = array_merge($rules, [
@@ -140,6 +171,11 @@ class StoreDocumentRequest extends FormRequest
                 // Kemasan
                 'jumlah_kemasan' => ['required', 'integer', 'min:1'],
                 'jenis_kemasan' => ['required', 'string', 'max:50'],
+
+                // Pengangkutan & Kantor (dynamic fallbacks)
+                'kode_kantor' => ['nullable', 'string', 'max:10'],
+                'kode_bendera' => ['nullable', 'string', 'size:2'],
+                'cara_angkut' => ['nullable', 'string', 'max:50'],
             ], $this->barangRules('nilai_barang'));
         }
 
@@ -301,18 +337,39 @@ class StoreDocumentRequest extends FormRequest
                         'nama' => $v['nama_importir'],
                         'npwp' => $v['npwp_importir'],
                         'alamat' => $v['alamat_importir'],
+                        'nib' => $v['nib_importir'] ?? null,
+                        'jenis_api' => $v['jenis_api'] ?? null,
                     ],
                     'pemasok' => [
                         'nama' => $v['nama_pemasok'],
                         'negara' => strtoupper($v['negara_pemasok']),
                     ],
+                    'jenis_impor' => $v['jenis_impor'] ?? null,
+                    'cara_bayar' => $v['cara_bayar'] ?? null,
                     'pengangkutan' => [
                         'pelabuhan_muat' => $v['pelabuhan_muat'],
                         'pelabuhan_bongkar' => $v['pelabuhan_bongkar'],
+                        'cara_angkut' => $v['cara_angkut'] ?? null,
+                        'sarana_angkut' => $v['nama_sarana'] ?? null,
+                        'voy_flight' => $v['voy_flight'] ?? null,
+                        'bendera' => isset($v['kode_bendera']) ? strtoupper($v['kode_bendera']) : null,
+                        'tps' => $v['kode_tps'] ?? null,
+                        'tanggal_tiba' => $v['tanggal_tiba'] ?? null,
                     ],
                     'valuta' => strtoupper($v['kode_valuta']),
+                    'ndpbm' => isset($v['ndpbm']) ? (float) $v['ndpbm'] : null,
+                    'incoterm' => isset($v['incoterm']) ? strtoupper($v['incoterm']) : null,
                     'nilai_cif' => (float) $v['nilai_cif'],
+                    'freight' => isset($v['freight']) ? (float) $v['freight'] : null,
+                    'asuransi' => isset($v['nilai_asuransi']) ? (float) $v['nilai_asuransi'] : null,
+                    'asuransi_jenis' => $v['asuransi_jenis'] ?? null,
+                    'bruto' => isset($v['bruto']) ? (float) $v['bruto'] : null,
                     'cara_pembayaran' => $v['cara_pembayaran'] ?? null,
+                    'pernyataan' => [
+                        'nama' => $v['pernyataan_nama'] ?? null,
+                        'jabatan' => $v['pernyataan_jabatan'] ?? null,
+                        'kota' => $v['pernyataan_kota'] ?? null,
+                    ],
                 ],
                 'barang' => $this->mapBarang($v['barang'], 'nilai_cif'),
             ];
@@ -329,6 +386,13 @@ class StoreDocumentRequest extends FormRequest
                     'dokumen_referensi' => $v['dokumen_referensi'],
                     'valuta' => strtoupper($v['kode_valuta']),
                     'nilai_barang' => (float) $v['nilai_barang'],
+                    'kode_kantor' => $v['kode_kantor'] ?? null,
+                    'pengangkutan' => [
+                        'cara_angkut' => $v['cara_angkut'] ?? null,
+                        'sarana_angkut' => $v['nama_sarana'] ?? null,
+                        'voy_flight' => $v['voy_flight'] ?? null,
+                        'bendera' => isset($v['kode_bendera']) ? strtoupper($v['kode_bendera']) : null,
+                    ],
                 ],
                 'barang' => $this->mapBarang($v['barang'], 'nilai_barang'),
             ];
@@ -343,6 +407,8 @@ class StoreDocumentRequest extends FormRequest
                     'pengangkutan' => [
                         'sarana' => $v['nama_sarana_pengangkut'],
                         'flight_no' => $v['nomor_flight'],
+                        'bendera' => isset($v['kode_bendera']) ? strtoupper($v['kode_bendera']) : null,
+                        'cara_angkut' => $v['cara_angkut'] ?? null,
                     ],
                     'dokumen_pengangkutan' => [
                         'awb_bl' => $v['nomor_awb_bl'],
@@ -353,6 +419,7 @@ class StoreDocumentRequest extends FormRequest
                         'jumlah' => (int) $v['jumlah_kemasan'],
                         'jenis' => $v['jenis_kemasan'],
                     ],
+                    'kode_kantor' => $v['kode_kantor'] ?? null,
                 ],
                 'barang' => $this->mapBarang($v['barang'], 'nilai_barang'),
             ];

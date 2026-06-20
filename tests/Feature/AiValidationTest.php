@@ -52,37 +52,37 @@ class AiValidationTest extends TestCase
     public function test_hybrid_client_fails_over_to_next_provider(): void
     {
         config([
-            'ai.order' => ['claude', 'gemini'],
-            'ai.providers.claude.api_key' => 'k-claude',
+            'ai.order' => ['gemini', 'deepseek'],
             'ai.providers.gemini.api_key' => 'k-gemini',
+            'ai.providers.deepseek.api_key' => 'k-deepseek',
         ]);
 
         Http::fake([
-            'api.anthropic.com/*' => Http::response(['error' => 'boom'], 500),
-            'generativelanguage.googleapis.com/*' => Http::response([
-                'candidates' => [['content' => ['parts' => [['text' => 'HALO-GEMINI']]]]],
+            'generativelanguage.googleapis.com/*' => Http::response(['error' => 'boom'], 500),
+            'api.deepseek.com/*' => Http::response([
+                'choices' => [['message' => ['content' => 'HALO-DEEPSEEK']]],
             ], 200),
         ]);
 
         $result = HybridAiClient::fromConfig()->chat('sys', 'user');
 
-        $this->assertSame('gemini', $result['provider']);
-        $this->assertSame('HALO-GEMINI', $result['text']);
+        $this->assertSame('deepseek', $result['provider']);
+        $this->assertSame('HALO-DEEPSEEK', $result['text']);
     }
 
-    public function test_validate_ai_action_returns_findings_from_claude(): void
+    public function test_validate_ai_action_returns_findings_from_gemini(): void
     {
         config([
             'ai.enabled' => true,
-            'ai.order' => ['claude'],
-            'ai.providers.claude.api_key' => 'k-claude',
+            'ai.order' => ['gemini'],
+            'ai.providers.gemini.api_key' => 'k-gemini',
         ]);
 
         Http::fake([
-            'api.anthropic.com/*' => Http::response([
-                'content' => [['type' => 'text', 'text' => '```json
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [['content' => ['parts' => [['text' => '```json
 {"findings":[{"level":"warning","field":"barang #1","message":"HS code tidak konsisten dengan uraian"}]}
-```']],
+```']]]]],
             ], 200),
         ]);
 
@@ -93,7 +93,7 @@ class AiValidationTest extends TestCase
         $response->assertRedirect(route('documents.show', $doc));
 
         $av = session('ai_validation');
-        $this->assertSame('claude', $av['provider']);
+        $this->assertSame('gemini', $av['provider']);
         $this->assertNull($av['ai_error']);
         $this->assertSame('HS code tidak konsisten dengan uraian', $av['ai_findings'][0]['message']);
         $this->assertSame('warning', $av['ai_findings'][0]['level']);
@@ -104,8 +104,7 @@ class AiValidationTest extends TestCase
     {
         config([
             'ai.enabled' => true,
-            'ai.order' => ['claude', 'gemini', 'deepseek'],
-            'ai.providers.claude.api_key' => null,
+            'ai.order' => ['gemini', 'deepseek'],
             'ai.providers.gemini.api_key' => null,
             'ai.providers.deepseek.api_key' => null,
         ]);

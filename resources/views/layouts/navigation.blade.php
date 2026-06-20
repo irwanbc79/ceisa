@@ -1,88 +1,127 @@
-{{-- ── Sidebar Navigation (Maritime Indigo) ────────────────── --}}
-<aside
-    class="fixed inset-y-0 left-0 z-40 w-[260px] transform transition-transform duration-300 ease-out lg:translate-x-0"
-    :class="sideOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
-
-    <div class="relative h-full ink-hero border-r border-ink-700/50 flex flex-col">
-
-        {{-- Brand --}}
-        <div class="relative px-5 pt-7 pb-5 border-b border-white/10">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
-                <span class="relative inline-flex h-11 w-11 items-center justify-center rounded-xl bg-cream shadow-gold-glow ring-1 ring-gold-300/40 overflow-hidden">
-                    <img src="{{ asset('images/m2b-logo.png') }}" alt="M2B" class="h-9 w-9 object-contain">
-                </span>
-                <div class="flex flex-col leading-tight">
-                    <span class="font-display text-[20px] font-semibold tracking-tighter text-cream">
-                        M2B<span class="text-gold-400">·</span>Customs
-                    </span>
-                    <span class="text-[10px] font-mono uppercase tracking-[0.3em] text-gold-300/80">CEISA H2H · 4.0</span>
+<nav x-data="{ open: false }" class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 shadow-sm transition-all duration-300">
+    <!-- Primary Navigation Menu -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex">
+                <!-- Logo -->
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ route('dashboard') }}">
+                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    </a>
                 </div>
-            </a>
-        </div>
 
-        {{-- Nav links --}}
-        <nav class="relative flex-1 px-4 py-6 overflow-y-auto">
-            <p class="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-cream/40">Workspace</p>
-            <ul class="space-y-1">
-                <li>
-                    <a href="{{ route('dashboard') }}" data-active="{{ request()->routeIs('dashboard') ? 'true' : 'false' }}" class="nav-side">
-                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12 12 2.25 21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"/></svg>
-                        <span>Dashboard</span>
-                        <span class="ml-auto text-[10px] font-mono opacity-50">⌘D</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('documents.index') }}" data-active="{{ request()->routeIs('documents.index') ? 'true' : 'false' }}" class="nav-side">
-                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>
-                        <span>Daftar Dokumen</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('documents.create') }}" data-active="{{ request()->routeIs('documents.create') ? 'true' : 'false' }}" class="nav-side">
-                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                        <span>Buat Dokumen</span>
-                        <span class="ml-auto pill-gold !py-0.5 !px-1.5 !text-[9px] !tracking-wider">H2H</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('documents.lookup') }}" data-active="{{ request()->routeIs('documents.lookup') ? 'true' : 'false' }}" class="nav-side">
-                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803m10.607.197a7.5 7.5 0 0 1-10.607 0"/></svg>
-                        <span>Cek Status</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('documents.archive.create') }}" data-active="{{ request()->routeIs('documents.archive.*') ? 'true' : 'false' }}" class="nav-side">
-                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5v9a2.25 2.25 0 0 1-2.25 2.25h-12a2.25 2.25 0 0 1-2.25-2.25v-9m16.5 0a2.25 2.25 0 0 0-2.25-2.25h-12a2.25 2.25 0 0 0-2.25 2.25m16.5 0V7.5m-9 6h.008v.008H11.25v-.008Z"/></svg>
-                        <span>Arsip Dokumen</span>
-                    </a>
-                </li>
-            </ul>
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.index')">
+                        {{ __('Daftar Dokumen') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
+                        {{ __('Buat Dokumen') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
+                        {{ __('Notifikasi') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
+                        {{ __('Pengaturan CEISA') }}
+                    </x-nav-link>
+                </div>
+            </div>
 
-            <p class="px-3 mt-7 mb-2 text-[10px] font-bold uppercase tracking-[0.22em] text-cream/40">System</p>
-            <ul class="space-y-1">
-                <li>
-                    <a href="{{ route('settings.ceisa.edit') }}" data-active="{{ request()->routeIs('settings.ceisa.*') ? 'true' : 'false' }}" class="nav-side">
-                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
-                        <span>Kredensial CEISA</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('profile.edit') }}" data-active="{{ request()->routeIs('profile.*') ? 'true' : 'false' }}" class="nav-side">
-                        <svg class="h-4 w-4 shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
-                        <span>Akun Saya</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+            <!-- Settings Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <x-dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button class="inline-flex items-center gap-2 px-3 py-1.5 border border-slate-200/60 text-sm leading-4 font-semibold rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100/80 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition ease-in-out duration-150 shadow-sm">
+                            <div class="h-6 w-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-inner">
+                                {{ substr(Auth::user()->name, 0, 2) }}
+                            </div>
+                            <div>{{ Auth::user()->name }}</div>
 
-        {{-- Footer brand block --}}
-        <div class="relative px-5 py-5 border-t border-white/10">
-            <div class="relative rounded-xl border border-gold-500/30 bg-gradient-to-br from-gold-500/[.12] to-transparent p-4 overflow-hidden">
-                <div class="absolute -right-6 -top-6 h-16 w-16 rounded-full bg-gold-400/20 blur-2xl"></div>
-                <p class="text-[10px] font-mono uppercase tracking-[0.25em] text-gold-300/90">Powered by</p>
-                <p class="font-display text-lg font-semibold text-cream leading-tight mt-1">Mora<span class="text-gold-400">·</span>Bangun</p>
-                <p class="text-[10px] text-cream/50 mt-1">Pilot project H2H · 2026</p>
+                            <div class="ms-0.5">
+                                <svg class="fill-current h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </button>
+                    </x-slot>
+
+                    <x-slot name="content">
+                        <x-dropdown-link :href="route('profile.edit')">
+                            {{ __('Profile') }}
+                        </x-dropdown-link>
+
+                        <!-- Authentication -->
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
+                    </x-slot>
+                </x-dropdown>
+            </div>
+
+            <!-- Hamburger -->
+            <div class="-me-2 flex items-center sm:hidden">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
-</aside>
+
+    <!-- Responsive Navigation Menu -->
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.index')">
+                {{ __('Daftar Dokumen') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
+                {{ __('Buat Dokumen') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
+                {{ __('Notifikasi') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
+                {{ __('Pengaturan CEISA') }}
+            </x-responsive-nav-link>
+        </div>
+
+        <!-- Responsive Settings Options -->
+        <div class="pt-4 pb-1 border-t border-gray-200">
+            <div class="px-4">
+                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+            </div>
+
+            <div class="mt-3 space-y-1">
+                <x-responsive-nav-link :href="route('profile.edit')">
+                    {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <!-- Authentication -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+
+                    <x-responsive-nav-link :href="route('logout')"
+                            onclick="event.preventDefault();
+                                        this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </x-responsive-nav-link>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>

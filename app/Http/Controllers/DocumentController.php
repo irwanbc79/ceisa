@@ -8,6 +8,7 @@ use App\Http\Requests\StoreDocumentRequest;
 use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Services\CeisaService;
+use App\Services\CeisaStatusMapper;
 use App\Services\DocumentValidator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +25,9 @@ class DocumentController extends Controller
     {
         [$query, $filters] = $this->filteredDocuments($request);
 
-        // Rekap agregat (mengikuti filter aktif) dalam satu query.
+        // Rekap agregat (mengikuti filter aktif) dalam satu query. Sekaligus
+        // jadi sumber total paginasi agar paginator tidak menjalankan query
+        // COUNT terpisah yang redundan (total sudah ada di rekap).
         $agg = (clone $query)
             ->selectRaw('count(*) as total')
             ->selectRaw('sum(case when status = ? then 1 else 0 end) as accepted', [Document::STATUS_ACCEPTED])
@@ -39,7 +42,16 @@ class DocumentController extends Controller
             'merah' => (int) $agg->merah,
         ];
 
-        $documents = $query->latest()->paginate(20)->withQueryString();
+        $perPage = 20;
+        $page = (int) $request->input('page', 1);
+        $documents = $query->latest()->forPage($page, $perPage)->get();
+        $documents = new \Illuminate\Pagination\LengthAwarePaginator(
+            $documents,
+            $rekap['total'],
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()],
+        );
 
         return view('documents.index', [
             'documents' => $documents,
@@ -99,6 +111,7 @@ class DocumentController extends Controller
             'source' => $request->input('source'),
             'from' => $request->input('from'),
             'to' => $request->input('to'),
+            'bumn' => $request->boolean('bumn'),
         ];
 
         $query = $request->user()->documents()
@@ -113,7 +126,8 @@ class DocumentController extends Controller
             ->when($filters['jalur'], fn ($q, $v) => $q->where('jalur', $v))
             ->when($filters['source'], fn ($q, $v) => $q->where('source', $v))
             ->when($filters['from'], fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
-            ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v));
+            ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
+            ->when($filters['bumn'], fn ($q) => $q->where('payload->bumn', true));
 
         return [$query, $filters];
     }
@@ -204,6 +218,7 @@ class DocumentController extends Controller
 
         $document = $user->documents()->create([
             'doc_type' => $request->validated('doc_type'),
+            'nomor_aju' => $request->validated('nomor_aju'),
             'payload' => $request->toCeisaPayload(),
             'status' => Document::STATUS_DRAFT,
         ]);
@@ -225,6 +240,129 @@ class DocumentController extends Controller
         return redirect()
             ->route('documents.show', $document)
             ->with('success', 'Dokumen berhasil dikirim ke CEISA. Menunggu response.');
+    }
+
+    /**
+     * Form ubah dokumen. Dokumen H2H (draft/error) memakai wizard; dokumen
+     * arsip memakai form rekam manual. Keduanya di-pre-fill dari payload.
+     */
+    public function edit(Request $request, Document $document): View|RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        if (! $document->isEditable()) {
+            return redirect()
+                ->route('documents.show', $document)
+                ->with('error', 'Dokumen ini tidak dapat diubah karena sudah dikirim/diterima CEISA.');
+        }
+
+        if ($document->isArchived()) {
+            return view('documents.arsip', [
+                'docTypes' => config('ceisa.doc_types'),
+                'references' => CeisaReference::forWizard(),
+                'editDocument' => $document,
+                'values' => $document->toArchiveFormData(),
+            ]);
+        }
+
+        if (! $request->user()->ceisaCredential) {
+            return redirect()
+                ->route('settings.ceisa.edit')
+                ->with('error', 'Lengkapi kredensial CEISA terlebih dahulu sebelum mengubah dokumen.');
+        }
+
+        return view('documents.create', [
+            'docTypes' => config('ceisa.doc_types'),
+            'references' => CeisaReference::forWizard(),
+            'editDocument' => $document,
+            'editData' => $document->toFormData(),
+        ]);
+    }
+
+    /**
+     * Simpan perubahan dokumen H2H (wizard). Hanya draft/error yang boleh diubah.
+     */
+    public function update(StoreDocumentRequest $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        if ($document->isArchived() || ! $document->isEditable()) {
+            return redirect()
+                ->route('documents.show', $document)
+                ->with('error', 'Dokumen ini tidak dapat diubah.');
+        }
+
+        $document->update([
+            'doc_type' => $request->validated('doc_type'),
+            'nomor_aju' => $request->validated('nomor_aju'),
+            'payload' => $request->toCeisaPayload(),
+        ]);
+
+        if ($request->input('submit_action') === 'draft') {
+            return redirect()
+                ->route('documents.show', $document)
+                ->with('success', 'Perubahan dokumen tersimpan sebagai draft.');
+        }
+
+        try {
+            CeisaService::forCredential($request->user()->ceisaCredential)->submit($document);
+        } catch (CeisaException $e) {
+            return redirect()
+                ->route('documents.show', $document)
+                ->with('error', 'Perubahan tersimpan, namun submit gagal: '.$e->getMessage());
+        }
+
+        return redirect()
+            ->route('documents.show', $document)
+            ->with('success', 'Dokumen berhasil diperbarui dan dikirim ke CEISA.');
+    }
+
+    /**
+     * Simpan perubahan dokumen arsip (rekam manual).
+     */
+    public function updateArchive(StoreArchiveDocumentRequest $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        if (! $document->isArchived()) {
+            return redirect()
+                ->route('documents.show', $document)
+                ->with('error', 'Dokumen ini bukan dokumen arsip.');
+        }
+
+        $v = $request->validated();
+
+        $document->update([
+            'doc_type' => $v['doc_type'],
+            'nomor_aju' => $v['nomor_aju'],
+            'nomor_daftar' => $v['nomor_daftar'] ?? null,
+            'status' => $v['status'],
+            'jalur' => $v['jalur'] ?? null,
+            'payload' => $request->toArchivePayload(),
+            'submitted_at' => $v['tanggal_dokumen'] ?? $document->submitted_at,
+        ]);
+
+        return redirect()
+            ->route('documents.show', $document)
+            ->with('success', 'Dokumen arsip berhasil diperbarui.');
+    }
+
+    /**
+     * Hapus dokumen milik user. Dokumen H2H yang sudah hidup di DJBC ditolak.
+     */
+    public function destroy(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        if (! $document->canBeDeleted()) {
+            return back()->with('error', 'Dokumen yang sudah terkirim/diterima CEISA tidak dapat dihapus demi jejak audit.');
+        }
+
+        $document->delete();
+
+        return redirect()
+            ->route('documents.index')
+            ->with('success', 'Dokumen berhasil dihapus.');
     }
 
     /**
@@ -274,6 +412,62 @@ class DocumentController extends Controller
         }
 
         return back()->with('success', 'Dokumen berhasil dikirim ulang ke CEISA.');
+    }
+
+    /**
+     * Kirim Nota Pembetulan (NOTUL) / Perbaikan Data ke CEISA.
+     */
+    public function submitRevision(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        $credential = $request->user()->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        if (empty($document->nomor_aju)) {
+            return back()->with('error', 'Dokumen harus memiliki nomor AJU sebelum mengirim pembetulan.');
+        }
+
+        try {
+            CeisaService::forCredential($credential)->submit($document, isRevision: true);
+        } catch (CeisaException $e) {
+            return back()->with('error', 'Kirim pembetulan gagal: '.$e->getMessage());
+        }
+
+        return back()->with('success', 'Nota Pembetulan / Perbaikan Dokumen berhasil dikirim ke CEISA.');
+    }
+
+    /**
+     * Tarik status terbaru dokumen dari CEISA (polling manual) lalu terapkan
+     * ke dokumen. Memprioritaskan idHeader hasil submit; fallback nomor aju.
+     */
+    public function refreshStatus(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        if ($document->isArchived()) {
+            return back()->with('error', 'Dokumen arsip tidak memiliki status CEISA untuk ditarik.');
+        }
+
+        if (empty($document->nomor_aju)) {
+            return back()->with('error', 'Dokumen belum memiliki nomor aju — kirim ke CEISA terlebih dahulu.');
+        }
+
+        $credential = $request->user()->ceisaCredential;
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        try {
+            $data = CeisaService::forCredential($credential)
+                ->queryDocumentStatus($document->nomor_aju, $document->id_header);
+        } catch (CeisaException $e) {
+            return back()->with('error', 'Gagal menarik status: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menghubungi server CEISA: '.$e->getMessage());
+        }
+
+        CeisaStatusMapper::apply($document, $data);
+
+        return back()->with('success', 'Status dokumen berhasil diperbarui dari CEISA.');
     }
 
     /**
@@ -430,13 +624,13 @@ class DocumentController extends Controller
             ?? data_get($document->ceisa_response, 'data.pathRespon')
             ?? data_get($document->ceisa_response, 'responPdf')
             ?? data_get($document->ceisa_response, 'pathRespon')
-            ?? $document->webhookLogs->map(fn($log) => data_get($log->payload, 'data.responPdf') ?? data_get($log->payload, 'data.pathRespon') ?? data_get($log->payload, 'pathRespon'))->filter()->first();
+            ?? $document->webhookLogs->map(fn ($log) => data_get($log->payload, 'data.responPdf') ?? data_get($log->payload, 'data.pathRespon') ?? data_get($log->payload, 'pathRespon'))->filter()->first();
 
-        if (!$path) {
+        if (! $path) {
             $path = $request->query('path');
         }
 
-        if (!$path) {
+        if (! $path) {
             return back()->with('error', 'Path file respon tidak ditemukan di data dokumen. Pastikan webhook respon sudah masuk.');
         }
 
@@ -452,9 +646,9 @@ class DocumentController extends Controller
                 ]);
             }
 
-            return back()->with('error', 'Gagal mengunduh respon dari CEISA (HTTP ' . $response->status() . ').');
+            return back()->with('error', 'Gagal mengunduh respon dari CEISA (HTTP '.$response->status().').');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengunduh: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengunduh: '.$e->getMessage());
         }
     }
 
@@ -483,9 +677,9 @@ class DocumentController extends Controller
                 ]);
             }
 
-            return back()->with('error', 'Gagal mencetak formulir dari CEISA (HTTP ' . $response->status() . ').');
+            return back()->with('error', 'Gagal mencetak formulir dari CEISA (HTTP '.$response->status().').');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mencetak: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mencetak: '.$e->getMessage());
         }
     }
 
@@ -500,13 +694,13 @@ class DocumentController extends Controller
 
         $kodeBilling = data_get($document->ceisa_response, 'data.kodeBilling')
             ?? data_get($document->ceisa_response, 'kodeBilling')
-            ?? $document->webhookLogs->map(fn($log) => data_get($log->payload, 'data.kodeBilling') ?? data_get($log->payload, 'kodeBilling'))->filter()->first();
+            ?? $document->webhookLogs->map(fn ($log) => data_get($log->payload, 'data.kodeBilling') ?? data_get($log->payload, 'kodeBilling'))->filter()->first();
 
-        if (!$kodeBilling) {
+        if (! $kodeBilling) {
             $kodeBilling = $request->query('kode_billing');
         }
 
-        if (!$kodeBilling) {
+        if (! $kodeBilling) {
             return back()->with('error', 'Kode billing tidak ditemukan di data dokumen.');
         }
 
@@ -522,9 +716,9 @@ class DocumentController extends Controller
                 ]);
             }
 
-            return back()->with('error', 'Gagal mengunduh billing dari CEISA (HTTP ' . $response->status() . ').');
+            return back()->with('error', 'Gagal mengunduh billing dari CEISA (HTTP '.$response->status().').');
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengunduh billing: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengunduh billing: '.$e->getMessage());
         }
     }
 
