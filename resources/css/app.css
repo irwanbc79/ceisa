@@ -6,3 +6,325 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* ────────────────────────────────────────────────────────────
+   M2B Customs · Maritime Indigo Design System
+   Tema: ink (navy) · cream · gold · sea · crimson
+   ──────────────────────────────────────────────────────────── */
+
+@layer components {
+
+    /* ── Backgrounds ─────────────────────────────────────────── */
+
+    .ink-hero {
+        background-color: theme('colors.ink.900');
+        background-image:
+            radial-gradient(ellipse 80% 50% at 20% 0%, rgba(201, 165, 92, 0.12), transparent 60%),
+            radial-gradient(ellipse 60% 50% at 80% 100%, rgba(14, 134, 126, 0.10), transparent 60%),
+            theme('colors.ink.900');
+        background-attachment: fixed;
+    }
+
+    .topo-bg {
+        background-image:
+            theme('backgroundImage.grid-ink'),
+            linear-gradient(to bottom, theme('colors.cream.50'), theme('colors.cream.100'));
+        background-size: theme('backgroundSize.grid'), 100% 100%;
+    }
+
+    /* ── Typography ──────────────────────────────────────────── */
+
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: theme('fontFamily.mono');
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.25em;
+    }
+    .eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 1.5rem;
+        height: 1px;
+        background: currentColor;
+        opacity: 0.5;
+    }
+
+    .num-display {
+        font-family: theme('fontFamily.display');
+        font-weight: 300;
+        font-feature-settings: 'tnum', 'lnum';
+        letter-spacing: -0.02em;
+    }
+
+    /* ── Form controls ───────────────────────────────────────── */
+
+    .label {
+        display: block;
+        margin-bottom: 0.375rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: theme('colors.ink.600');
+        letter-spacing: -0.005em;
+    }
+
+    .field {
+        display: block;
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        background-color: theme('colors.cream.50');
+        border: 1px solid theme('colors.cream.400');
+        border-radius: 0.625rem;
+        font-size: 0.9375rem;
+        color: theme('colors.ink.900');
+        transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+    }
+    .field::placeholder {
+        color: theme('colors.ink.300');
+    }
+    .field:focus {
+        border-color: theme('colors.gold.500');
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(201, 165, 92, 0.15);
+        outline: none;
+    }
+    .field:focus-visible {
+        outline: none;
+    }
+    .field[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 0.25rem;
+    }
+
+    /* Monospace variant (NPWP, AJU, codes) */
+    .field-mono {
+        font-family: theme('fontFamily.mono');
+        font-size: 0.875rem;
+        letter-spacing: 0.02em;
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, theme('colors.ink.800'), theme('colors.ink.950'));
+        color: theme('colors.cream.DEFAULT');
+        border-radius: 0.625rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+        box-shadow: 0 1px 2px rgba(11, 20, 55, .08), 0 4px 12px -2px rgba(11, 20, 55, .15);
+        transition: transform .15s ease, box-shadow .15s ease, background .2s ease;
+        cursor: pointer;
+    }
+    .btn-primary:hover {
+        background: linear-gradient(135deg, theme('colors.ink.700'), theme('colors.ink.900'));
+        box-shadow: 0 2px 4px rgba(11, 20, 55, .1), 0 8px 20px -4px rgba(11, 20, 55, .25);
+        transform: translateY(-1px);
+    }
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .btn-gold {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1.125rem;
+        background: linear-gradient(135deg, theme('colors.gold.400'), theme('colors.gold.600'));
+        color: theme('colors.ink.900');
+        border-radius: 0.625rem;
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: -0.005em;
+        box-shadow: 0 1px 2px rgba(201, 165, 92, .2), 0 8px 24px -6px rgba(201, 165, 92, .45);
+        transition: transform .15s ease, box-shadow .15s ease, filter .2s ease;
+        cursor: pointer;
+    }
+    .btn-gold:hover {
+        filter: brightness(1.05);
+        box-shadow: 0 2px 4px rgba(201, 165, 92, .25), 0 12px 32px -6px rgba(201, 165, 92, .55);
+        transform: translateY(-1px);
+    }
+    .btn-gold:active {
+        transform: translateY(0);
+    }
+
+    .btn-ghost-dark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: theme('colors.cream.DEFAULT');
+        border: 1px solid rgba(251, 248, 242, 0.25);
+        border-radius: 0.625rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: background .15s ease, border-color .15s ease;
+        cursor: pointer;
+    }
+    .btn-ghost-dark:hover {
+        background: rgba(251, 248, 242, 0.08);
+        border-color: rgba(251, 248, 242, 0.4);
+    }
+
+    .btn-danger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: theme('colors.crimson.500');
+        color: white;
+        border-radius: 0.625rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: background .15s ease, transform .15s ease;
+        cursor: pointer;
+    }
+    .btn-danger:hover {
+        background-color: theme('colors.crimson.600');
+        transform: translateY(-1px);
+    }
+
+    /* ── Links & accents ─────────────────────────────────────── */
+
+    .link-gold {
+        background-image: linear-gradient(currentColor, currentColor);
+        background-size: 0% 1px;
+        background-position: 0 100%;
+        background-repeat: no-repeat;
+        transition: background-size .25s ease;
+    }
+    .link-gold:hover {
+        background-size: 100% 1px;
+    }
+
+    .divider-gold {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: theme('colors.ink.300');
+    }
+    .divider-gold::before,
+    .divider-gold::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, theme('colors.cream.400'), transparent);
+    }
+
+    /* ── Pills & dots ────────────────────────────────────────── */
+
+    .pill-sea {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        background-color: theme('colors.sea.50');
+        color: theme('colors.sea.700');
+        border: 1px solid theme('colors.sea.200');
+        border-radius: 9999px;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .dot {
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 9999px;
+    }
+
+    /* ── Cards ───────────────────────────────────────────────── */
+
+    .card {
+        background-color: white;
+        border: 1px solid theme('colors.cream.300');
+        border-radius: 1rem;
+        box-shadow: theme('boxShadow.soft');
+    }
+
+    /* ── Ticker (marquee) ────────────────────────────────────── */
+
+    .ticker {
+        display: inline-flex;
+        white-space: nowrap;
+        animation: theme('animation.marquee');
+    }
+
+    /* ── Animations & helpers ────────────────────────────────── */
+
+    .stagger > * {
+        opacity: 0;
+        animation: theme('animation.fade-in-up');
+    }
+    .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+    .stagger > *:nth-child(2) { animation-delay: 0.12s; }
+    .stagger > *:nth-child(3) { animation-delay: 0.19s; }
+    .stagger > *:nth-child(4) { animation-delay: 0.26s; }
+    .stagger > *:nth-child(5) { animation-delay: 0.33s; }
+    .stagger > *:nth-child(6) { animation-delay: 0.40s; }
+    .stagger > *:nth-child(7) { animation-delay: 0.47s; }
+    .stagger > *:nth-child(8) { animation-delay: 0.54s; }
+
+    .shimmer-on-hover {
+        position: relative;
+        overflow: hidden;
+    }
+    .shimmer-on-hover::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, transparent 30%, rgba(201, 165, 92, 0.12) 50%, transparent 70%);
+        background-size: 200% 100%;
+        opacity: 0;
+        transition: opacity .25s ease;
+        pointer-events: none;
+    }
+    .shimmer-on-hover:hover::after {
+        opacity: 1;
+        animation: theme('animation.shimmer');
+    }
+
+    .mask-fade {
+        mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+    }
+    .mask-fade-x {
+        mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    }
+}
+
+/* ────────────────────────────────────────────────────────────
+   Scrollbar styling (optional, for scrollable areas)
+   ──────────────────────────────────────────────────────────── */
+@layer utilities {
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: theme('colors.ink.700') transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: theme('colors.ink.700');
+        border-radius: 9999px;
+    }
+}
