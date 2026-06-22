@@ -1,13 +1,24 @@
 <x-guest-layout>
-    <p class="eyebrow text-gold-700">Welcome back</p>
-    <h1 class="font-display text-4xl lg:text-5xl font-light tracking-tightest leading-tight mt-5 text-ink-900">
-        Masuk ke <em class="font-semibold not-italic">gateway H2H</em><br>Anda.
+
+    {{-- ── Status badge ──────────────────────────────────── --}}
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sea-50 border border-sea-200 mb-6">
+        <span class="relative flex h-2 w-2">
+            <span class="absolute h-full w-full rounded-full bg-sea-400 opacity-60 animate-ping"></span>
+            <span class="relative h-2 w-2 rounded-full bg-sea-500"></span>
+        </span>
+        <span class="text-[11px] font-mono font-semibold uppercase tracking-widest text-sea-700">System Online</span>
+    </div>
+
+    <h1 class="font-display text-4xl lg:text-5xl font-light tracking-tightest leading-tight text-ink-900">
+        Masuk ke <em class="font-semibold not-italic">Workspace H2H</em>
     </h1>
-    <p class="mt-3 text-ink-500 leading-relaxed">Workspace M2B Customs · CEISA 4.0</p>
+    <p class="mt-2 text-ink-500 leading-relaxed text-sm">
+        PT Mora Multi Berkah · CEISA 4.0 Gateway
+    </p>
 
     <x-auth-session-status class="mt-6" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}" class="mt-10 space-y-5">
+    <form method="POST" action="{{ route('login') }}" class="mt-8 space-y-5">
         @csrf
 
         <div>
@@ -35,15 +46,24 @@
             @endif
         </div>
 
-        <button type="submit" class="btn-primary w-full !py-3 !text-base mt-2">
+        <button type="submit" class="btn-primary w-full !py-3.5 !text-base mt-2">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3 3m0 0 3-3m-3 3V9"/></svg>
             Masuk ke Dashboard
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
         </button>
-
-        <div class="divider-gold pt-3"><span class="text-[10px] font-mono uppercase tracking-widest">atau</span></div>
-
-        <p class="text-center text-sm text-ink-500">
-            Belum punya akun H2H? <a href="{{ route('register') }}" class="font-bold text-ink-900 link-gold">Daftar gratis</a>
-        </p>
     </form>
+
+    {{-- ── Access info ──────────────────────────────────── --}}
+    <div class="mt-8 pt-6 border-t border-cream-200/80">
+        <p class="text-[11px] font-mono text-ink-400 leading-relaxed">
+            <span class="inline-flex items-center gap-1.5">
+                <svg class="h-3 w-3 text-ink-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>
+                Akses dibatasi · Akun dibuat oleh administrator
+            </span>
+        </p>
+        <a href="mailto:halo@morabangun.com" class="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-gold-700 hover:text-ink-700 link-gold">
+            Butuh akses? Hubungi halo@morabangun.com
+            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
+        </a>
+    </div>
+
 </x-guest-layout>

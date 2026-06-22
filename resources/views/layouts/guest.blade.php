@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name', 'M2B Customs') }}</title>
+    <meta name="description" content="Portal Host-to-Host CEISA 4.0 Bea Cukai — PT Mora Multi Berkah. Pengelolaan dokumen kepabeanan impor, ekspor & TPB.">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&family=fraunces:300,400,500,600,700,900&family=jetbrains-mono:400,500,700&display=swap" rel="stylesheet" />
@@ -18,10 +19,17 @@
         {{-- ── Left brand panel ─────────────────────────────── --}}
         <aside class="relative ink-hero hidden lg:flex flex-col justify-between p-12 xl:p-16 overflow-hidden">
 
+            {{-- Subtle maritime wave overlay --}}
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none">
+                <svg class="absolute bottom-0 left-0 w-full h-64" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                    <path fill="currentColor" class="text-gold-400" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,208C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"/>
+                </svg>
+            </div>
+
             {{-- Top: brand --}}
             <div class="relative z-10">
                 <a href="/" class="inline-flex items-center gap-3 group">
-                    <span class="h-12 w-12 inline-flex items-center justify-center rounded-2xl bg-cream shadow-gold-glow ring-1 ring-gold-300/40">
+                    <span class="h-12 w-12 inline-flex items-center justify-center rounded-2xl bg-cream shadow-gold-glow ring-1 ring-gold-300/40 transition-transform duration-300 group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(201,165,92,0.25)]">
                         <img src="{{ asset('images/m2b-logo.png') }}" alt="M2B" class="h-9 w-9 object-contain">
                     </span>
                     <div class="leading-tight">
@@ -33,7 +41,7 @@
 
             {{-- Middle: editorial pitch --}}
             <div class="relative z-10 max-w-xl stagger">
-                <p class="eyebrow text-gold-300">Indonesia · DJBC · 2026</p>
+                <p class="eyebrow text-gold-300">Direktorat Jenderal Bea dan Cukai · Indonesia</p>
 
                 <h1 class="font-display text-5xl xl:text-7xl font-light text-cream leading-[0.92] tracking-tightest mt-6 text-balance">
                     Kepabeanan <em class="text-gold-400 not-italic font-semibold">tanpa antrian</em>, <br>
@@ -63,14 +71,20 @@
                 </div>
             </div>
 
-            {{-- Bottom: ticker --}}
-            <div class="relative z-10 mt-12">
+            {{-- Bottom: ticker + footer --}}
+            <div class="relative z-10 mt-12 space-y-8">
                 <div class="overflow-hidden mask-fade">
                     <div class="ticker text-[11px] uppercase tracking-[0.3em] text-cream/40 font-mono">
                         @for ($i = 0; $i < 2; $i++)
                             <span>· BC 2.0 Impor</span><span>· BC 2.4 TPB Impor</span><span>· BC 3.0 Ekspor</span><span>· Portal TPB</span><span>· Rush Handling</span><span>· Validasi AI</span><span>· Real-time webhook</span><span>· Audit-ready log</span>
                         @endfor
                     </div>
+                </div>
+
+                <div class="flex items-center justify-between text-[10px] font-mono text-cream/30">
+                    <span>© {{ date('Y') }} PT Mora Multi Berkah</span>
+                    <span class="hidden xl:inline">morabangun.com</span>
+                    <span>v4.0 · TLS 1.3</span>
                 </div>
             </div>
 
@@ -97,19 +111,25 @@
                 <span class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-ink-900">
                     <img src="{{ asset('images/m2b-logo.png') }}" alt="M2B" class="h-8 w-8 object-contain">
                 </span>
-                <span class="font-display text-xl font-semibold tracking-tighter text-ink-900">M2B<span class="text-gold-500">·</span>Customs</span>
+                <div class="leading-tight">
+                    <span class="font-display text-xl font-semibold tracking-tighter text-ink-900">M2B<span class="text-gold-500">·</span>Customs</span>
+                    <span class="block text-[9px] font-mono uppercase tracking-[0.25em] text-ink-400">CEISA 4.0 H2H</span>
+                </div>
             </a>
 
             <div class="w-full max-w-md mx-auto lg:mx-0">
                 {{ $slot }}
             </div>
 
-            <div class="mt-12 text-[11px] font-mono text-ink-400 max-w-md mx-auto lg:mx-0">
-                © {{ date('Y') }} morabangun.com · Mora Multi Berkah · All systems secure.
+            <div class="mt-auto pt-12 text-[10px] font-mono text-ink-300 max-w-md mx-auto lg:mx-0 flex items-center justify-between">
+                <span>© {{ date('Y') }} morabangun.com · PT Mora Multi Berkah</span>
+                <span class="hidden sm:inline">All systems secure</span>
             </div>
         </main>
     </div>
 
-    <style>.mask-fade { mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent); }</style>
+    <style>
+        .mask-fade { mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent); }
+    </style>
 </body>
 </html>
