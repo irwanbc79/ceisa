@@ -52,20 +52,25 @@ return [
 
     /*
     | Endpoint relatif terhadap base_url (host gateway).
-    | Terverifikasi dari dokumentasi resmi PIA-CEISA40 (ceisa40.gitbook.io/pia-ceisa40):
-    |   - token  : POST {host}/nle-oauth/v1/user/login (body: username+password)
-    |   - refresh: POST {host}/nle-oauth/v1/user/update-token (header: Authorization refresh_token)
-    |   - submit : POST {host}/openapi/document
-    |   - status : GET  {host}/openapi/status/{nomorAju} atau ?idPerusahaan={NPWP}
+    | Diselaraskan dengan Beacukai Developer Portal (API Gallery + halaman Authentication)
+    | dan DIVERIFIKASI LIVE via probe 2026-06-29 (akun H2H PT Mora Multi Berkah):
+    |   - ✅ token : POST {host}/v1/openapi-auth/user/login (body: username+password,
+    |               header: beacukai-api-key) → HTTP 200, item.access_token + refresh_token.
+    |   - ✅ base layanan H2H = {host}/v2/openapi (contoh resmi GET /v2/openapi/kurs/USD → 200).
+    |   - refresh/submit/status: base /v1/openapi-auth & /v2/openapi sudah benar; SUB-PATH
+    |     (update-token, document, status) masih asumsi — konfirmasi dari Swagger
+    |     "API for Host To Host services" (/v2/openapi) lalu override via .env bila beda.
+    | Catatan: id_platform TIDAK dipakai pada flow resmi (login cukup beacukai-api-key).
     */
     'endpoints' => [
-        'token' => env('CEISA_TOKEN_ENDPOINT', '/nle-oauth/v1/user/login'),
-        'refresh_token' => env('CEISA_REFRESH_ENDPOINT', '/nle-oauth/v1/user/update-token'),
-        'submit' => env('CEISA_SUBMIT_ENDPOINT', '/openapi/document'),
-        'status' => env('CEISA_STATUS_ENDPOINT', '/openapi/status'),
-        'download_respon' => env('CEISA_DOWNLOAD_ENDPOINT', '/openapi/download-respon'),
-        'cetak_formulir' => env('CEISA_CETAK_ENDPOINT', '/openapi/respon/cetak-formulir'),
-        'billing' => env('CEISA_BILLING_ENDPOINT', '/openapi/respon/billing'),
+        'token' => env('CEISA_TOKEN_ENDPOINT', '/v1/openapi-auth/user/login'),
+        'refresh_token' => env('CEISA_REFRESH_ENDPOINT', '/v1/openapi-auth/user/update-token'),
+        'submit' => env('CEISA_SUBMIT_ENDPOINT', '/v2/openapi/document'),
+        'status' => env('CEISA_STATUS_ENDPOINT', '/v2/openapi/status'),
+        'kurs' => env('CEISA_KURS_ENDPOINT', '/v2/openapi/kurs'),
+        'download_respon' => env('CEISA_DOWNLOAD_ENDPOINT', '/v2/openapi/download-respon'),
+        'cetak_formulir' => env('CEISA_CETAK_ENDPOINT', '/v2/openapi/respon/cetak-formulir'),
+        'billing' => env('CEISA_BILLING_ENDPOINT', '/v2/openapi/respon/billing'),
         'upload_dokap' => env('CEISA_UPLOAD_DOKAP_ENDPOINT', '/v2/openapi/file/dokumen'),
         'upload_gambar' => env('CEISA_UPLOAD_GAMBAR_ENDPOINT', '/v2/openapi/file/barang'),
         'upload_dokap_npd' => env('CEISA_UPLOAD_NPD_ENDPOINT', '/v2/openapi/file/upload-dokap-npd'),

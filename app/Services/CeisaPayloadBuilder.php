@@ -481,6 +481,9 @@ class CeisaPayloadBuilder
                         'nilaiFasilitas' => 0.0,
                     ],
                 ],
+                // Wajib hadir per JSON Schema BC 2.0 (barang.required memuat "barangVd").
+                // Kosong = tanpa voluntary declaration (kasus normal); diisi bila flagVd=Y.
+                'barangVd' => [],
             ];
         }
 

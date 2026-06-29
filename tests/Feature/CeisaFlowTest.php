@@ -130,7 +130,7 @@ class CeisaFlowTest extends TestCase
         CeisaService::forCredential($credential)->getToken();
 
         Http::assertSent(function (Request $request) {
-            return str_contains($request->url(), '/nle-oauth/v1/user/login')
+            return str_contains($request->url(), '/v1/openapi-auth/user/login')
                 && $request->hasHeader('Beacukai-Api-Key', 'KEY-123')
                 && $request->hasHeader('id_platform', 'PLAT-XYZ');
         });
@@ -196,7 +196,7 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('TOK', $token);
 
         Http::assertSent(function (Request $request) {
-            return str_contains($request->url(), '/nle-oauth/v1/user/login')
+            return str_contains($request->url(), '/v1/openapi-auth/user/login')
                 && $request->method() === 'POST'
                 && $request['username'] === 'm2b_user'
                 && $request['password'] === 'm2b_pass'
@@ -222,7 +222,7 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('TOK-CUSTOM', $token);
 
         Http::assertSent(function (Request $request) {
-            return str_starts_with($request->url(), 'https://custom-gateway.example.com/nle-oauth/v1/user/login');
+            return str_starts_with($request->url(), 'https://custom-gateway.example.com/v1/openapi-auth/user/login');
         });
     }
 
@@ -271,7 +271,7 @@ class CeisaFlowTest extends TestCase
 
         $this->assertSame('ACCESS-2', $token);
 
-        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/nle-oauth/v1/user/update-token')
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/v1/openapi-auth/user/update-token')
             && $r->method() === 'POST'
             && $r->hasHeader('Authorization', 'REFRESH-1'));
         Http::assertNotSent(fn (Request $r) => str_contains($r->url(), 'user/login'));

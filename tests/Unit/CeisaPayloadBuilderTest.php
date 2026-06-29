@@ -81,6 +81,9 @@ class CeisaPayloadBuilderTest extends TestCase
         $this->assertSame('20', $flat['kodeDokumen']);
         // Sub-blok Pungutan (barangTarif) hadir dengan jenis pungutan BM.
         $this->assertSame('BM', $flat['barang'][0]['barangTarif'][0]['kodeJenisPungutan']);
+        // barangVd wajib hadir per JSON Schema BC 2.0 (barang.required) — kosong = tanpa VD.
+        $this->assertArrayHasKey('barangVd', $flat['barang'][0]);
+        $this->assertSame([], $flat['barang'][0]['barangVd']);
         // NPWP 15 digit -> kodeJenisIdentitas 5.
         $this->assertSame('5', $flat['entitas'][0]['kodeJenisIdentitas']);
     }

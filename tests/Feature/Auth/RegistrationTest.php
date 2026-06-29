@@ -9,14 +9,19 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_screen_can_be_rendered(): void
+    /**
+     * Registrasi publik sengaja dinonaktifkan (lihat commit d370f32 —
+     * login sebagai homepage, akun dibuat admin via `php artisan admin:create`).
+     * Test ini menjaga keputusan itu agar route /register tidak hidup lagi.
+     */
+    public function test_registration_screen_is_disabled(): void
     {
         $response = $this->get('/register');
 
-        $response->assertStatus(200);
+        $response->assertNotFound();
     }
 
-    public function test_new_users_can_register(): void
+    public function test_registration_endpoint_is_disabled(): void
     {
         $response = $this->post('/register', [
             'name' => 'Test User',
@@ -25,7 +30,7 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertNotFound();
+        $this->assertGuest();
     }
 }
