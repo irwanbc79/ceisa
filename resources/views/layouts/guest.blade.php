@@ -37,6 +37,19 @@
                         <span class="block text-[10px] font-mono uppercase tracking-[0.32em] text-gold-300/85">Ceisa H2H · 4.0</span>
                     </div>
                 </a>
+
+                {{-- Lambang resmi DJBC — penanda integrasi Host-to-Host --}}
+                <div class="mt-12 flex items-center gap-5">
+                    <span class="h-20 w-20 inline-flex items-center justify-center rounded-2xl bg-cream/[0.06] ring-1 ring-gold-300/20 backdrop-blur-sm">
+                        <img src="{{ asset('images/bea-cukai.png') }}" alt="Direktorat Jenderal Bea dan Cukai"
+                             class="h-16 w-16 object-contain drop-shadow-[0_2px_14px_rgba(201,165,92,0.3)]">
+                    </span>
+                    <div class="leading-tight">
+                        <p class="eyebrow text-gold-300 !mb-1.5">Terintegrasi resmi</p>
+                        <p class="font-display text-lg font-medium text-cream">Direktorat Jenderal<br>Bea &amp; Cukai</p>
+                        <p class="text-[11px] font-mono text-cream/55 mt-1.5">Gateway CEISA 4.0 · Host-to-Host</p>
+                    </div>
+                </div>
             </div>
 
             {{-- Middle: editorial pitch --}}
