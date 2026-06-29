@@ -86,6 +86,40 @@ class CeisaPayloadBuilderTest extends TestCase
         $this->assertSame([], $flat['barang'][0]['barangVd']);
         // NPWP 15 digit -> kodeJenisIdentitas 5.
         $this->assertSame('5', $flat['entitas'][0]['kodeJenisIdentitas']);
+
+        // Pungutan lengkap: BM + PPN + PPH (default tarif PPN 11, PPH 2.5).
+        $this->assertSame(
+            ['BM', 'PPN', 'PPH'],
+            array_column($flat['barang'][0]['barangTarif'], 'kodeJenisPungutan'),
+        );
+        $this->assertSame(11.0, $flat['barang'][0]['barangTarif'][1]['tarif']);
+    }
+
+    public function test_bc20_includes_ppjk_entity_and_house_bl_when_provided(): void
+    {
+        $payload = [
+            'header' => [
+                'importir' => ['nama' => 'PT Importir', 'npwp' => '012345678901000', 'alamat' => 'Jkt'],
+                'pemasok' => ['nama' => 'Acme Inc', 'negara' => 'us'],
+                'ppjk' => ['nama' => 'PT Mora Multi Berkah', 'npwp' => '960208833125000', 'alamat' => 'Medan'],
+                'pengangkutan' => ['pelabuhan_muat' => 'SGSIN', 'pelabuhan_bongkar' => 'IDTPP', 'cara_angkut' => 'Laut'],
+                'dokumen_pengangkutan' => ['awb_bl' => 'BL-998877', 'tanggal' => '2026-06-20'],
+                'valuta' => 'USD',
+                'nilai_cif' => 1000,
+            ],
+            'barang' => [
+                ['hs_code' => '8517.12.00', 'uraian' => 'Ponsel', 'jumlah_satuan' => 10, 'kode_satuan' => 'UNT', 'netto' => 5, 'nilai_cif' => 1000],
+            ],
+        ];
+
+        $flat = CeisaPayloadBuilder::make()->build('BC20', $payload, 'AJU-IMP-2');
+
+        // Entitas PPJK (kode 4) ikut tergenerate setelah importir(1), pemilik(7), pengirim(9).
+        $this->assertContains('4', array_column($flat['entitas'], 'kodeEntitas'));
+
+        // Dokumen House-BL (705 untuk laut) menyusul invoice (380).
+        $this->assertSame(['380', '705'], array_column($flat['dokumen'], 'kodeDokumen'));
+        $this->assertSame('BL-998877', $flat['dokumen'][1]['nomorDokumen']);
     }
 
     public function test_cara_angkut_code_mapping(): void

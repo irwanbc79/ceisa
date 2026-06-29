@@ -369,6 +369,30 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
+    public function test_submit_retries_once_after_401_with_fresh_login(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/document*' => Http::sequence()
+                ->push(['message' => 'unauthorized'], 401)
+                ->push(['status' => 'OK', 'idHeader' => 'uuid-retry'], 200),
+        ]);
+
+        $credential = $this->authedUser()->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $data = CeisaService::forCredential($credential)
+            ->submitDocument('BC30', ['nomorAju' => 'X'], ['is_final' => false]);
+
+        // 401 pertama memicu login ulang + retry → akhirnya sukses.
+        $this->assertSame('OK', $data['status']);
+        // login awal + submit(401) + login ulang + submit(200) = 4 request.
+        Http::assertSentCount(4);
+    }
+
     public function test_submit_document_with_custom_nomor_aju_saves_it(): void
     {
         Http::fake([
