@@ -19,7 +19,8 @@ class ImportCeisaReferences extends Command
 {
     protected $signature = 'ceisa:import-references
                             {path? : Path file Markdown referensi (relatif base_path)}
-                            {--dry : Hanya parsing & laporkan jumlah, tanpa menulis ke DB}';
+                            {--dry : Hanya parsing & laporkan jumlah, tanpa menulis ke DB}
+                            {--prune : Hapus kode lama yang tidak ada di dokumen resmi (per tipe yang diimpor)}';
 
     protected $description = 'Impor Reference Code resmi CEISA 4.0 dari file Markdown ke ceisa_references';
 
@@ -132,7 +133,9 @@ class ImportCeisaReferences extends Command
             return self::FAILURE;
         }
 
+        $prune = (bool) $this->option('prune');
         $total = 0;
+        $pruned = 0;
         foreach ($rows as $type => $items) {
             $this->line(sprintf('  %-22s %d', $type, count($items)));
             $total += count($items);
@@ -160,10 +163,20 @@ class ImportCeisaReferences extends Command
             foreach (array_chunk($payload, 500) as $chunk) {
                 DB::table('ceisa_references')->upsert($chunk, ['type', 'code'], ['label', 'sort', 'active', 'updated_at']);
             }
+
+            if ($prune) {
+                $pruned += DB::table('ceisa_references')
+                    ->where('type', $type)
+                    ->whereNotIn('code', array_map('strval', array_keys($items)))
+                    ->delete();
+            }
         }
 
         $this->newLine();
         $this->info(($dry ? '[DRY] ' : '').sprintf('%d tipe, %d baris referensi%s.', count($rows), $total, $dry ? ' (tidak ditulis)' : ' diimpor'));
+        if ($prune && ! $dry) {
+            $this->warn(sprintf('  %d kode lama (non-resmi) dihapus.', $pruned));
+        }
 
         return self::SUCCESS;
     }
