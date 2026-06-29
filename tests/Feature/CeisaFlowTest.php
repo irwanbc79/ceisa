@@ -130,7 +130,7 @@ class CeisaFlowTest extends TestCase
         CeisaService::forCredential($credential)->getToken();
 
         Http::assertSent(function (Request $request) {
-            return str_contains($request->url(), '/nle-oauth/v1/user/login')
+            return str_contains($request->url(), '/v1/openapi-auth/user/login')
                 && $request->hasHeader('Beacukai-Api-Key', 'KEY-123')
                 && $request->hasHeader('id_platform', 'PLAT-XYZ');
         });
@@ -196,7 +196,7 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('TOK', $token);
 
         Http::assertSent(function (Request $request) {
-            return str_contains($request->url(), '/nle-oauth/v1/user/login')
+            return str_contains($request->url(), '/v1/openapi-auth/user/login')
                 && $request->method() === 'POST'
                 && $request['username'] === 'm2b_user'
                 && $request['password'] === 'm2b_pass'
@@ -222,7 +222,7 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('TOK-CUSTOM', $token);
 
         Http::assertSent(function (Request $request) {
-            return str_starts_with($request->url(), 'https://custom-gateway.example.com/nle-oauth/v1/user/login');
+            return str_starts_with($request->url(), 'https://custom-gateway.example.com/v1/openapi-auth/user/login');
         });
     }
 
@@ -271,7 +271,7 @@ class CeisaFlowTest extends TestCase
 
         $this->assertSame('ACCESS-2', $token);
 
-        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/nle-oauth/v1/user/update-token')
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/v1/openapi-auth/user/update-token')
             && $r->method() === 'POST'
             && $r->hasHeader('Authorization', 'REFRESH-1'));
         Http::assertNotSent(fn (Request $r) => str_contains($r->url(), 'user/login'));
@@ -367,6 +367,30 @@ class CeisaFlowTest extends TestCase
         $this->assertEquals(15800, data_get($doc->payload, 'header.ndpbm'));
         $this->assertSame('Irwan', data_get($doc->payload, 'header.pernyataan.nama'));
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
+    }
+
+    public function test_submit_retries_once_after_401_with_fresh_login(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/document*' => Http::sequence()
+                ->push(['message' => 'unauthorized'], 401)
+                ->push(['status' => 'OK', 'idHeader' => 'uuid-retry'], 200),
+        ]);
+
+        $credential = $this->authedUser()->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $data = CeisaService::forCredential($credential)
+            ->submitDocument('BC30', ['nomorAju' => 'X'], ['is_final' => false]);
+
+        // 401 pertama memicu login ulang + retry → akhirnya sukses.
+        $this->assertSame('OK', $data['status']);
+        // login awal + submit(401) + login ulang + submit(200) = 4 request.
+        Http::assertSentCount(4);
     }
 
     public function test_submit_document_with_custom_nomor_aju_saves_it(): void
