@@ -102,7 +102,8 @@ class CeisaPayloadBuilder
             'freight' => isset($header['freight']) ? (float) $header['freight'] : 0.0,
 
             'asuransi' => isset($header['asuransi']['nilai']) ? (float) $header['asuransi']['nilai'] : 0.0,
-            'kodeAsuransi' => $header['asuransi']['jenis'] ?? '',
+            // Required + enum [LN,DN] di JSON Schema BC 3.0 → kosong akan kena error 1008.
+            'kodeAsuransi' => ($header['asuransi']['jenis'] ?? '') ?: 'DN',
 
             'bruto' => isset($header['bruto']) ? (float) $header['bruto'] : 0.0,
             'netto' => array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0),
@@ -367,9 +368,65 @@ class CeisaPayloadBuilder
         $flat['barang'] = $this->barangBc20($barang, $header);
         $flat['kemasan'] = [$this->kemasanDefault()];
         $flat['pengangkut'] = [$this->pengangkutImpor($header)];
-        $flat['dokumen'] = [$this->dokumenInvoice($nomorAju)];
+        $flat['dokumen'] = $this->dokumenImpor($header, $nomorAju);
 
         return $flat;
+    }
+
+    /**
+     * Sub-blok pungutan per barang impor: BM (wajib JSON Schema) + PPN + PPH (lazim impor).
+     * Tarif bisa dioverride dari data barang; default mengikuti tarif umum
+     * (PPN 11%, PPH 2.5%). ⚠ VERIFIKASI tarif per komoditas/HS sebelum submit final
+     * (isFinal=true) — nilaiBayar dihitung CEISA dari tarif × nilai pabean.
+     *
+     * @param  array<string, mixed>  $item
+     * @return array<int, array<string, mixed>>
+     */
+    private function barangTarif(int $seri, array $item): array
+    {
+        $fasilitas = (string) ($item['kode_fasilitas_tarif'] ?? '1'); // 1 = dibayar (tanpa fasilitas)
+
+        $pungutan = [
+            ['kode' => 'BM', 'tarif' => (float) ($item['tarif_bm'] ?? 0)],
+            ['kode' => 'PPN', 'tarif' => (float) ($item['tarif_ppn'] ?? 11)],
+            ['kode' => 'PPH', 'tarif' => (float) ($item['tarif_pph'] ?? 2.5)],
+        ];
+
+        return array_map(fn (array $p): array => [
+            'seriBarang' => $seri,
+            'kodeJenisTarif' => '1', // Advalorum
+            'kodeJenisPungutan' => $p['kode'],
+            'kodeFasilitasTarif' => $fasilitas,
+            'tarif' => $p['tarif'],
+            'tarifFasilitas' => 0.0,
+            'nilaiBayar' => 0.0,
+            'nilaiFasilitas' => 0.0,
+        ], $pungutan);
+    }
+
+    /**
+     * Blok dokumen pelengkap impor: Invoice (380) wajib + House-BL/AWB bila tersedia
+     * (705 untuk laut, 740 untuk udara) — sesuai JSON Schema dokumen tuple BC 2.0.
+     *
+     * @param  array<string, mixed>  $header
+     * @return array<int, array<string, mixed>>
+     */
+    private function dokumenImpor(array $header, string $nomorAju): array
+    {
+        $dokumen = [$this->dokumenInvoice($nomorAju)];
+
+        $blAwb = $header['dokumen_pengangkutan']['awb_bl'] ?? null;
+        if (! empty($blAwb)) {
+            $isUdara = ($header['pengangkutan']['cara_angkut'] ?? 'Laut') === 'Udara';
+            $dokumen[] = [
+                'seriDokumen' => 2,
+                'kodeDokumen' => $isUdara ? '740' : '705',
+                'nomorDokumen' => $blAwb,
+                'tanggalDokumen' => $header['dokumen_pengangkutan']['tanggal'] ?? date('Y-m-d'),
+            ];
+        }
+
+        return $dokumen;
     }
 
     /**
@@ -429,6 +486,20 @@ class CeisaPayloadBuilder
             ];
         }
 
+        // Entitas PPJK (kode 4) — diisi bila importir memakai jasa PPJK (mis. PT Mora).
+        // Aktif saat payload menyertakan header.ppjk; sesuai JSON Schema entitas tuple #6.
+        if (isset($header['ppjk'])) {
+            $npwp = $header['ppjk']['npwp'] ?? '';
+            $entitas[] = [
+                'seriEntitas' => count($entitas) + 1,
+                'kodeEntitas' => '4',
+                'namaEntitas' => $header['ppjk']['nama'] ?? '',
+                'alamatEntitas' => $header['ppjk']['alamat'] ?? '',
+                'nomorIdentitas' => $this->digits($npwp),
+                'kodeJenisIdentitas' => $this->jenisIdentitas($npwp),
+            ];
+        }
+
         return $entitas;
     }
 
@@ -469,18 +540,10 @@ class CeisaPayloadBuilder
                 'bruto' => isset($item['netto']) ? (float) $item['netto'] * 1.1 : 1.1,
                 'netto' => isset($item['netto']) ? (float) $item['netto'] : 1.0,
                 'kodeNegaraAsal' => strtoupper($header['pemasok']['negara'] ?? 'US'),
-                'barangTarif' => [
-                    [
-                        'seriBarang' => $i + 1,
-                        'kodeJenisTarif' => '1',
-                        'kodeJenisPungutan' => 'BM',
-                        'kodeFasilitasTarif' => '1',
-                        'tarif' => 0.0,
-                        'tarifFasilitas' => 0.0,
-                        'nilaiBayar' => 0.0,
-                        'nilaiFasilitas' => 0.0,
-                    ],
-                ],
+                'barangTarif' => $this->barangTarif($i + 1, $item),
+                // Wajib hadir per JSON Schema BC 2.0 (barang.required memuat "barangVd").
+                // Kosong = tanpa voluntary declaration (kasus normal); diisi bila flagVd=Y.
+                'barangVd' => [],
             ];
         }
 
@@ -530,7 +593,7 @@ class CeisaPayloadBuilder
 
         $flat['barang'] = $this->barangNilaiSederhana($barang);
         $flat['kemasan'] = [$this->kemasanDefault()];
-        
+
         $p = $header['pengangkutan'] ?? [];
         $flat['pengangkut'] = [[
             'seriPengangkut' => 1,
@@ -539,7 +602,7 @@ class CeisaPayloadBuilder
             'kodeBendera' => $p['bendera'] ?? 'US',
             'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Laut'),
         ]];
-        
+
         $flat['dokumen'] = [$this->dokumenInvoice($nomorAju)];
 
         return $flat;
@@ -592,7 +655,7 @@ class CeisaPayloadBuilder
             'kodeJenisKemasan' => $header['kemasan']['jenis'] ?? 'CT',
             'merkKemasan' => 'UNMARKED',
         ]];
-        
+
         $p = $header['pengangkutan'] ?? [];
         $flat['pengangkut'] = [[
             'seriPengangkut' => 1,
@@ -601,7 +664,7 @@ class CeisaPayloadBuilder
             'kodeBendera' => $p['bendera'] ?? 'US',
             'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Udara'),
         ]];
-        
+
         $flat['dokumen'] = [[
             'seriDokumen' => 1,
             'kodeDokumen' => '740',
@@ -639,6 +702,7 @@ class CeisaPayloadBuilder
 
         return $out;
     }
+
     /**
      * Blok pengangkut impor dari data form (fallback default bila kosong).
      *

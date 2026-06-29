@@ -69,7 +69,6 @@ class CeisaService
      */
     public function submitDocument(string $type, array $payload, array $options = []): array
     {
-        $token = $this->refreshTokenIfExpired();
         $endpoint = config('ceisa.endpoints.submit');
 
         $isFinal = $options['is_final'] ?? config('ceisa.submit_is_final_default', true);
@@ -89,9 +88,9 @@ class CeisaService
         }
 
         try {
-            $response = $this->baseRequest()
-                ->withToken($token)
-                ->post($endpoint, $body);
+            $response = $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()->withToken($token)->post($endpoint, $body),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal terhubung ke server CEISA saat submit dokumen: '.$e->getMessage(),
@@ -104,7 +103,7 @@ class CeisaService
 
         if (! $response->successful()) {
             throw new CeisaException(
-                'CEISA menolak submit dokumen (HTTP '.$response->status().').',
+                $this->httpStatusMessage($response->status()).' (submit dokumen)',
                 context: $data,
             );
         }
@@ -202,15 +201,14 @@ class CeisaService
      */
     public function queryDocumentStatus(string $nomorAju, ?string $idHeader = null): array
     {
-        $token = $this->refreshTokenIfExpired();
         $endpoint = rtrim((string) config('ceisa.endpoints.status'), '/').'/'.rawurlencode($nomorAju);
 
         $query = ! empty($idHeader) ? ['idHeader' => $idHeader] : [];
 
         try {
-            $response = $this->baseRequest()
-                ->withToken($token)
-                ->get($endpoint, $query);
+            $response = $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()->withToken($token)->get($endpoint, $query),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal menghubungi CEISA saat query status: '.$e->getMessage(),
@@ -233,13 +231,12 @@ class CeisaService
      */
     public function fetchAllStatuses(string $npwp): array
     {
-        $token = $this->refreshTokenIfExpired();
         $endpoint = config('ceisa.endpoints.status');
 
         try {
-            $response = $this->baseRequest()
-                ->withToken($token)
-                ->get($endpoint, ['idPerusahaan' => $npwp]);
+            $response = $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()->withToken($token)->get($endpoint, ['idPerusahaan' => $npwp]),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal menghubungi CEISA saat query semua status: '.$e->getMessage(),
@@ -263,12 +260,10 @@ class CeisaService
      */
     public function fetchReference(string $path, array $query = []): array
     {
-        $token = $this->refreshTokenIfExpired();
-
         try {
-            $response = $this->baseRequest()
-                ->withToken($token)
-                ->get($path, $query);
+            $response = $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()->withToken($token)->get($path, $query),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal menghubungi CEISA saat ambil referensi: '.$e->getMessage(),
@@ -281,7 +276,7 @@ class CeisaService
 
         if (! $response->successful()) {
             throw new CeisaException(
-                'CEISA menolak permintaan referensi (HTTP '.$response->status().').',
+                $this->httpStatusMessage($response->status()).' (ambil referensi)',
                 context: $data,
             );
         }

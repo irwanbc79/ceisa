@@ -66,6 +66,48 @@ trait HandlesCeisaHttp
     }
 
     /**
+     * Jalankan request berotorisasi; bila CEISA membalas 401 (token kadaluarsa/
+     * ditolak di tengah operasi), lakukan login ulang penuh lalu ulangi SEKALI.
+     * Token H2H berumur 2 jam sehingga kasus ini jarang, tapi penting di prod.
+     *
+     * @param  callable(string $token): Response  $call
+     */
+    protected function authorizedRequest(callable $call): Response
+    {
+        $token = $this->refreshTokenIfExpired();
+        $response = $call($token);
+
+        if ($response->status() === 401) {
+            $response = $call($this->getToken());
+        }
+
+        return $response;
+    }
+
+    /**
+     * Pesan Bahasa Indonesia yang actionable per kode HTTP (REST Response Code DJBC).
+     */
+    protected function httpStatusMessage(int $status): string
+    {
+        return match ($status) {
+            400 => 'Permintaan ditolak: parameter atau format data tidak valid (400).',
+            401 => 'Sesi CEISA berakhir atau kredensial tidak sah (401).',
+            403 => 'Akses ditolak CEISA (403) — periksa API Key & Whitelist IP di portal.',
+            404 => 'Sumber daya tidak ditemukan di CEISA (404) — periksa endpoint/nomor aju.',
+            405 => 'Metode HTTP tidak didukung endpoint CEISA (405).',
+            406, 415 => 'Format konten tidak diterima CEISA ('.$status.').',
+            409 => 'Konflik data saat memproses permintaan di CEISA (409).',
+            429 => 'Terlalu banyak permintaan ke CEISA (429) — coba lagi beberapa saat.',
+            500, 502, 503, 504 => 'Server DJBC sedang bermasalah ('.$status.') — coba lagi nanti.',
+            default => 'CEISA mengembalikan status HTTP '.$status.'.',
+        };
+    }
+
+    abstract public function getToken(): string;
+
+    abstract public function refreshTokenIfExpired(): string;
+
+    /**
      * Decode body response menjadi array (aman bila bukan JSON).
      *
      * @return array<string, mixed>
@@ -125,18 +167,21 @@ trait HandlesCeisaHttp
      */
     protected function uploadFile(string $endpoint, string $filePath, array $params, string $errorMessage): array
     {
-        $token = $this->refreshTokenIfExpired();
         $baseUrl = $this->credential()->base_url ?: config('ceisa.base_url');
+        $fileContents = file_get_contents($filePath);
+        $fileName = basename($filePath);
 
         try {
-            $response = Http::baseUrl(rtrim($baseUrl, '/'))
-                ->timeout((int) config('ceisa.timeout', 30))
-                ->withHeaders($this->commonHeaders())
-                ->withToken($token)
-                ->attach('file', file_get_contents($filePath), basename($filePath))
-                ->post($endpoint, [
-                    'param' => json_encode($params),
-                ]);
+            $response = $this->authorizedRequest(
+                fn (string $token) => Http::baseUrl(rtrim($baseUrl, '/'))
+                    ->timeout((int) config('ceisa.timeout', 30))
+                    ->withHeaders($this->commonHeaders())
+                    ->withToken($token)
+                    ->attach('file', $fileContents, $fileName)
+                    ->post($endpoint, [
+                        'param' => json_encode($params),
+                    ]),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 $errorMessage.': '.$e->getMessage(),
@@ -149,7 +194,7 @@ trait HandlesCeisaHttp
 
         if (! $response->successful()) {
             throw new CeisaException(
-                $errorMessage.' (HTTP '.$response->status().').',
+                $errorMessage.' — '.$this->httpStatusMessage($response->status()),
                 context: $data,
             );
         }
