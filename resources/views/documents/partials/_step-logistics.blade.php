@@ -195,18 +195,7 @@
             <input type="text" maxlength="5" id="jenis_api_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'jenis_api' : ''" x-model="formData.jenis_api" placeholder="01" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
         </div>
 
-        {{-- Pernyataan penanggung jawab (impor) --}}
-        <div class="sm:col-span-2 mt-1 pt-3 border-t border-slate-100">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pernyataan Penanggung Jawab</p>
-        </div>
-        <div>
-            <x-input-label for="pernyataan_nama_imp" value="Nama Penanggung Jawab" />
-            <input type="text" id="pernyataan_nama_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pernyataan_nama' : ''" x-model="formData.pernyataan_nama" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
-        </div>
-        <div>
-            <x-input-label for="pernyataan_jabatan_imp" value="Jabatan" />
-            <input type="text" id="pernyataan_jabatan_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pernyataan_jabatan' : ''" x-model="formData.pernyataan_jabatan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
-        </div>
+
 
         <div class="sm:col-span-2">
             <x-input-label for="cara_pembayaran" value="Cara Pembayaran (Referensi)" />

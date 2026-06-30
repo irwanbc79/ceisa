@@ -90,27 +90,25 @@
             </dl>
         </div>
 
-        {{-- Pernyataan (BC 3.0) --}}
-        <template x-if="doc_type === 'BC30'">
-            <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
-                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pernyataan Penanggung Jawab</h4>
-                <div class="grid sm:grid-cols-3 gap-4">
-                    <div>
-                        <x-input-label for="pernyataan_nama" value="Nama Penanggung Jawab" />
-                        <input type="text" id="pernyataan_nama" name="pernyataan_nama" x-model="formData.pernyataan_nama" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
-                    </div>
-                    <div>
-                        <x-input-label for="pernyataan_jabatan" value="Jabatan" />
-                        <input type="text" id="pernyataan_jabatan" name="pernyataan_jabatan" x-model="formData.pernyataan_jabatan" placeholder="mis. Direktur" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
-                    </div>
-                    <div>
-                        <x-input-label for="pernyataan_kota" value="Kota (Opsional)" />
-                        <input type="text" id="pernyataan_kota" name="pernyataan_kota" x-model="formData.pernyataan_kota" placeholder="mis. Jakarta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
-                    </div>
+        {{-- Pernyataan Penanggung Jawab --}}
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pernyataan Penanggung Jawab</h4>
+            <div class="grid sm:grid-cols-3 gap-4">
+                <div>
+                    <x-input-label for="pernyataan_nama" value="Nama Penanggung Jawab" />
+                    <input type="text" id="pernyataan_nama" name="pernyataan_nama" x-model="formData.pernyataan_nama" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
                 </div>
-                <p class="text-[11px] text-slate-500 mt-3">Dengan ini menyatakan bahwa data yang diisi adalah benar dan bertanggung jawab penuh sesuai ketentuan kepabeanan.</p>
+                <div>
+                    <x-input-label for="pernyataan_jabatan" value="Jabatan" />
+                    <input type="text" id="pernyataan_jabatan" name="pernyataan_jabatan" x-model="formData.pernyataan_jabatan" placeholder="mis. Direktur" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                </div>
+                <div>
+                    <x-input-label for="pernyataan_kota" value="Kota (Opsional)" />
+                    <input type="text" id="pernyataan_kota" name="pernyataan_kota" x-model="formData.pernyataan_kota" placeholder="mis. Jakarta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                </div>
             </div>
-        </template>
+            <p class="text-[11px] text-slate-500 mt-3">Dengan ini menyatakan bahwa data yang diisi adalah benar dan bertanggung jawab penuh sesuai ketentuan kepabeanan.</p>
+        </div>
 
         {{-- Validation Guard Message --}}
         <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-900 flex items-start gap-2.5">
