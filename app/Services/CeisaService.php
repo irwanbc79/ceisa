@@ -292,6 +292,56 @@ class CeisaService
     }
 
     /**
+     * Ambil daftar manifes (BC 1.1) dari CEISA untuk monitoring.
+     * ⚠ Sub-path endpoint manifes masih asumsi (base /v1/openapi-manifes terverifikasi
+     * dari API Gallery) — override via .env CEISA_MANIFEST_ENDPOINT bila berbeda.
+     *
+     * @param  array{jenis?: string, npwp?: ?string}  $params
+     * @return array<int, array<string, mixed>>
+     *
+     * @throws CeisaException
+     */
+    public function fetchManifests(array $params = []): array
+    {
+        $jenis = ($params['jenis'] ?? 'inward') === 'outward' ? 'outward' : 'inward';
+        $endpoint = rtrim((string) config('ceisa.endpoints.manifest'), '/').'/'.$jenis;
+
+        $query = array_filter([
+            'npwp' => $params['npwp'] ?? null,
+            'idPerusahaan' => $params['npwp'] ?? null,
+        ]);
+
+        try {
+            $response = $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()->withToken($token)->get($endpoint, $query),
+            );
+        } catch (Throwable $e) {
+            throw new CeisaException(
+                'Gagal menghubungi CEISA saat ambil manifes: '.$e->getMessage(),
+                previous: $e,
+            );
+        }
+
+        $data = $this->decode($response);
+        $this->guardAgainstErrorCode($data, $response);
+
+        if (! $response->successful()) {
+            throw new CeisaException(
+                $this->httpStatusMessage($response->status()).' (ambil manifes)',
+                context: $data,
+            );
+        }
+
+        foreach (['data', 'item', 'rows', 'content', 'result'] as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                return array_values(array_filter($data[$key], 'is_array'));
+            }
+        }
+
+        return array_values(array_filter($data, 'is_array'));
+    }
+
+    /**
      * Download respon PDF dari CEISA.
      *
      * @throws CeisaException

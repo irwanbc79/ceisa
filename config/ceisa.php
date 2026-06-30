@@ -68,6 +68,9 @@ return [
         'submit' => env('CEISA_SUBMIT_ENDPOINT', '/v2/openapi/document'),
         'status' => env('CEISA_STATUS_ENDPOINT', '/v2/openapi/status'),
         'kurs' => env('CEISA_KURS_ENDPOINT', '/v2/openapi/kurs'),
+        // Manifes (BC 1.1): base /v1/openapi-manifes (API Gallery). Sub-path /{inward|outward}
+        // masih asumsi — override via .env saat Swagger manifes dikonfirmasi.
+        'manifest' => env('CEISA_MANIFEST_ENDPOINT', '/v1/openapi-manifes'),
         'download_respon' => env('CEISA_DOWNLOAD_ENDPOINT', '/v2/openapi/download-respon'),
         'cetak_formulir' => env('CEISA_CETAK_ENDPOINT', '/v2/openapi/respon/cetak-formulir'),
         'billing' => env('CEISA_BILLING_ENDPOINT', '/v2/openapi/respon/billing'),

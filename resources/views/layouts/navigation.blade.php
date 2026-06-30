@@ -21,6 +21,9 @@
                     <x-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
                         {{ __('Buat Dokumen') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('manifests.index')" :active="request()->routeIs('manifests.*')">
+                        {{ __('Monitoring Manifes') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
                         {{ __('Notifikasi') }}
                     </x-nav-link>
@@ -90,6 +93,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
                 {{ __('Buat Dokumen') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('manifests.index')" :active="request()->routeIs('manifests.*')">
+                {{ __('Monitoring Manifes') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
                 {{ __('Notifikasi') }}
