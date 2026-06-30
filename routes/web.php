@@ -3,6 +3,7 @@
 use App\Http\Controllers\CeisaSettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ManifestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -16,6 +17,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Pusat notifikasi DJBC (Respon / Formulir / Informasi)
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+
+    // Monitoring Manifes (BC 1.1) — kedatangan/keberangkatan sarana pengangkut
+    Route::get('/manifes', [ManifestController::class, 'index'])->name('manifests.index');
+    Route::post('/manifes/sync', [ManifestController::class, 'sync'])->name('manifests.sync');
 
     // Daftar dokumen lengkap (filter, search, jalur)
     Route::get('/daftar-dokumen', [DocumentController::class, 'index'])->name('documents.index');
