@@ -29,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dokumen CEISA
     Route::get('/dokumen/buat', [DocumentController::class, 'create'])->name('documents.create');
     Route::post('/dokumen/submit', [DocumentController::class, 'store'])->name('documents.store');
+    Route::post('/dokumen/sync', [DocumentController::class, 'sync'])->name('documents.sync');
 
     // Arsip / rekam manual dokumen lama (PIB/PEB dari portal DJBC)
     Route::get('/dokumen/arsip', [DocumentController::class, 'archiveCreate'])->name('documents.archive.create');
