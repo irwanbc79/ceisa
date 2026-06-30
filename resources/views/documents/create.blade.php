@@ -136,7 +136,12 @@
 
                         @include('documents.partials._step-entities')
 
+                        @include('documents.partials._step-documents')
+
                         @include('documents.partials._step-logistics')
+
+                        @include('documents.partials._step-containers')
+
                         @include('documents.partials._step-items')
 
                         @include('documents.partials._step-review')
@@ -168,7 +173,9 @@
                 steps: [
                     { title: 'Portal Layanan' },
                     { title: 'Data Entitas' },
+                    { title: 'Dokumen Pelengkap' },
                     { title: 'Logistik & Valuta' },
+                    { title: 'Peti Kemas' },
                     { title: 'Pos Barang' },
                     { title: 'Review & Submit' }
                 ],
@@ -221,7 +228,33 @@
                 ],
 
                 // Referensi diambil dari tabel ceisa_references (server-side; dapat disinkron dari API CEISA).
-                references: @json($references ?? new \stdClass()),
+                references: Object.assign(@json($references ?? new \stdClass()), {
+                    documentTypes: [
+                        { code: '380', label: '380 - Invoice' },
+                        { code: '217', label: '217 - Packing List' },
+                        { code: '705', label: '705 - Bill of Lading (B/L)' },
+                        { code: '740', label: '740 - Air Waybill (AWB)' },
+                        { code: '812', label: '812 - Certificate of Origin (COO)' },
+                        { code: '999', label: '999 - Dokumen Lainnya' }
+                    ],
+                    containerSizes: [
+                        { code: '20', label: '20 Feet' },
+                        { code: '40', label: '40 Feet' },
+                        { code: '45', label: '45 Feet' }
+                    ],
+                    containerTypes: [
+                        { code: '4', label: 'Dry Cargo / GP' },
+                        { code: '8', label: 'Reefer' },
+                        { code: '7', label: 'Open Top' },
+                        { code: '9', label: 'Flat Rack' },
+                        { code: '55', label: 'Tank' }
+                    ],
+                    containerStatuses: [
+                        { code: 'FCL', label: 'FCL - Full Container Load' },
+                        { code: 'LCL', label: 'LCL - Less Container Load' },
+                        { code: 'EMPTY', label: 'EMPTY - Empty' }
+                    ]
+                }),
                 
                 // Form Fields Data Model
                 formData: {
@@ -307,7 +340,13 @@
                     // Pos Barang
                     barang: [
                         { hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: '' }
-                    ]
+                    ],
+                    // Dokumen Pelengkap
+                    dokumen: [
+                        { kode_dokumen: '380', nomor_dokumen: '', tanggal_dokumen: '' }
+                    ],
+                    // Peti Kemas
+                    kontainer: []
                 },
 
                 // Repopulasi dari input lama bila submit gagal validasi server,
@@ -320,8 +359,14 @@
                         if (Array.isArray(editData.barang) && editData.barang.length) {
                             this.formData.barang = editData.barang.map(b => ({ ...this.formData.barang[0], ...b }));
                         }
+                        if (Array.isArray(editData.dokumen) && editData.dokumen.length) {
+                            this.formData.dokumen = editData.dokumen.map(d => ({ ...this.formData.dokumen[0] ?? { kode_dokumen: '380', nomor_dokumen: '', tanggal_dokumen: '' }, ...d }));
+                        }
+                        if (Array.isArray(editData.kontainer) && editData.kontainer.length) {
+                            this.formData.kontainer = editData.kontainer.map(c => ({ ...this.formData.kontainer[0] ?? { nomor_kontainer: '', kode_ukuran: '', kode_tipe: '', kode_status: '' }, ...c }));
+                        }
                         for (const k in this.formData) {
-                            if (k === 'barang') continue;
+                            if (k === 'barang' || k === 'dokumen' || k === 'kontainer') continue;
                             if (editData[k] !== undefined && editData[k] !== null && editData[k] !== '') {
                                 this.formData[k] = editData[k];
                             }
@@ -345,20 +390,26 @@
                                 'nama_tpb': 2, 'npwp_tpb': 2, 'alamat_tpb': 2, 'jenis_tpb': 2, 'tujuan_tpb': 2, 'dokumen_referensi': 2,
                                 'nama_pemohon': 2, 'npwp_pemohon': 2, 'alamat_pemohon': 2, 'alasan_segera': 2,
                                 
-                                'cara_angkut': 3, 'nama_sarana': 3, 'voy_flight': 3, 'pelabuhan_muat': 3, 'pelabuhan_bongkar': 3, 'pelabuhan_tujuan': 3, 'tanggal_ekspor': 3,
-                                'kode_valuta': 3, 'ndpbm': 3, 'incoterm': 3, 'nilai_fob': 3, 'freight': 3, 'asuransi_jenis': 3, 'nilai_asuransi': 3, 'bruto': 3, 'bank_devisa': 3,
-                                'nilai_cif': 3, 'nilai_barang': 3, 'cara_pembayaran': 3,
-                                'nama_sarana_pengangkut': 3, 'nomor_flight': 3, 'nomor_awb_bl': 3, 'tanggal_awb_bl': 3, 'jumlah_kemasan': 3, 'jenis_kemasan': 3,
+                                'cara_angkut': 4, 'nama_sarana': 4, 'voy_flight': 4, 'pelabuhan_muat': 4, 'pelabuhan_bongkar': 4, 'pelabuhan_tujuan': 4, 'tanggal_ekspor': 4,
+                                'kode_valuta': 4, 'ndpbm': 4, 'incoterm': 4, 'nilai_fob': 4, 'freight': 4, 'asuransi_jenis': 4, 'nilai_asuransi': 4, 'bruto': 4, 'bank_devisa': 4,
+                                'nilai_cif': 4, 'nilai_barang': 4, 'cara_pembayaran': 4,
+                                'nama_sarana_pengangkut': 4, 'nomor_flight': 4, 'nomor_awb_bl': 4, 'tanggal_awb_bl': 4, 'jumlah_kemasan': 4, 'jenis_kemasan': 4,
                                 
-                                'barang': 4,
-                                
-                                'pernyataan_nama': 5, 'pernyataan_jabatan': 5, 'pernyataan_kota': 5
+                                'pernyataan_nama': 7, 'pernyataan_jabatan': 7, 'pernyataan_kota': 7
                             };
                             
-                            let targetStep = 5;
+                            let targetStep = 7;
                             for (const key of errorKeys) {
                                 if (key.startsWith('barang.')) {
-                                    targetStep = 4;
+                                    targetStep = 6;
+                                    break;
+                                }
+                                if (key.startsWith('dokumen.')) {
+                                    targetStep = 3;
+                                    break;
+                                }
+                                if (key.startsWith('kontainer.')) {
+                                    targetStep = 5;
                                     break;
                                 }
                                 if (stepMap[key]) {
@@ -368,7 +419,7 @@
                             }
                             this.step = targetStep;
                             
-                            const firstErrorKey = errorKeys.find(k => !k.startsWith('barang.'));
+                            const firstErrorKey = errorKeys.find(k => !k.startsWith('barang.') && !k.startsWith('dokumen.') && !k.startsWith('kontainer.'));
                             if (firstErrorKey) {
                                 setTimeout(() => {
                                     const element = document.getElementById(firstErrorKey);
@@ -423,6 +474,9 @@
                         }
                     }
                     if (s === 3) {
+                        return this.formData.dokumen.length > 0 && this.formData.dokumen.every(d => d.kode_dokumen && d.nomor_dokumen && d.tanggal_dokumen);
+                    }
+                    if (s === 4) {
                         if (this.doc_type === 'BC30') {
                             return this.formData.pelabuhan_muat && this.formData.pelabuhan_tujuan && this.formData.kode_valuta
                                 && this.formData.ndpbm && this.formData.incoterm && this.formData.nilai_fob && this.formData.bruto;
@@ -436,6 +490,12 @@
                         if (this.doc_type === 'RUSH') {
                             return this.formData.nama_sarana_pengangkut && this.formData.nomor_awb_bl;
                         }
+                    }
+                    if (s === 5) {
+                        return this.formData.kontainer.every(c => c.nomor_kontainer && c.kode_ukuran && c.kode_tipe && c.kode_status);
+                    }
+                    if (s === 6) {
+                        return this.formData.barang.length > 0 && this.formData.barang.every(b => b.hs_code && b.uraian && b.jumlah_satuan && b.kode_satuan && b.netto);
                     }
                     return true;
                 },
@@ -455,6 +515,22 @@
                     this.formData.barang.splice(idx, 1);
                 },
 
+                addDocument() {
+                    this.formData.dokumen.push({ kode_dokumen: '380', nomor_dokumen: '', tanggal_dokumen: '' });
+                },
+
+                removeDocument(idx) {
+                    this.formData.dokumen.splice(idx, 1);
+                },
+
+                addContainer() {
+                    this.formData.kontainer.push({ nomor_kontainer: '', kode_ukuran: '20', kode_tipe: '4', kode_status: 'FCL' });
+                },
+
+                removeContainer(idx) {
+                    this.formData.kontainer.splice(idx, 1);
+                },
+
                 calculateTotalNetto() {
                     return this.formData.barang.reduce((acc, curr) => acc + (parseFloat(curr.netto) || 0), 0);
                 },
@@ -467,6 +543,7 @@
                     const total = this.formData.barang.reduce((acc, curr) => acc + (parseFloat(curr[field]) || 0), 0);
                     
                     // Sync total value back to header
+                // Sync total value back to header
                     if (this.doc_type === 'BC30') this.formData.nilai_fob = total;
                     if (this.doc_type === 'BC20' || this.doc_type === 'BC24') this.formData.nilai_cif = total;
                     if (this.doc_type === 'TPB' || this.doc_type === 'RUSH') this.formData.nilai_barang = total;
@@ -478,9 +555,10 @@
                 generateLivePayload() {
                     const docType = this.doc_type;
                     const f = this.formData;
+                    let out = {};
                     
                     if (docType === 'BC30') {
-                        return {
+                        out = {
                             header: {
                                 kantor_muat: f.kantor_muat,
                                 jenis_ekspor: f.jenis_ekspor,
@@ -535,7 +613,7 @@
                             })
                         };
                     } else if (docType === 'BC20' || docType === 'BC24') {
-                        return {
+                        out = {
                             header: {
                                 importir: { nama: f.nama_importir, npwp: f.npwp_importir, alamat: f.alamat_importir },
                                 pemasok: { nama: f.nama_pemasok, negara: (f.negara_pemasok || '').toUpperCase() },
@@ -555,7 +633,7 @@
                             }))
                         };
                     } else if (docType === 'TPB') {
-                        return {
+                        out = {
                             header: {
                                 pengusaha_tpb: { nama: f.nama_tpb, npwp: f.npwp_tpb, alamat: f.alamat_tpb },
                                 jenis_tpb: f.jenis_tpb,
@@ -575,7 +653,7 @@
                             }))
                         };
                     } else if (docType === 'RUSH') {
-                        return {
+                        out = {
                             header: {
                                 pemohon: { nama: f.nama_pemohon, npwp: f.npwp_pemohon, alamat: f.alamat_pemohon },
                                 pengangkutan: { sarana: f.nama_sarana_pengangkut, flight_no: f.nomor_flight },
@@ -594,6 +672,14 @@
                             }))
                         };
                     }
+
+                    if (f.dokumen && f.dokumen.length) {
+                        out.dokumen = f.dokumen;
+                    }
+                    if (f.kontainer && f.kontainer.length) {
+                        out.kontainer = f.kontainer;
+                    }
+                    return out;
                 },
 
                 // Mock Data Injector

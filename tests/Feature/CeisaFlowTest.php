@@ -369,6 +369,74 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
+    public function test_submit_document_with_supporting_documents_and_containers(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'error_code' => 0,
+                'nomor_aju' => '000001-PEB',
+                'status' => 'DITERIMA',
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'app_id' => 'APP123',
+            'api_key' => 'secret-key',
+        ]);
+
+        $payload = $this->bc30Payload([
+            'dokumen' => [
+                [
+                    'kode_dokumen' => '380',
+                    'nomor_dokumen' => 'INV-2026-001',
+                    'tanggal_dokumen' => '2026-06-30',
+                ],
+            ],
+            'kontainer' => [
+                [
+                    'nomor_kontainer' => 'MSKU1234567',
+                    'kode_ukuran' => '40',
+                    'kode_tipe' => '8',
+                    'kode_status' => 'FCL',
+                ],
+            ],
+        ]);
+
+        $this->actingAs($user)
+            ->post('/dokumen/submit', $payload)
+            ->assertRedirect();
+
+        $doc = Document::first();
+        $this->assertNotNull($doc);
+        
+        // Check database storage
+        $this->assertCount(1, data_get($doc->payload, 'dokumen'));
+        $this->assertSame('INV-2026-001', data_get($doc->payload, 'dokumen.0.nomor_dokumen'));
+        
+        $this->assertCount(1, data_get($doc->payload, 'kontainer'));
+        $this->assertSame('MSKU1234567', data_get($doc->payload, 'kontainer.0.nomor_kontainer'));
+
+        // Check H2H payload building mapping
+        $builderPayload = (new CeisaPayloadBuilder())->build('BC30', $doc->payload, '000001-PEB');
+        
+        $this->assertCount(1, data_get($builderPayload, 'dokumen'));
+        $this->assertSame('380', data_get($builderPayload, 'dokumen.0.kodeDokumen'));
+        $this->assertSame('INV-2026-001', data_get($builderPayload, 'dokumen.0.nomorDokumen'));
+
+        $this->assertCount(1, data_get($builderPayload, 'kontainer'));
+        $this->assertSame('MSKU1234567', data_get($builderPayload, 'kontainer.0.nomorKontainer'));
+        $this->assertSame('40', data_get($builderPayload, 'kontainer.0.kodeUkuranKontainer'));
+        $this->assertSame('8', data_get($builderPayload, 'kontainer.0.kodeTipeKontainer'));
+        $this->assertSame('FCL', data_get($builderPayload, 'kontainer.0.kodeStatusKontainer'));
+    }
+
     public function test_submit_retries_once_after_401_with_fresh_login(): void
     {
         Http::fake([

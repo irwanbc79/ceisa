@@ -12,7 +12,7 @@
 @endphp
 
 {{-- Step 5: Review & Send --}}
-<div x-show="step === 5" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+<div x-show="step === 7" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Review Data &amp; Submit</h3>

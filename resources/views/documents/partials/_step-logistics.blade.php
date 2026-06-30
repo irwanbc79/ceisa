@@ -9,13 +9,13 @@
 @endphp
 
 {{-- Step 3: Logistics & Transactions --}}
-<div x-show="step === 3" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+<div x-show="step === 4" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h3 class="text-lg font-bold text-slate-800">Pengangkutan &amp; Transaksi</h3>
-            <p class="text-xs text-slate-500 mt-0.5">Rincian sarana logistik dan nilai moneter dokumen</p>
+            <h3 class="text-lg font-bold text-slate-800">Data Logistik & Transaksi</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Input pelabuhan, sarana angkut, valuta, nilai, dan asuransi</p>
         </div>
-        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap 3 dari 5</span>
+        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap <span x-text="step"></span> dari <span x-text="steps.length"></span></span>
     </div>
 
     {{-- Common Header Options: Nomor AJU Kustom --}}

@@ -151,10 +151,31 @@ class CeisaPayloadBuilder
             'tanggalPkb' => date('Y-m-d'),
             'waktuSiapPeriksa' => date('Y-m-d\TH:i:s.000\Z'),
         ]];
-        $flat['dokumen'] = [
-            ['seriDokumen' => 1, 'kodeDokumen' => '380', 'nomorDokumen' => 'INV-'.$nomorAju, 'tanggalDokumen' => date('Y-m-d')],
-            ['seriDokumen' => 2, 'kodeDokumen' => '217', 'nomorDokumen' => 'PL-'.$nomorAju, 'tanggalDokumen' => date('Y-m-d')],
-        ];
+        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && !empty($payload['dokumen'])) {
+            $flat['dokumen'] = array_map(fn ($d, $idx) => [
+                'seriDokumen' => $idx + 1,
+                'kodeDokumen' => $d['kode_dokumen'] ?? '',
+                'nomorDokumen' => $d['nomor_dokumen'] ?? '',
+                'tanggalDokumen' => $d['tanggal_dokumen'] ?? '',
+            ], $payload['dokumen'], array_keys($payload['dokumen']));
+        } else {
+            $flat['dokumen'] = [
+                ['seriDokumen' => 1, 'kodeDokumen' => '380', 'nomorDokumen' => 'INV-'.$nomorAju, 'tanggalDokumen' => date('Y-m-d')],
+                ['seriDokumen' => 2, 'kodeDokumen' => '217', 'nomorDokumen' => 'PL-'.$nomorAju, 'tanggalDokumen' => date('Y-m-d')],
+            ];
+        }
+
+        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && !empty($payload['kontainer'])) {
+            $flat['kontainer'] = array_map(fn ($c, $idx) => [
+                'seriKontainer' => $idx + 1,
+                'nomorKontainer' => $c['nomor_kontainer'] ?? '',
+                'kodeUkuranKontainer' => $c['kode_ukuran'] ?? '',
+                'kodeTipeKontainer' => $c['kode_tipe'] ?? '',
+                'kodeStatusKontainer' => $c['kode_status'] ?? '',
+                'kodeTipeIsi' => $c['kode_tipe_isi'] ?? 'FCL',
+            ], $payload['kontainer'], array_keys($payload['kontainer']));
+            $flat['jumlahKontainer'] = count($flat['kontainer']);
+        }
 
         return $flat;
     }
@@ -368,7 +389,28 @@ class CeisaPayloadBuilder
         $flat['barang'] = $this->barangBc20($barang, $header);
         $flat['kemasan'] = [$this->kemasanDefault()];
         $flat['pengangkut'] = [$this->pengangkutImpor($header)];
-        $flat['dokumen'] = $this->dokumenImpor($header, $nomorAju);
+        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && !empty($payload['dokumen'])) {
+            $flat['dokumen'] = array_map(fn ($d, $idx) => [
+                'seriDokumen' => $idx + 1,
+                'kodeDokumen' => $d['kode_dokumen'] ?? '',
+                'nomorDokumen' => $d['nomor_dokumen'] ?? '',
+                'tanggalDokumen' => $d['tanggal_dokumen'] ?? '',
+            ], $payload['dokumen'], array_keys($payload['dokumen']));
+        } else {
+            $flat['dokumen'] = $this->dokumenImpor($header, $nomorAju);
+        }
+
+        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && !empty($payload['kontainer'])) {
+            $flat['kontainer'] = array_map(fn ($c, $idx) => [
+                'seriKontainer' => $idx + 1,
+                'nomorKontainer' => $c['nomor_kontainer'] ?? '',
+                'kodeUkuranKontainer' => $c['kode_ukuran'] ?? '',
+                'kodeTipeKontainer' => $c['kode_tipe'] ?? '',
+                'kodeStatusKontainer' => $c['kode_status'] ?? '',
+                'kodeTipeIsi' => $c['kode_tipe_isi'] ?? 'FCL',
+            ], $payload['kontainer'], array_keys($payload['kontainer']));
+            $flat['jumlahKontainer'] = count($flat['kontainer']);
+        }
 
         return $flat;
     }
@@ -603,7 +645,28 @@ class CeisaPayloadBuilder
             'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Laut'),
         ]];
 
-        $flat['dokumen'] = [$this->dokumenInvoice($nomorAju)];
+        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && !empty($payload['dokumen'])) {
+            $flat['dokumen'] = array_map(fn ($d, $idx) => [
+                'seriDokumen' => $idx + 1,
+                'kodeDokumen' => $d['kode_dokumen'] ?? '',
+                'nomorDokumen' => $d['nomor_dokumen'] ?? '',
+                'tanggalDokumen' => $d['tanggal_dokumen'] ?? '',
+            ], $payload['dokumen'], array_keys($payload['dokumen']));
+        } else {
+            $flat['dokumen'] = [$this->dokumenInvoice($nomorAju)];
+        }
+
+        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && !empty($payload['kontainer'])) {
+            $flat['kontainer'] = array_map(fn ($c, $idx) => [
+                'seriKontainer' => $idx + 1,
+                'nomorKontainer' => $c['nomor_kontainer'] ?? '',
+                'kodeUkuranKontainer' => $c['kode_ukuran'] ?? '',
+                'kodeTipeKontainer' => $c['kode_tipe'] ?? '',
+                'kodeStatusKontainer' => $c['kode_status'] ?? '',
+                'kodeTipeIsi' => $c['kode_tipe_isi'] ?? 'FCL',
+            ], $payload['kontainer'], array_keys($payload['kontainer']));
+            $flat['jumlahKontainer'] = count($flat['kontainer']);
+        }
 
         return $flat;
     }

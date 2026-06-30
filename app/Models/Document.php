@@ -411,6 +411,19 @@ class Document extends Model
             'nilai_barang' => data_get($b, 'nilai_barang', ''),
         ], is_array($barang) ? $barang : []);
 
+        $data['dokumen'] = array_map(static fn ($d): array => [
+            'kode_dokumen' => data_get($d, 'kode_dokumen', ''),
+            'nomor_dokumen' => data_get($d, 'nomor_dokumen', ''),
+            'tanggal_dokumen' => data_get($d, 'tanggal_dokumen', ''),
+        ], is_array(data_get($this->payload, 'dokumen')) ? data_get($this->payload, 'dokumen') : []);
+
+        $data['kontainer'] = array_map(static fn ($c): array => [
+            'nomor_kontainer' => data_get($c, 'nomor_kontainer', ''),
+            'kode_ukuran' => data_get($c, 'kode_ukuran', ''),
+            'kode_tipe' => data_get($c, 'kode_tipe', ''),
+            'kode_status' => data_get($c, 'kode_status', ''),
+        ], is_array(data_get($this->payload, 'kontainer')) ? data_get($this->payload, 'kontainer') : []);
+
         // Buang nilai null agar tidak menimpa default form dengan kosong.
         $data = array_filter($data, static fn ($v) => $v !== null);
 
