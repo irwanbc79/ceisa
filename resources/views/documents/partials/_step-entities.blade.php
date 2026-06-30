@@ -33,59 +33,32 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
                 <div>
                     <x-input-label for="kantor_muat" value="Kantor Muat" />
-                    <select id="kantor_muat" name="kantor_muat" x-model="formData.kantor_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <option value="">-- Pilih Kantor Muat --</option>
-                        <template x-for="k in references.kantorMuat" :key="k.code">
-                            <option :value="k.code" x-text="k.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="kantor_muat" name="kantor_muat" model="formData.kantor_muat" options="references.kantorMuat" placeholder="-- Pilih Kantor Muat --" />
                 </div>
                 <div>
                     <x-input-label for="jenis_ekspor" value="Jenis Ekspor" />
-                    <select id="jenis_ekspor" name="jenis_ekspor" x-model="formData.jenis_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <template x-for="j in references.jenisEkspor" :key="j.code">
-                            <option :value="j.code" x-text="j.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="jenis_ekspor" name="jenis_ekspor" model="formData.jenis_ekspor" options="references.jenisEkspor" placeholder="-- Pilih Jenis Ekspor --" />
                 </div>
                 <div>
                     <x-input-label for="kategori_ekspor" value="Kategori Ekspor" />
-                    <select id="kategori_ekspor" name="kategori_ekspor" x-model="formData.kategori_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <template x-for="k in references.kategoriEkspor" :key="k.code">
-                            <option :value="k.code" x-text="k.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="kategori_ekspor" name="kategori_ekspor" model="formData.kategori_ekspor" options="references.kategoriEkspor" placeholder="-- Pilih Kategori Ekspor --" />
                 </div>
                 <div>
                     <x-input-label for="cara_dagang" value="Cara Dagang" />
-                    <select id="cara_dagang" name="cara_dagang" x-model="formData.cara_dagang" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <template x-for="c in references.caraDagang" :key="c.code">
-                            <option :value="c.code" x-text="c.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="cara_dagang" name="cara_dagang" model="formData.cara_dagang" options="references.caraDagang" placeholder="-- Pilih Cara Dagang --" />
                 </div>
                 <div>
                     <x-input-label for="cara_bayar" value="Cara Bayar" />
-                    <select id="cara_bayar" name="cara_bayar" x-model="formData.cara_bayar" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <template x-for="c in references.caraBayar" :key="c.code">
-                            <option :value="c.code" x-text="c.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="cara_bayar" name="cara_bayar" model="formData.cara_bayar" options="references.caraBayar" placeholder="-- Pilih Cara Bayar --" />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <x-input-label for="komoditi" value="Komoditi" />
-                        <select id="komoditi" name="komoditi" x-model="formData.komoditi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                            <option value="NON_MIGAS">Non Migas</option>
-                            <option value="MIGAS">Migas</option>
-                        </select>
+                        <x-searchable-select id="komoditi" name="komoditi" model="formData.komoditi" :options="['NON_MIGAS' => 'Non Migas', 'MIGAS' => 'Migas']" placeholder="-- Pilih Komoditi --" />
                     </div>
                     <div>
                         <x-input-label for="curah" value="Curah" />
-                        <select id="curah" name="curah" x-model="formData.curah" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                            <option value="NON_CURAH">Non Curah</option>
-                            <option value="CURAH">Curah</option>
-                        </select>
+                        <x-searchable-select id="curah" name="curah" model="formData.curah" :options="['NON_CURAH' => 'Non Curah', 'CURAH' => 'Curah']" placeholder="-- Pilih Curah --" />
                     </div>
                 </div>
             </div>
@@ -120,12 +93,7 @@
                 </div>
                 <div>
                     <x-input-label for="negara_tujuan" value="Negara Tujuan (Kode Referensi)" />
-                    <select id="negara_tujuan" name="negara_tujuan" x-model="formData.negara_tujuan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required>
-                        <option value="">-- Pilih Negara Tujuan --</option>
-                        <template x-for="c in references.countries" :key="c.code">
-                            <option :value="c.code" x-text="c.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="negara_tujuan" name="negara_tujuan" model="formData.negara_tujuan" options="references.countries" placeholder="-- Pilih Negara Tujuan --" required />
                 </div>
                 <div class="sm:col-span-2">
                     <x-input-label for="alamat_penerima" value="Alamat Penerima (Opsional)" />
@@ -163,12 +131,7 @@
                 </div>
                 <div>
                     <x-input-label for="negara_pemasok" value="Negara Asal Pemasok (Kode Referensi)" />
-                    <select id="negara_pemasok" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'negara_pemasok' : ''" x-model="formData.negara_pemasok" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
-                        <option value="">-- Pilih Negara Asal --</option>
-                        <template x-for="c in references.countries" :key="c.code">
-                            <option :value="c.code" x-text="c.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="negara_pemasok" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'negara_pemasok' : ''" model="formData.negara_pemasok" options="references.countries" placeholder="-- Pilih Negara Asal --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
                 </div>
             </div>
         </div>
@@ -198,21 +161,11 @@
             <div class="grid sm:grid-cols-3 gap-4 mt-3">
                 <div>
                     <x-input-label for="jenis_tpb" value="Jenis TPB (Referensi)" />
-                    <select id="jenis_tpb" :name="doc_type === 'TPB' ? 'jenis_tpb' : ''" x-model="formData.jenis_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
-                        <option value="">-- Pilih Jenis TPB --</option>
-                        <template x-for="t in references.tpbTypes" :key="t.code">
-                            <option :value="t.code" x-text="t.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="jenis_tpb" ::name="doc_type === 'TPB' ? 'jenis_tpb' : ''" model="formData.jenis_tpb" options="references.tpbTypes" placeholder="-- Pilih Jenis TPB --" ::required="doc_type === 'TPB'" />
                 </div>
                 <div>
                     <x-input-label for="tujuan_tpb" value="Tujuan Pengiriman (Referensi)" />
-                    <select id="tujuan_tpb" :name="doc_type === 'TPB' ? 'tujuan_tpb' : ''" x-model="formData.tujuan_tpb" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
-                        <option value="">-- Pilih Tujuan --</option>
-                        <template x-for="d in references.tpbDestinations" :key="d.code">
-                            <option :value="d.code" x-text="d.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="tujuan_tpb" ::name="doc_type === 'TPB' ? 'tujuan_tpb' : ''" model="formData.tujuan_tpb" options="references.tpbDestinations" placeholder="-- Pilih Tujuan --" ::required="doc_type === 'TPB'" />
                 </div>
                 <div>
                     <x-input-label for="dokumen_referensi" value="No. Dokumen Referensi / Kontrak" />
@@ -245,15 +198,14 @@
             <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Alasan Kebutuhan Rush Handling</h4>
             <div class="mt-3">
                 <x-input-label for="alasan_segera" value="Pilih Kebutuhan Barang Segera (Referensi)" />
-                <select id="alasan_segera" :name="doc_type === 'RUSH' ? 'alasan_segera' : ''" x-model="formData.alasan_segera" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
-                    <option value="">-- Pilih Alasan Utama --</option>
-                    <option value="Organ Tubuh Manusia / Darah / Jenazah">Organ Tubuh Manusia / Darah / Jenazah</option>
-                    <option value="Vaksin / Serum / Obat-obatan Kritis">Vaksin / Serum / Obat-obatan Kritis</option>
-                    <option value="Binatang Hidup (Live Animals)">Binatang Hidup (Live Animals)</option>
-                    <option value="Tumbuhan / Bibit Hidup (Live Plants)">Tumbuhan / Bibit Hidup (Live Plants)</option>
-                    <option value="Surat Kabar / Majalah / Berita Aktual">Surat Kabar / Majalah / Berita Aktual</option>
-                    <option value="Barang lain yang karena sifatnya membutuhkan penanganan segera">Lainnya (Tulis detail di bawah)</option>
-                </select>
+                <x-searchable-select id="alasan_segera" ::name="doc_type === 'RUSH' ? 'alasan_segera' : ''" model="formData.alasan_segera" :options="[
+                    'Organ Tubuh Manusia / Darah / Jenazah' => 'Organ Tubuh Manusia / Darah / Jenazah',
+                    'Vaksin / Serum / Obat-obatan Kritis' => 'Vaksin / Serum / Obat-obatan Kritis',
+                    'Binatang Hidup (Live Animals)' => 'Binatang Hidup (Live Animals)',
+                    'Tumbuhan / Bibit Hidup (Live Plants)' => 'Tumbuhan / Bibit Hidup (Live Plants)',
+                    'Surat Kabar / Majalah / Berita Aktual' => 'Surat Kabar / Majalah / Berita Aktual',
+                    'Barang lain yang karena sifatnya membutuhkan penanganan segera' => 'Lainnya (Tulis detail di bawah)'
+                ]" placeholder="-- Pilih Alasan Utama --" ::required="doc_type === 'RUSH'" />
                 <input type="text" :name="doc_type === 'RUSH' ? 'alasan_segera' : ''" x-model="formData.alasan_segera" class="mt-2 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" placeholder="Tulis alasan khusus bila tidak ada di daftar..." x-show="formData.alasan_segera === 'Barang lain yang karena sifatnya membutuhkan penanganan segera' || !['Organ Tubuh Manusia / Darah / Jenazah', 'Vaksin / Serum / Obat-obatan Kritis', 'Binatang Hidup (Live Animals)', 'Tumbuhan / Bibit Hidup (Live Plants)', 'Surat Kabar / Majalah / Berita Aktual', ''].includes(formData.alasan_segera)" />
             </div>
         </div>

@@ -44,11 +44,7 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
                 <div>
                     <x-input-label for="cara_angkut" value="Cara Pengangkutan" />
-                    <select id="cara_angkut" name="cara_angkut" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <template x-for="c in references.caraAngkut" :key="c.code">
-                            <option :value="c.code" x-text="c.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="cara_angkut" name="cara_angkut" model="formData.cara_angkut" options="references.caraAngkut" placeholder="-- Pilih Cara Pengangkutan --" />
                 </div>
                 <div>
                     <x-input-label for="nama_sarana" value="Nama Sarana Pengangkut" />
@@ -60,21 +56,11 @@
                 </div>
                 <div>
                     <x-input-label for="pelabuhan_muat_bc30" value="Pelabuhan Muat Ekspor" />
-                    <select id="pelabuhan_muat_bc30" :name="doc_type === 'BC30' ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
-                        <option value="">-- Pilih Pelabuhan Muat --</option>
-                        <template x-for="p in references.ports" :key="p.code">
-                            <option :value="p.code" x-text="p.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="pelabuhan_muat_bc30" ::name="doc_type === 'BC30' ? 'pelabuhan_muat' : ''" model="formData.pelabuhan_muat" options="references.ports" placeholder="-- Pilih Pelabuhan Muat --" ::required="doc_type === 'BC30'" />
                 </div>
                 <div>
                     <x-input-label for="pelabuhan_tujuan" value="Pelabuhan Tujuan" />
-                    <select id="pelabuhan_tujuan" name="pelabuhan_tujuan" x-model="formData.pelabuhan_tujuan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
-                        <option value="">-- Pilih Pelabuhan Tujuan --</option>
-                        <template x-for="p in references.ports" :key="p.code">
-                            <option :value="p.code" x-text="p.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="pelabuhan_tujuan" name="pelabuhan_tujuan" model="formData.pelabuhan_tujuan" options="references.ports" placeholder="-- Pilih Pelabuhan Tujuan --" ::required="doc_type === 'BC30'" />
                 </div>
                 <div>
                     <x-input-label for="tanggal_ekspor" value="Tanggal Perkiraan Ekspor" />
@@ -88,12 +74,7 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
                 <div>
                     <x-input-label for="kode_valuta_bc30" value="Valuta" />
-                    <select id="kode_valuta_bc30" :name="doc_type === 'BC30' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
-                        <option value="">-- Pilih Mata Uang --</option>
-                        <template x-for="c in references.currencies" :key="c.code">
-                            <option :value="c.code" x-text="c.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="kode_valuta_bc30" ::name="doc_type === 'BC30' ? 'kode_valuta' : ''" model="formData.kode_valuta" options="references.currencies" placeholder="-- Pilih Mata Uang --" ::required="doc_type === 'BC30'" />
                 </div>
                 <div>
                     <x-input-label for="ndpbm" value="NDPBM / Kurs (ke IDR)" />
@@ -101,11 +82,7 @@
                 </div>
                 <div>
                     <x-input-label for="incoterm" value="Cara Penyerahan (Incoterm)" />
-                    <select id="incoterm" name="incoterm" x-model="formData.incoterm" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'">
-                        <template x-for="i in references.incoterms" :key="i.code">
-                            <option :value="i.code" x-text="i.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="incoterm" name="incoterm" model="formData.incoterm" options="references.incoterms" placeholder="-- Pilih Incoterm --" ::required="doc_type === 'BC30'" />
                 </div>
                 <div>
                     <x-input-label for="nilai_fob" value="Nilai FOB Total" />
@@ -122,10 +99,7 @@
                 </div>
                 <div>
                     <x-input-label for="asuransi_jenis" value="Asuransi" />
-                    <select id="asuransi_jenis" name="asuransi_jenis" x-model="formData.asuransi_jenis" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <option value="DN">Dalam Negeri</option>
-                        <option value="LN">Luar Negeri</option>
-                    </select>
+                    <x-searchable-select id="asuransi_jenis" name="asuransi_jenis" model="formData.asuransi_jenis" :options="['DN' => 'Dalam Negeri', 'LN' => 'Luar Negeri']" placeholder="-- Pilih Asuransi --" />
                 </div>
                 <div>
                     <x-input-label for="nilai_asuransi" value="Nilai Asuransi (Opsional)" />
@@ -137,12 +111,7 @@
                 </div>
                 <div class="sm:col-span-2 lg:col-span-3">
                     <x-input-label for="cara_pembayaran_bc30" value="Cara Pembayaran (Opsional)" />
-                    <select id="cara_pembayaran_bc30" :name="doc_type === 'BC30' ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <option value="">-- Pilih Cara Pembayaran --</option>
-                        <template x-for="m in references.paymentMethods" :key="m.code">
-                            <option :value="m.code" x-text="m.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="cara_pembayaran_bc30" ::name="doc_type === 'BC30' ? 'cara_pembayaran' : ''" model="formData.cara_pembayaran" options="references.paymentMethods" placeholder="-- Pilih Cara Pembayaran --" />
                 </div>
             </div>
         </div>
@@ -152,30 +121,15 @@
     <div x-show="doc_type === 'BC20' || doc_type === 'BC24'" class="grid sm:grid-cols-2 gap-4">
         <div>
             <x-input-label for="pelabuhan_muat" value="Pelabuhan Muat (Kode Referensi)" />
-            <select id="pelabuhan_muat" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pelabuhan_muat' : ''" x-model="formData.pelabuhan_muat" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
-                <option value="">-- Pilih Pelabuhan Muat --</option>
-                <template x-for="p in references.ports" :key="p.code">
-                    <option :value="p.code" x-text="p.label"></option>
-                </template>
-            </select>
+            <x-searchable-select id="pelabuhan_muat" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pelabuhan_muat' : ''" model="formData.pelabuhan_muat" options="references.ports" placeholder="-- Pilih Pelabuhan Muat --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="pelabuhan_bongkar" value="Pelabuhan Bongkar (Kode Referensi)" />
-            <select id="pelabuhan_bongkar" name="pelabuhan_bongkar" x-model="formData.pelabuhan_bongkar" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type !== 'BC30'">
-                <option value="">-- Pilih Pelabuhan Bongkar --</option>
-                <template x-for="p in references.ports" :key="p.code">
-                    <option :value="p.code" x-text="p.label"></option>
-                </template>
-            </select>
+            <x-searchable-select id="pelabuhan_bongkar" name="pelabuhan_bongkar" model="formData.pelabuhan_bongkar" options="references.ports" placeholder="-- Pilih Pelabuhan Bongkar --" ::required="doc_type !== 'BC30'" />
         </div>
         <div>
             <x-input-label for="kode_valuta" value="Mata Uang / Valuta (Referensi)" />
-            <select id="kode_valuta" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'">
-                <option value="">-- Pilih Mata Uang --</option>
-                <template x-for="c in references.currencies" :key="c.code">
-                    <option :value="c.code" x-text="c.label"></option>
-                </template>
-            </select>
+            <x-searchable-select id="kode_valuta" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_valuta' : ''" model="formData.kode_valuta" options="references.currencies" placeholder="-- Pilih Mata Uang --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
 
         <div x-show="doc_type === 'BC20' || doc_type === 'BC24'">
@@ -189,11 +143,7 @@
         </div>
         <div>
             <x-input-label for="incoterm_imp" value="Cara Penyerahan (Incoterm)" />
-            <select id="incoterm_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'incoterm' : ''" x-model="formData.incoterm" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                <template x-for="t in references.incoterms" :key="t.code">
-                    <option :value="t.code" x-text="t.label"></option>
-                </template>
-            </select>
+            <x-searchable-select id="incoterm_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'incoterm' : ''" model="formData.incoterm" options="references.incoterms" placeholder="-- Pilih Incoterm --" />
         </div>
         <div>
             <x-input-label for="freight_imp" value="Freight (opsional)" />
@@ -214,13 +164,7 @@
         </div>
         <div>
             <x-input-label for="cara_angkut_imp" value="Cara Pengangkutan" />
-            <select id="cara_angkut_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_angkut' : ''" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                <option value="Laut">Laut</option>
-                <option value="Udara">Udara</option>
-                <option value="Darat">Darat</option>
-                <option value="Kereta Api">Kereta Api</option>
-                <option value="Pos">Pos</option>
-            </select>
+            <x-searchable-select id="cara_angkut_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_angkut' : ''" model="formData.cara_angkut" :options="['Laut' => 'Laut', 'Udara' => 'Udara', 'Darat' => 'Darat', 'Kereta Api' => 'Kereta Api', 'Pos' => 'Pos']" placeholder="-- Pilih Cara Pengangkutan --" />
         </div>
         <div>
             <x-input-label for="kode_bendera_imp" value="Bendera Sarana (ISO 2 huruf)" />
@@ -266,12 +210,7 @@
 
         <div class="sm:col-span-2">
             <x-input-label for="cara_pembayaran" value="Cara Pembayaran (Referensi)" />
-            <select id="cara_pembayaran" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_pembayaran' : ''" x-model="formData.cara_pembayaran" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                <option value="">-- Pilih Cara Pembayaran --</option>
-                <template x-for="m in references.paymentMethods" :key="m.code">
-                    <option :value="m.code" x-text="m.label"></option>
-                </template>
-            </select>
+            <x-searchable-select id="cara_pembayaran" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_pembayaran' : ''" model="formData.cara_pembayaran" options="references.paymentMethods" placeholder="-- Pilih Cara Pembayaran --" />
         </div>
     </div>
 
@@ -280,21 +219,11 @@
         <div class="grid sm:grid-cols-3 gap-4">
             <div>
                 <x-input-label for="kode_kantor_tpb" value="Kantor Bea Cukai (Referensi)" />
-                <select id="kode_kantor_tpb" :name="doc_type === 'TPB' ? 'kode_kantor' : ''" x-model="formData.kode_kantor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
-                    <option value="">-- Pilih Kantor Bea Cukai --</option>
-                    <template x-for="k in references.kantorMuat" :key="k.code">
-                        <option :value="k.code" x-text="k.label"></option>
-                    </template>
-                </select>
+                <x-searchable-select id="kode_kantor_tpb" ::name="doc_type === 'TPB' ? 'kode_kantor' : ''" model="formData.kode_kantor" options="references.kantorMuat" placeholder="-- Pilih Kantor Bea Cukai --" ::required="doc_type === 'TPB'" />
             </div>
             <div>
                 <x-input-label for="kode_valuta_tpb" value="Mata Uang / Valuta (Referensi)" />
-                <select id="kode_valuta_tpb" :name="doc_type === 'TPB' ? 'kode_valuta' : ''" x-model="formData.kode_valuta" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'">
-                    <option value="">-- Pilih Mata Uang --</option>
-                    <template x-for="c in references.currencies" :key="c.code">
-                        <option :value="c.code" x-text="c.label"></option>
-                    </template>
-                </select>
+                <x-searchable-select id="kode_valuta_tpb" ::name="doc_type === 'TPB' ? 'kode_valuta' : ''" model="formData.kode_valuta" options="references.currencies" placeholder="-- Pilih Mata Uang --" ::required="doc_type === 'TPB'" />
             </div>
             <div>
                 <x-input-label for="nilai_barang" value="Nilai Total Barang TPB" />
@@ -306,12 +235,7 @@
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                     <x-input-label for="cara_angkut_tpb" value="Cara Pengangkutan" />
-                    <select id="cara_angkut_tpb" :name="doc_type === 'TPB' ? 'cara_angkut' : ''" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                        <option value="">-- Pilih Cara Angkut --</option>
-                        <template x-for="c in references.caraAngkut" :key="c.code">
-                            <option :value="c.code" x-text="c.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="cara_angkut_tpb" ::name="doc_type === 'TPB' ? 'cara_angkut' : ''" model="formData.cara_angkut" options="references.caraAngkut" placeholder="-- Pilih Cara Angkut --" />
                 </div>
                 <div>
                     <x-input-label for="nama_sarana_tpb" value="Nama Sarana Pengangkut" />
@@ -334,21 +258,11 @@
         <div class="grid sm:grid-cols-3 gap-4">
             <div>
                 <x-input-label for="kode_kantor_rush" value="Kantor Bea Cukai (Referensi)" />
-                <select id="kode_kantor_rush" :name="doc_type === 'RUSH' ? 'kode_kantor' : ''" x-model="formData.kode_kantor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
-                    <option value="">-- Pilih Kantor Bea Cukai --</option>
-                    <template x-for="k in references.kantorMuat" :key="k.code">
-                        <option :value="k.code" x-text="k.label"></option>
-                    </template>
-                </select>
+                <x-searchable-select id="kode_kantor_rush" ::name="doc_type === 'RUSH' ? 'kode_kantor' : ''" model="formData.kode_kantor" options="references.kantorMuat" placeholder="-- Pilih Kantor Bea Cukai --" ::required="doc_type === 'RUSH'" />
             </div>
             <div>
                 <x-input-label for="cara_angkut_rush" value="Cara Pengangkutan" />
-                <select id="cara_angkut_rush" :name="doc_type === 'RUSH' ? 'cara_angkut' : ''" x-model="formData.cara_angkut" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm">
-                    <option value="">-- Pilih Cara Angkut --</option>
-                    <template x-for="c in references.caraAngkut" :key="c.code">
-                        <option :value="c.code" x-text="c.label"></option>
-                    </template>
-                </select>
+                <x-searchable-select id="cara_angkut_rush" ::name="doc_type === 'RUSH' ? 'cara_angkut' : ''" model="formData.cara_angkut" options="references.caraAngkut" placeholder="-- Pilih Cara Angkut --" />
             </div>
             <div>
                 <x-input-label for="kode_bendera_rush" value="Bendera Pengangkut" />
@@ -382,12 +296,7 @@
                 </div>
                 <div>
                     <x-input-label for="jenis_kemasan" value="Jenis Kemasan (Referensi)" />
-                    <select id="jenis_kemasan" :name="doc_type === 'RUSH' ? 'jenis_kemasan' : ''" x-model="formData.jenis_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'">
-                        <option value="">-- Pilih Jenis Kemasan --</option>
-                        <template x-for="p in references.packages" :key="p.code">
-                            <option :value="p.code" x-text="p.label"></option>
-                        </template>
-                    </select>
+                    <x-searchable-select id="jenis_kemasan" ::name="doc_type === 'RUSH' ? 'jenis_kemasan' : ''" model="formData.jenis_kemasan" options="references.packages" placeholder="-- Pilih Jenis Kemasan --" ::required="doc_type === 'RUSH'" />
                 </div>
             </div>
         </div>

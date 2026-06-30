@@ -56,13 +56,7 @@
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase">Kode Satuan (Referensi)</label>
-                        <select :name="`barang[${index}][kode_satuan]`" x-model="item.kode_satuan"
-                                class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required>
-                            <option value="">-- Pilih Satuan --</option>
-                            <template x-for="u in references.units" :key="u.code">
-                                <option :value="u.code" x-text="u.label"></option>
-                            </template>
-                        </select>
+                        <x-searchable-select ::name="'barang[' + index + '][kode_satuan]'" model="item.kode_satuan" options="references.units" placeholder="-- Pilih Satuan --" required />
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-500 uppercase">Netto (KGM / Kilogram)</label>
@@ -87,12 +81,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase">Negara Asal Barang</label>
-                                <select :name="`barang[${index}][negara_asal]`" x-model="item.negara_asal" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm">
-                                    <option value="">-- Pilih --</option>
-                                    <template x-for="c in references.countries" :key="c.code">
-                                        <option :value="c.code" x-text="c.label"></option>
-                                    </template>
-                                </select>
+                                <x-searchable-select ::name="'barang[' + index + '][negara_asal]'" model="item.negara_asal" options="references.countries" placeholder="-- Pilih Negara --" />
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase">Daerah Asal (Opsional)</label>
@@ -108,12 +97,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase">Jenis Kemasan</label>
-                                <select :name="`barang[${index}][kode_kemasan]`" x-model="item.kode_kemasan" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm">
-                                    <option value="">-- Pilih --</option>
-                                    <template x-for="p in references.packages" :key="p.code">
-                                        <option :value="p.code" x-text="p.label"></option>
-                                    </template>
-                                </select>
+                                <x-searchable-select ::name="'barang[' + index + '][kode_kemasan]'" model="item.kode_kemasan" options="references.packages" placeholder="-- Pilih Kemasan --" />
                             </div>
                         </div>
                     </template>
