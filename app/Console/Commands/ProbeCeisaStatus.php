@@ -55,34 +55,69 @@ class ProbeCeisaStatus extends Command
         }
 
         $npwp = $credential->npwp;
+        $npwp15 = (strlen($npwp) === 16 && str_starts_with($npwp, '0')) ? substr($npwp, 1) : $npwp;
         $statusEndpoint = config('ceisa.endpoints.status', '/v2/openapi/status');
 
         $probes = [
             [
-                'name' => '1. GET /v2/openapi/status?idPerusahaan={NPWP} (Doc standard)',
+                'name' => '1. GET /v2/openapi/status?idPerusahaan={NPWP16} (16-digit NPWP)',
                 'method' => 'GET',
                 'path' => $statusEndpoint,
                 'query' => ['idPerusahaan' => $npwp],
             ],
             [
-                'name' => '2. GET /v2/openapi/status?npwp={NPWP} (Variant parameter)',
+                'name' => '2. GET /v2/openapi/status?idPerusahaan={NPWP15} (15-digit NPWP)',
                 'method' => 'GET',
                 'path' => $statusEndpoint,
-                'query' => ['npwp' => $npwp],
+                'query' => ['idPerusahaan' => $npwp15],
             ],
             [
-                'name' => '3. GET /v2/openapi/status (No query parameters)',
+                'name' => '3. GET /v2/openapi/status?npwp={NPWP15} (Variant parameter NPWP15)',
+                'method' => 'GET',
+                'path' => $statusEndpoint,
+                'query' => ['npwp' => $npwp15],
+            ],
+            [
+                'name' => '4. GET /v2/openapi/status (No query parameters)',
                 'method' => 'GET',
                 'path' => $statusEndpoint,
                 'query' => [],
             ],
             [
-                'name' => '4. GET /v2/openapi/document (Check list endpoint)',
+                'name' => '5. GET /v2/openapi/document (Check list endpoint)',
                 'method' => 'GET',
                 'path' => '/v2/openapi/document',
                 'query' => [],
             ]
         ];
+
+        // Ambil maksimal 5 dokumen riil untuk dicoba tracking status per nomor_aju
+        try {
+            $realDocs = \App\Models\Document::whereNotNull('nomor_aju')
+                ->where('nomor_aju', '!=', '')
+                ->latest()
+                ->limit(5)
+                ->get();
+
+            foreach ($realDocs as $idx => $doc) {
+                $probes[] = [
+                    'name' => "Real Doc Status - {$doc->nomor_aju} (Tanpa idHeader)",
+                    'method' => 'GET',
+                    'path' => rtrim($statusEndpoint, '/') . '/' . $doc->nomor_aju,
+                    'query' => [],
+                ];
+                if (!empty($doc->id_header)) {
+                    $probes[] = [
+                        'name' => "Real Doc Status - {$doc->nomor_aju} (Dengan idHeader: {$doc->id_header})",
+                        'method' => 'GET',
+                        'path' => rtrim($statusEndpoint, '/') . '/' . $doc->nomor_aju,
+                        'query' => ['idHeader' => $doc->id_header],
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            // Abaikan jika tabel documents belum ada/error
+        }
 
         $logPath = storage_path('logs/ceisa-probe.log');
         @unlink($logPath); // Bersihkan log sebelumnya jika ada
