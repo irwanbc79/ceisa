@@ -22,25 +22,28 @@
         // Load options
         @if($isJsExpr)
             this.optionsList = {{ $jsOptions }} || [];
-            this.$watch('{{ $jsOptions }}', val => {
+            this.$watch('{{ $jsOptions }}', function(val) {
                 this.optionsList = val || [];
                 this.updateLabel();
-            });
+            }.bind(this));
         @else
             this.optionsList = {!! $jsOptions !!} || [];
         @endif
 
         // Watch external model changes
-        this.$watch('{{ $model }}', val => {
+        this.$watch('{{ $model }}', function(val) {
             this.selectedVal = val;
             this.updateLabel();
-        });
+        }.bind(this));
         
         this.selectedVal = this.{{ $model }};
         this.updateLabel();
     },
     updateLabel() {
-        const option = this.optionsList.find(opt => opt.code === this.selectedVal || opt.value === this.selectedVal || opt.id === this.selectedVal);
+        const self = this;
+        const option = this.optionsList.find(function(opt) {
+            return opt.code === self.selectedVal || opt.value === self.selectedVal || opt.id === self.selectedVal;
+        });
         if (option) {
             const lbl = option.label || option.name || option.uraian || option.value || '';
             const cd = option.code || '';
@@ -51,10 +54,11 @@
     },
     get filteredOptions() {
         if (!this.search) return this.optionsList;
-        return this.optionsList.filter(opt => {
+        const self = this;
+        return this.optionsList.filter(function(opt) {
             const label = (opt.label || opt.name || opt.uraian || opt.value || '').toLowerCase();
             const code = (opt.code || opt.id || '').toLowerCase();
-            const searchLower = this.search.toLowerCase();
+            const searchLower = self.search.toLowerCase();
             return label.includes(searchLower) || code.includes(searchLower);
         });
     },

@@ -27,6 +27,17 @@ class StoreDocumentRequest extends FormRequest
         $rules = [
             'doc_type' => ['required', 'in:BC20,BC24,TPB,BC30,RUSH'],
             'nomor_aju' => ['nullable', 'string', 'size:26', 'regex:/^[A-Za-z0-9]+$/'],
+            // Dokumen Pelengkap
+            'dokumen' => ['nullable', 'array'],
+            'dokumen.*.kode_dokumen' => ['required_with:dokumen', 'string', 'max:10'],
+            'dokumen.*.nomor_dokumen' => ['required_with:dokumen', 'string', 'max:100'],
+            'dokumen.*.tanggal_dokumen' => ['required_with:dokumen', 'date'],
+            // Peti Kemas
+            'kontainer' => ['nullable', 'array'],
+            'kontainer.*.nomor_kontainer' => ['required_with:kontainer', 'string', 'max:50'],
+            'kontainer.*.kode_ukuran' => ['required_with:kontainer', 'string', 'max:10'],
+            'kontainer.*.kode_tipe' => ['required_with:kontainer', 'string', 'max:10'],
+            'kontainer.*.kode_status' => ['required_with:kontainer', 'string', 'max:10'],
         ];
 
         if ($docType === 'BC30') {
@@ -244,8 +255,20 @@ class StoreDocumentRequest extends FormRequest
     public function toCeisaPayload(): array
     {
         $v = $this->validated();
-        $docType = $v['doc_type'];
+        $payload = $this->buildRawPayload($v['doc_type'], $v);
 
+        if (isset($v['dokumen'])) {
+            $payload['dokumen'] = $v['dokumen'];
+        }
+        if (isset($v['kontainer'])) {
+            $payload['kontainer'] = $v['kontainer'];
+        }
+
+        return $payload;
+    }
+
+    protected function buildRawPayload(string $docType, array $v): array
+    {
         if ($docType === 'BC30') {
             $ndpbm = (float) $v['ndpbm'];
 

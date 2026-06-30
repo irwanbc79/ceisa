@@ -13,7 +13,7 @@
 @endphp
 
 {{-- Step 4: Items (Dynamic Grid) --}}
-<div x-show="step === 4" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+<div x-show="step === 6" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Detail Pos Barang</h3>
