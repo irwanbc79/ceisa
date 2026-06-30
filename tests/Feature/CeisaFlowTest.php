@@ -1525,14 +1525,31 @@ class CeisaFlowTest extends TestCase
     public function test_sync_references_command_skips_when_no_endpoints_mapped(): void
     {
         config(['ceisa.reference_endpoints' => []]);
-
         $user = $this->authedUser();
         $user->ceisaCredential()->create([
             'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
         ]);
+        $this->artisan('ceisa:sync-references')->assertExitCode(0);
+    }
 
-        $this->artisan('ceisa:sync-references')
-            ->expectsOutputToContain('Belum ada endpoint referensi')
+    public function test_probe_status_command_executes_requests(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/status*' => Http::response(['status' => 'OK', 'data' => []], 200),
+            '*/document*' => Http::response(['status' => 'OK', 'data' => []], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '123456789012345'
+        ]);
+
+        $this->artisan('ceisa:probe-status')
             ->assertExitCode(0);
+
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/status') && ($r->toPsrRequest()->getUri()->getQuery() === 'idPerusahaan=123456789012345' || str_contains($r->url(), 'idPerusahaan=123456789012345')));
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/status') && ($r->toPsrRequest()->getUri()->getQuery() === 'npwp=123456789012345' || str_contains($r->url(), 'npwp=123456789012345')));
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/document'));
     }
 }

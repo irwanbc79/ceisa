@@ -447,4 +447,29 @@ class CeisaService
             'Gagal upload gambar barang ke CEISA',
         );
     }
+
+    /**
+     * Jalankan request probe custom (hanya untuk debugging/investigasi API).
+     *
+     * @param  string  $method  GET, POST, dll.
+     * @param  string  $path  Endpoint relatif, contoh '/v2/openapi/status'
+     * @param  array<string, mixed>  $query
+     * @param  array<string, mixed>  $body
+     */
+    public function probe(string $method, string $path, array $query = [], array $body = []): Response
+    {
+        $token = $this->refreshTokenIfExpired();
+
+        $req = $this->baseRequest()->withToken($token);
+
+        if (strtoupper($method) === 'GET') {
+            return $req->get($path, $query);
+        }
+
+        return $req->send($method, $path, [
+            'query' => $query,
+            'json' => $body,
+        ]);
+    }
 }
+
