@@ -9,7 +9,7 @@
 @endphp
 
 {{-- Step 3: Logistics & Transactions --}}
-<div x-show="step === 4" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+<div x-show="step === 4" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Data Logistik & Transaksi</h3>

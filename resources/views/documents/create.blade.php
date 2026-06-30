@@ -51,7 +51,7 @@
             </div>
 
             {{-- Stepper Progress Bar --}}
-            <div class="mb-8 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+            <div class="mb-8 bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6">
                 <div class="relative flex items-center justify-between">
                     {{-- Progress Line Background --}}
                     <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-100 rounded"></div>
