@@ -438,6 +438,29 @@ class DocumentController extends Controller
     }
 
     /**
+     * Tarik dan sinkronkan seluruh dokumen H2H dari CEISA.
+     */
+    public function sync(Request $request): RedirectResponse
+    {
+        $credential = $request->user()->ceisaCredential;
+
+        if (! $credential) {
+            return back()->with('error', 'Lengkapi kredensial CEISA terlebih dahulu sebelum melakukan sinkronisasi.');
+        }
+
+        try {
+            $service = CeisaService::forCredential($credential);
+            $count = $service->syncDocuments($request->user());
+
+            return back()->with('success', "Berhasil mensinkronisasikan {$count} dokumen dari CEISA.");
+        } catch (CeisaException $e) {
+            return back()->with('error', 'Gagal sinkronisasi dokumen dari CEISA: '.$e->getMessage());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Gagal menghubungi server CEISA: '.$e->getMessage());
+        }
+    }
+
+    /**
      * Tarik status terbaru dokumen dari CEISA (polling manual) lalu terapkan
      * ke dokumen. Memprioritaskan idHeader hasil submit; fallback nomor aju.
      */

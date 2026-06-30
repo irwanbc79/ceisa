@@ -11,6 +11,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use App\Services\CeisaStatusMapper;
 
 /**
  * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai (CEISA 4.0 / PIA).
@@ -446,6 +447,127 @@ class CeisaService
             $params,
             'Gagal upload gambar barang ke CEISA',
         );
+    }
+
+    /**
+     * Tarik dan sinkronkan seluruh dokumen H2H dari CEISA ke database lokal.
+     *
+     * @return int Jumlah dokumen yang berhasil disinkron/di-update
+     */
+    public function syncDocuments(\App\Models\User $user): int
+    {
+        $npwp = $this->credential->npwp;
+        // Gunakan 15-digit NPWP untuk query
+        $npwp15 = (strlen($npwp) === 16 && str_starts_with($npwp, '0')) ? substr($npwp, 1) : $npwp;
+
+        $response = $this->fetchAllStatuses($npwp15);
+
+        $dataStatus = data_get($response, 'dataStatus') ?? data_get($response, 'data_status') ?? [];
+        $dataRespon = data_get($response, 'dataRespon') ?? data_get($response, 'data_respon') ?? [];
+
+        // Gabungkan berdasarkan nomorAju
+        $merged = [];
+
+        foreach ($dataStatus as $statusItem) {
+            $nomorAju = data_get($statusItem, 'nomorAju') ?? data_get($statusItem, 'nomor_aju');
+            if (empty($nomorAju)) {
+                continue;
+            }
+
+            $merged[$nomorAju] = [
+                'nomor_aju' => $nomorAju,
+                'status' => data_get($statusItem, 'status'),
+                'jalur' => data_get($statusItem, 'jalur') ?? data_get($statusItem, 'kodeJalur') ?? data_get($statusItem, 'kode_jalur'),
+                'id_header' => data_get($statusItem, 'idHeader') ?? data_get($statusItem, 'id_header'),
+                'waktu_status' => data_get($statusItem, 'waktuStatus') ?? data_get($statusItem, 'waktu_status') ?? data_get($statusItem, 'createdDate'),
+                'raw_status' => $statusItem,
+            ];
+        }
+
+        foreach ($dataRespon as $responItem) {
+            $nomorAju = data_get($responItem, 'nomorAju') ?? data_get($responItem, 'nomor_aju');
+            if (empty($nomorAju)) {
+                continue;
+            }
+
+            if (! isset($merged[$nomorAju])) {
+                $merged[$nomorAju] = [
+                    'nomor_aju' => $nomorAju,
+                    'status' => null,
+                    'jalur' => null,
+                    'id_header' => null,
+                    'waktu_status' => null,
+                    'raw_status' => [],
+                ];
+            }
+
+            $merged[$nomorAju]['nomor_daftar'] = data_get($responItem, 'nomorDaftar') ?? data_get($responItem, 'nomor_daftar');
+            $merged[$nomorAju]['tanggal_daftar'] = data_get($responItem, 'tanggalDaftar') ?? data_get($responItem, 'tanggal_daftar');
+            $merged[$nomorAju]['kode_billing'] = data_get($responItem, 'kodeBilling') ?? data_get($responItem, 'kode_billing');
+            $merged[$nomorAju]['respon_pdf'] = data_get($responItem, 'responPdf') ?? data_get($responItem, 'pathRespon') ?? data_get($responItem, 'path_respon');
+            $merged[$nomorAju]['raw_respon'] = $responItem;
+        }
+
+        $count = 0;
+        foreach ($merged as $nomorAju => $info) {
+            // Parse doc_type dari nomor_aju (digit ke-5 & 6)
+            $dd = substr($nomorAju, 4, 2);
+            $docType = match ($dd) {
+                '20' => 'BC20',
+                '30' => 'BC30',
+                '24' => 'BC24',
+                '23' => 'BC23',
+                '28' => 'BC28',
+                '33' => 'BC33',
+                '16' => 'BC16',
+                default => 'BC30',
+            };
+
+            // Cari dokumen lokal
+            $document = $user->documents()->where('nomor_aju', $nomorAju)->first();
+
+            $statusText = $info['status'] ?? ($document ? $document->status : Document::STATUS_SUBMITTED);
+            $mappedStatus = CeisaStatusMapper::mapStatus(['status' => $statusText], $document ?? new Document());
+            $mappedJalur = CeisaStatusMapper::extractJalur(['jalur' => $info['jalur']]);
+
+            $payload = [
+                'synced_from_ceisa' => true,
+                'raw_status' => $info['raw_status'],
+                'raw_respon' => $info['raw_respon'] ?? null,
+            ];
+
+            if ($document) {
+                $payload = array_merge(is_array($document->payload) ? $document->payload : [], $payload);
+            }
+
+            $updateData = [
+                'status' => $mappedStatus,
+                'jalur' => $mappedJalur ?? ($document ? $document->jalur : null),
+                'nomor_daftar' => $info['nomor_daftar'] ?? ($document ? $document->nomor_daftar : null),
+                'id_header' => $info['id_header'] ?? ($document ? $document->id_header : null),
+                'ceisa_response' => array_merge(
+                    is_array($info['raw_status']) ? $info['raw_status'] : [],
+                    is_array($info['raw_respon'] ?? null) ? $info['raw_respon'] : []
+                ),
+                'payload' => $payload,
+                'submitted_at' => $info['waktu_status'] ? Carbon::parse($info['waktu_status']) : ($document ? $document->submitted_at : now()),
+                'response_at' => now(),
+            ];
+
+            if ($document) {
+                $document->update($updateData);
+            } else {
+                $user->documents()->create(array_merge([
+                    'doc_type' => $docType,
+                    'nomor_aju' => $nomorAju,
+                    'source' => Document::SOURCE_H2H,
+                ], $updateData));
+            }
+
+            $count++;
+        }
+
+        return $count;
     }
 
     /**

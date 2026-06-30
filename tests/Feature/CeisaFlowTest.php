@@ -1552,4 +1552,52 @@ class CeisaFlowTest extends TestCase
         Http::assertSent(fn (Request $r) => str_contains($r->url(), '/status') && ($r->toPsrRequest()->getUri()->getQuery() === 'npwp=123456789012345' || str_contains($r->url(), 'npwp=123456789012345')));
         Http::assertSent(fn (Request $r) => str_contains($r->url(), '/document'));
     }
+
+    public function test_sync_documents_pulls_and_creates_records(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/status*' => Http::response([
+                'status' => 'Success',
+                'dataStatus' => [
+                    [
+                        'nomorAju' => '04012001234567890123456789',
+                        'status' => 'TERIMA',
+                        'waktuStatus' => '2026-06-30 19:42:00',
+                        'idHeader' => 'id-1',
+                        'jalur' => 'H',
+                    ]
+                ],
+                'dataRespon' => [
+                    [
+                        'nomorAju' => '04012001234567890123456789',
+                        'nomorDaftar' => '001234',
+                        'tanggalDaftar' => '2026-06-30',
+                        'kodeDokumen' => '20',
+                        'responPdf' => 'path/to/pdf',
+                        'kodeBilling' => 'bill-1',
+                    ]
+                ]
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '0123456789012345'
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('documents.sync'))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('documents', [
+            'user_id' => $user->id,
+            'nomor_aju' => '04012001234567890123456789',
+            'doc_type' => 'BC20',
+            'status' => Document::STATUS_ACCEPTED,
+            'jalur' => Document::JALUR_HIJAU,
+            'nomor_daftar' => '001234',
+            'id_header' => 'id-1',
+        ]);
+    }
 }
