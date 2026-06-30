@@ -60,7 +60,7 @@
             {{-- Statistik --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
                 <!-- Total Dokumen -->
-                <div class="bg-white border border-slate-200/60 border-l-4 border-l-indigo-600 shadow-sm shadow-slate-100 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-indigo-100/30 transition-all duration-300">
+                <div class="bg-white/70 backdrop-blur-xl border border-white/60 border-l-4 border-l-indigo-600 shadow-xl shadow-slate-100/30 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-indigo-100/30 transition-all duration-300">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-indigo-50/40 rounded-full blur-xl group-hover:bg-indigo-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
@@ -76,7 +76,7 @@
                 </div>
 
                 <!-- Terkirim -->
-                <div class="bg-white border border-slate-200/60 border-l-4 border-l-blue-500 shadow-sm shadow-slate-100 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-blue-100/30 transition-all duration-300">
+                <div class="bg-white/70 backdrop-blur-xl border border-white/60 border-l-4 border-l-blue-500 shadow-xl shadow-slate-100/30 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-blue-100/30 transition-all duration-300">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-50/40 rounded-full blur-xl group-hover:bg-blue-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
@@ -92,7 +92,7 @@
                 </div>
 
                 <!-- Diterima -->
-                <div class="bg-white border border-slate-200/60 border-l-4 border-l-emerald-500 shadow-sm shadow-slate-100 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-emerald-100/30 transition-all duration-300">
+                <div class="bg-white/70 backdrop-blur-xl border border-white/60 border-l-4 border-l-emerald-500 shadow-xl shadow-slate-100/30 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-emerald-100/30 transition-all duration-300">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-emerald-50/40 rounded-full blur-xl group-hover:bg-emerald-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
@@ -108,7 +108,7 @@
                 </div>
 
                 <!-- Ditolak/Error -->
-                <div class="bg-white border border-slate-200/60 border-l-4 border-l-rose-500 shadow-sm shadow-slate-100 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-rose-100/30 transition-all duration-300">
+                <div class="bg-white/70 backdrop-blur-xl border border-white/60 border-l-4 border-l-rose-500 shadow-xl shadow-slate-100/30 rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-rose-100/30 transition-all duration-300">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-rose-50/40 rounded-full blur-xl group-hover:bg-rose-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
@@ -125,7 +125,7 @@
             </div>
 
             {{-- Tabel dokumen --}}
-            <div class="bg-white border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden mb-6">
+            <div class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl overflow-hidden mb-6">
                 <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <div>
                         <h3 class="font-extrabold text-slate-800 text-sm">Dokumen Terakhir</h3>
@@ -253,7 +253,7 @@
             </div>
 
             {{-- Pusat Edukasi & Fitur Premium H2H M2B --}}
-            <div class="mt-8 bg-white border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden" x-data="{ open: false }">
+            <div class="mt-8 bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl overflow-hidden" x-data="{ open: false }">
                 <button type="button" @click="open = !open" 
                         class="w-full px-5 py-4 border-b border-slate-100 bg-slate-50/50 hover:bg-slate-100/50 transition-colors flex items-center justify-between text-left">
                     <div>
