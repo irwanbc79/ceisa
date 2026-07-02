@@ -5,13 +5,13 @@ namespace App\Services;
 use App\Exceptions\CeisaException;
 use App\Models\CeisaCredential;
 use App\Models\Document;
+use App\Models\User;
 use App\Services\Concerns\HandlesCeisaAuth;
 use App\Services\Concerns\HandlesCeisaHttp;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Throwable;
-use App\Services\CeisaStatusMapper;
 
 /**
  * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai (CEISA 4.0 / PIA).
@@ -196,31 +196,78 @@ class CeisaService
     /**
      * Query status dokumen dari CEISA berdasarkan nomor aju.
      *
-     * @return array<string, mixed>
+     * Kontrak terverifikasi live (probe 2026-07-02): endpoint status WAJIB
+     * query `idPerusahaan` (NPWP 15 digit) dan mengembalikan SEMUA dokumen
+     * perusahaan (`dataStatus` timeline + `dataRespon`). Varian path
+     * /status/{nomorAju} ditolak gateway ("Required String parameter
+     * 'idPerusahaan' is not present"), jadi filter per-aju dilakukan di sini.
+     *
+     * @return array<string, mixed> payload ternormalisasi untuk CeisaStatusMapper
      *
      * @throws CeisaException
      */
     public function queryDocumentStatus(string $nomorAju, ?string $idHeader = null): array
     {
-        $endpoint = rtrim((string) config('ceisa.endpoints.status'), '/').'/'.rawurlencode($nomorAju);
+        $npwp = $this->npwp15();
 
-        $query = ! empty($idHeader) ? ['idHeader' => $idHeader] : [];
-
-        try {
-            $response = $this->authorizedRequest(
-                fn (string $token) => $this->baseRequest()->withToken($token)->get($endpoint, $query),
-            );
-        } catch (Throwable $e) {
+        if (empty($npwp)) {
             throw new CeisaException(
-                'Gagal menghubungi CEISA saat query status: '.$e->getMessage(),
-                previous: $e,
+                'NPWP perusahaan belum diisi pada Pengaturan CEISA — diperlukan untuk menarik status (idPerusahaan).'
             );
         }
 
-        $data = $this->decode($response);
-        $this->guardAgainstErrorCode($data, $response);
+        $data = $this->fetchAllStatuses($npwp);
 
-        return $data;
+        $statusEvents = array_values(array_filter(
+            (array) (data_get($data, 'dataStatus') ?? data_get($data, 'data_status') ?? []),
+            fn ($item) => (data_get($item, 'nomorAju') ?? data_get($item, 'nomor_aju')) === $nomorAju,
+        ));
+
+        $responEvents = array_values(array_filter(
+            (array) (data_get($data, 'dataRespon') ?? data_get($data, 'data_respon') ?? []),
+            fn ($item) => (data_get($item, 'nomorAju') ?? data_get($item, 'nomor_aju')) === $nomorAju,
+        ));
+
+        if (empty($statusEvents) && empty($responEvents)) {
+            throw new CeisaException(
+                "Dokumen {$nomorAju} tidak ditemukan pada daftar status CEISA perusahaan ini."
+            );
+        }
+
+        // Event terakhir berdasarkan waktuStatus (urutan dari API tidak kronologis).
+        $latest = collect($statusEvents)
+            ->sortBy(fn ($item) => (string) (data_get($item, 'waktuStatus') ?? data_get($item, 'waktu_status') ?? ''))
+            ->last();
+
+        $lastRespon = collect($responEvents)->last();
+
+        return [
+            'nomorAju' => $nomorAju,
+            'status' => data_get($latest, 'keterangan') ?? data_get($latest, 'status'),
+            'kodeProses' => data_get($latest, 'kodeProses'),
+            'waktuStatus' => data_get($latest, 'waktuStatus'),
+            'nomorDaftar' => data_get($latest, 'nomorDaftar')
+                ?? data_get($lastRespon, 'nomorDaftar'),
+            'dataStatus' => $statusEvents,
+            'dataRespon' => $responEvents,
+        ];
+    }
+
+    /**
+     * NPWP kredensial dinormalkan ke 15 digit (gateway menolak 16 digit
+     * berawalan 0 — "Data Perusahaan Tidak Sesuai", terbukti probe live).
+     */
+    public function npwp15(): ?string
+    {
+        $npwp = $this->credential?->npwp;
+
+        if ($npwp === null || $npwp === '') {
+            return null;
+        }
+
+        return (strlen($npwp) === 16 && str_starts_with($npwp, '0'))
+            ? substr($npwp, 1)
+            : $npwp;
     }
 
     /**
@@ -454,11 +501,15 @@ class CeisaService
      *
      * @return int Jumlah dokumen yang berhasil disinkron/di-update
      */
-    public function syncDocuments(\App\Models\User $user): int
+    public function syncDocuments(User $user): int
     {
-        $npwp = $this->credential->npwp;
-        // Gunakan 15-digit NPWP untuk query
-        $npwp15 = (strlen($npwp) === 16 && str_starts_with($npwp, '0')) ? substr($npwp, 1) : $npwp;
+        $npwp15 = $this->npwp15();
+
+        if (empty($npwp15)) {
+            throw new CeisaException(
+                'NPWP perusahaan belum diisi pada Pengaturan CEISA — diperlukan untuk sinkronisasi (idPerusahaan).'
+            );
+        }
 
         $response = $this->fetchAllStatuses($npwp15);
 
@@ -474,14 +525,26 @@ class CeisaService
                 continue;
             }
 
-            $merged[$nomorAju] = [
+            $waktu = (string) (data_get($statusItem, 'waktuStatus') ?? data_get($statusItem, 'waktu_status') ?? data_get($statusItem, 'createdDate') ?? '');
+
+            // Satu nomorAju punya BANYAK event timeline & urutan dari API tidak
+            // kronologis — simpan hanya event TERAKHIR berdasarkan waktuStatus.
+            if (isset($merged[$nomorAju]) && strcmp($waktu, (string) $merged[$nomorAju]['waktu_status']) < 0) {
+                continue;
+            }
+
+            $merged[$nomorAju] = array_merge($merged[$nomorAju] ?? [], [
                 'nomor_aju' => $nomorAju,
-                'status' => data_get($statusItem, 'status'),
+                // Skema live tidak punya field `status` — pakai `keterangan`
+                // (mis. "Perekaman Dokumen", "Pemeriksaan Dokumen").
+                'status' => data_get($statusItem, 'status') ?? data_get($statusItem, 'keterangan'),
                 'jalur' => data_get($statusItem, 'jalur') ?? data_get($statusItem, 'kodeJalur') ?? data_get($statusItem, 'kode_jalur'),
                 'id_header' => data_get($statusItem, 'idHeader') ?? data_get($statusItem, 'id_header'),
-                'waktu_status' => data_get($statusItem, 'waktuStatus') ?? data_get($statusItem, 'waktu_status') ?? data_get($statusItem, 'createdDate'),
+                'waktu_status' => $waktu,
+                'nomor_daftar' => data_get($statusItem, 'nomorDaftar') ?? data_get($statusItem, 'nomor_daftar') ?? ($merged[$nomorAju]['nomor_daftar'] ?? null),
+                'tanggal_daftar' => data_get($statusItem, 'tanggalDaftar') ?? data_get($statusItem, 'tanggal_daftar') ?? ($merged[$nomorAju]['tanggal_daftar'] ?? null),
                 'raw_status' => $statusItem,
-            ];
+            ]);
         }
 
         foreach ($dataRespon as $responItem) {
@@ -501,10 +564,11 @@ class CeisaService
                 ];
             }
 
-            $merged[$nomorAju]['nomor_daftar'] = data_get($responItem, 'nomorDaftar') ?? data_get($responItem, 'nomor_daftar');
-            $merged[$nomorAju]['tanggal_daftar'] = data_get($responItem, 'tanggalDaftar') ?? data_get($responItem, 'tanggal_daftar');
+            $merged[$nomorAju]['nomor_daftar'] = data_get($responItem, 'nomorDaftar') ?? data_get($responItem, 'nomor_daftar') ?? ($merged[$nomorAju]['nomor_daftar'] ?? null);
+            $merged[$nomorAju]['tanggal_daftar'] = data_get($responItem, 'tanggalDaftar') ?? data_get($responItem, 'tanggal_daftar') ?? ($merged[$nomorAju]['tanggal_daftar'] ?? null);
             $merged[$nomorAju]['kode_billing'] = data_get($responItem, 'kodeBilling') ?? data_get($responItem, 'kode_billing');
-            $merged[$nomorAju]['respon_pdf'] = data_get($responItem, 'responPdf') ?? data_get($responItem, 'pathRespon') ?? data_get($responItem, 'path_respon');
+            // Skema live: path PDF respon ada di key `pdf`.
+            $merged[$nomorAju]['respon_pdf'] = data_get($responItem, 'responPdf') ?? data_get($responItem, 'pathRespon') ?? data_get($responItem, 'path_respon') ?? data_get($responItem, 'pdf');
             $merged[$nomorAju]['raw_respon'] = $responItem;
         }
 
@@ -527,7 +591,11 @@ class CeisaService
             $document = $user->documents()->where('nomor_aju', $nomorAju)->first();
 
             $statusText = $info['status'] ?? ($document ? $document->status : Document::STATUS_SUBMITTED);
-            $mappedStatus = CeisaStatusMapper::mapStatus(['status' => $statusText], $document ?? new Document());
+            $mappedStatus = CeisaStatusMapper::mapStatus([
+                'status' => $statusText,
+                // Respon resmi (SPPB/NPE/NPP dst.) ikut menentukan status final.
+                'dataRespon' => array_filter([$info['raw_respon'] ?? null]),
+            ], $document ?? new Document);
             $mappedJalur = CeisaStatusMapper::extractJalur(['jalur' => $info['jalur']]);
 
             $payload = [
@@ -594,4 +662,3 @@ class CeisaService
         ]);
     }
 }
-
