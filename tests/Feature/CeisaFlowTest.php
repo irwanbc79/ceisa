@@ -415,17 +415,17 @@ class CeisaFlowTest extends TestCase
 
         $doc = Document::first();
         $this->assertNotNull($doc);
-        
+
         // Check database storage
         $this->assertCount(1, data_get($doc->payload, 'dokumen'));
         $this->assertSame('INV-2026-001', data_get($doc->payload, 'dokumen.0.nomor_dokumen'));
-        
+
         $this->assertCount(1, data_get($doc->payload, 'kontainer'));
         $this->assertSame('MSKU1234567', data_get($doc->payload, 'kontainer.0.nomor_kontainer'));
 
         // Check H2H payload building mapping
-        $builderPayload = (new CeisaPayloadBuilder())->build('BC30', $doc->payload, '000001-PEB');
-        
+        $builderPayload = (new CeisaPayloadBuilder)->build('BC30', $doc->payload, '000001-PEB');
+
         $this->assertCount(1, data_get($builderPayload, 'dokumen'));
         $this->assertSame('380', data_get($builderPayload, 'dokumen.0.kodeDokumen'));
         $this->assertSame('INV-2026-001', data_get($builderPayload, 'dokumen.0.nomorDokumen'));
@@ -1530,18 +1530,29 @@ class CeisaFlowTest extends TestCase
 
     public function test_refresh_status_pulls_and_applies_from_ceisa(): void
     {
+        // Skema respons NYATA gateway (probe live 2026-07-02): status per
+        // perusahaan (idPerusahaan NPWP 15 digit), timeline dataStatus TIDAK
+        // kronologis, respon resmi (NPE) di dataRespon dengan path `pdf`.
         Http::fake([
             '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
-            '*/openapi/status/*' => Http::response([
-                'status' => 'SPPB DITERBITKAN',
-                'jalur' => 'HIJAU',
-                'nomor_daftar' => 'REG-99',
+            '*/openapi/status*' => Http::response([
+                'status' => 'Success',
+                'message' => 'Data Ditemukan',
+                'dataStatus' => [
+                    ['nomorAju' => 'AJU-1', 'nomorDaftar' => '003574', 'tanggalDaftar' => '01-07-2026', 'kodeProses' => '400', 'waktuStatus' => '2026-07-01 13:13:00.03', 'keterangan' => 'Pemeriksaan Dokumen', 'kodeDokumen' => '30'],
+                    ['nomorAju' => 'AJU-1', 'nomorDaftar' => '003574', 'tanggalDaftar' => '01-07-2026', 'kodeProses' => '001', 'waktuStatus' => '2026-05-25 11:43:31.013', 'keterangan' => 'Perekaman Dokumen', 'kodeDokumen' => '30'],
+                    ['nomorAju' => 'AJU-MILIK-LAIN', 'kodeProses' => '001', 'waktuStatus' => '2026-06-01 00:00:00', 'keterangan' => 'Perekaman Dokumen', 'kodeDokumen' => '20'],
+                ],
+                'dataRespon' => [
+                    ['nomorAju' => 'AJU-1', 'kodeRespon' => '3015', 'nomorDaftar' => '003574', 'keterangan' => 'NPE', 'pdf' => 'respon/2026/7/1/contoh.pdf', 'kodeDokumen' => '30'],
+                ],
             ], 200),
         ]);
 
         $user = $this->authedUser();
         $user->ceisaCredential()->create([
             'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+            'npwp' => '0960208833125000',
         ]);
 
         $doc = $user->documents()->create([
@@ -1555,13 +1566,44 @@ class CeisaFlowTest extends TestCase
             ->assertRedirect();
 
         $doc->refresh();
+        // Respon NPE (Nota Pelayanan Ekspor) => accepted; nomor daftar terisi.
         $this->assertSame(Document::STATUS_ACCEPTED, $doc->status);
-        $this->assertSame(Document::JALUR_HIJAU, $doc->jalur);
-        $this->assertSame('REG-99', $doc->nomor_daftar);
+        $this->assertSame('003574', $doc->nomor_daftar);
 
-        // idHeader ikut dikirim sebagai query saat menarik status.
-        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/openapi/status/AJU-1')
-            && str_contains($r->url(), 'idHeader=uuid-1'));
+        // Kontrak terverifikasi live: query idPerusahaan = NPWP 15 digit
+        // (16 digit berawalan 0 dipangkas), BUKAN path /status/{nomorAju}.
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/openapi/status')
+            && str_contains($r->url(), 'idPerusahaan=960208833125000'));
+    }
+
+    public function test_refresh_status_fails_gracefully_when_document_absent_from_ceisa(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/openapi/status*' => Http::response([
+                'status' => 'Success', 'message' => 'Data Ditemukan',
+                'dataStatus' => [], 'dataRespon' => [],
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+            'npwp' => '960208833125000',
+        ]);
+
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
+            'nomor_aju' => 'AJU-HILANG', 'payload' => ['x' => 1],
+            'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('documents.refresh-status', $doc))
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $this->assertSame(Document::STATUS_SUBMITTED, $doc->fresh()->status);
     }
 
     public function test_sync_references_command_upserts_from_ceisa(): void
@@ -1610,7 +1652,7 @@ class CeisaFlowTest extends TestCase
 
         $user = $this->authedUser();
         $user->ceisaCredential()->create([
-            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '123456789012345'
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '123456789012345',
         ]);
 
         $this->artisan('ceisa:probe-status')
@@ -1634,7 +1676,7 @@ class CeisaFlowTest extends TestCase
                         'waktuStatus' => '2026-06-30 19:42:00',
                         'idHeader' => 'id-1',
                         'jalur' => 'H',
-                    ]
+                    ],
                 ],
                 'dataRespon' => [
                     [
@@ -1644,14 +1686,14 @@ class CeisaFlowTest extends TestCase
                         'kodeDokumen' => '20',
                         'responPdf' => 'path/to/pdf',
                         'kodeBilling' => 'bill-1',
-                    ]
-                ]
+                    ],
+                ],
             ], 200),
         ]);
 
         $user = $this->authedUser();
         $user->ceisaCredential()->create([
-            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '0123456789012345'
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '0123456789012345',
         ]);
 
         $this->actingAs($user)
@@ -1666,6 +1708,50 @@ class CeisaFlowTest extends TestCase
             'jalur' => Document::JALUR_HIJAU,
             'nomor_daftar' => '001234',
             'id_header' => 'id-1',
+        ]);
+    }
+
+    public function test_sync_documents_maps_real_live_schema(): void
+    {
+        // Bentuk respons persis hasil probe live 2026-07-02: timeline pakai
+        // keterangan+kodeProses (tanpa field status/jalur), urutan acak,
+        // respon NPE membawa nomorDaftar & path `pdf`.
+        Http::fake([
+            '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
+            '*/status*' => Http::response([
+                'status' => 'Success',
+                'message' => 'Data Ditemukan',
+                'dataStatus' => [
+                    ['nomorAju' => '000030MOT83720260525000009', 'nomorDaftar' => '003574', 'tanggalDaftar' => '01-07-2026', 'kodeProses' => '400', 'waktuStatus' => '2026-07-01 13:13:00.03', 'keterangan' => 'Pemeriksaan Dokumen', 'kodeDokumen' => '30'],
+                    ['nomorAju' => '000030MOT83720260525000009', 'nomorDaftar' => '003574', 'tanggalDaftar' => '01-07-2026', 'kodeProses' => '001', 'waktuStatus' => '2026-05-25 11:43:31.013', 'keterangan' => 'Perekaman Dokumen', 'kodeDokumen' => '30'],
+                ],
+                'dataRespon' => [
+                    ['nomorAju' => '000030MOT83720260525000009', 'kodeRespon' => '3015', 'nomorDaftar' => '003574', 'tanggalDaftar' => '2026-07-01 13:12:59', 'nomorRespon' => '003570/KBC.0207/2026', 'keterangan' => 'NPE', 'pdf' => 'respon/2026/7/1/contoh.pdf', 'kodeDokumen' => '30'],
+                ],
+            ], 200),
+        ]);
+
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123',
+            'npwp' => '0960208833125000',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('documents.sync'))
+            ->assertRedirect();
+
+        // NPWP dinormalkan 16 -> 15 digit saat query idPerusahaan.
+        Http::assertSent(fn (Request $r) => str_contains($r->url(), '/status')
+            && str_contains($r->url(), 'idPerusahaan=960208833125000'));
+
+        // NPE => accepted; doc_type dibaca dari digit 5-6 nomor aju (30 = BC30).
+        $this->assertDatabaseHas('documents', [
+            'user_id' => $user->id,
+            'nomor_aju' => '000030MOT83720260525000009',
+            'doc_type' => 'BC30',
+            'status' => Document::STATUS_ACCEPTED,
+            'nomor_daftar' => '003574',
         ]);
     }
 }
