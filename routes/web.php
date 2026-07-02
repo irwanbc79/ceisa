@@ -53,9 +53,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dokumen/{document}/detail-v2', [DocumentController::class, 'detailV2'])->name('documents.detail-v2');
     Route::get('/dokumen/{document}/download-billing', [DocumentController::class, 'downloadBilling'])->name('documents.download-billing');
 
-    // Pengaturan kredensial CEISA
+    // Pengaturan kredensial CEISA perusahaan (lihat & uji koneksi = semua staf,
+    // ubah kredensial = khusus admin)
     Route::get('/settings/ceisa', [CeisaSettingController::class, 'edit'])->name('settings.ceisa.edit');
-    Route::post('/settings/ceisa', [CeisaSettingController::class, 'update'])->name('settings.ceisa.update');
+    Route::post('/settings/ceisa', [CeisaSettingController::class, 'update'])->middleware('admin')->name('settings.ceisa.update');
     Route::post('/settings/ceisa/test', [CeisaSettingController::class, 'test'])->name('settings.ceisa.test');
 
     // Manajemen pengguna (khusus admin)

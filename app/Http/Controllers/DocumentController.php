@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\CeisaException;
 use App\Http\Requests\StoreArchiveDocumentRequest;
 use App\Http\Requests\StoreDocumentRequest;
+use App\Models\CeisaCredential;
 use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Services\CeisaService;
@@ -13,6 +14,7 @@ use App\Services\DocumentValidator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -45,7 +47,7 @@ class DocumentController extends Controller
         $perPage = 20;
         $page = (int) $request->input('page', 1);
         $documents = $query->latest()->forPage($page, $perPage)->get();
-        $documents = new \Illuminate\Pagination\LengthAwarePaginator(
+        $documents = new LengthAwarePaginator(
             $documents,
             $rekap['total'],
             $perPage,
@@ -160,7 +162,7 @@ class DocumentController extends Controller
      */
     public function create(Request $request): View|RedirectResponse
     {
-        if (! $request->user()->ceisaCredential) {
+        if (! CeisaCredential::shared()) {
             return redirect()
                 ->route('settings.ceisa.edit')
                 ->with('error', 'Lengkapi kredensial CEISA (App ID & API Key) terlebih dahulu sebelum membuat dokumen.');
@@ -213,7 +215,7 @@ class DocumentController extends Controller
     {
         $user = $request->user();
 
-        $credential = $user->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         $document = $user->documents()->create([
@@ -265,7 +267,7 @@ class DocumentController extends Controller
             ]);
         }
 
-        if (! $request->user()->ceisaCredential) {
+        if (! CeisaCredential::shared()) {
             return redirect()
                 ->route('settings.ceisa.edit')
                 ->with('error', 'Lengkapi kredensial CEISA terlebih dahulu sebelum mengubah dokumen.');
@@ -305,7 +307,7 @@ class DocumentController extends Controller
         }
 
         try {
-            CeisaService::forCredential($request->user()->ceisaCredential)->submit($document);
+            CeisaService::forCredential(CeisaCredential::shared())->submit($document);
         } catch (CeisaException $e) {
             return redirect()
                 ->route('documents.show', $document)
@@ -398,7 +400,7 @@ class DocumentController extends Controller
     {
         $this->authorizeOwnership($request, $document);
 
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         if (! in_array($document->status, [Document::STATUS_DRAFT, Document::STATUS_ERROR], true)) {
@@ -421,7 +423,7 @@ class DocumentController extends Controller
     {
         $this->authorizeOwnership($request, $document);
 
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         if (empty($document->nomor_aju)) {
@@ -442,7 +444,7 @@ class DocumentController extends Controller
      */
     public function sync(Request $request): RedirectResponse
     {
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
 
         if (! $credential) {
             return back()->with('error', 'Lengkapi kredensial CEISA terlebih dahulu sebelum melakukan sinkronisasi.');
@@ -476,7 +478,7 @@ class DocumentController extends Controller
             return back()->with('error', 'Dokumen belum memiliki nomor aju — kirim ke CEISA terlebih dahulu.');
         }
 
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         try {
@@ -498,7 +500,7 @@ class DocumentController extends Controller
      */
     public function lookup(Request $request): View|RedirectResponse
     {
-        if (! $request->user()->ceisaCredential) {
+        if (! CeisaCredential::shared()) {
             return redirect()
                 ->route('settings.ceisa.edit')
                 ->with('error', 'Lengkapi kredensial CEISA terlebih dahulu.');
@@ -517,7 +519,7 @@ class DocumentController extends Controller
         ]);
 
         $user = $request->user();
-        $credential = $user->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         $nomorAju = trim($request->input('nomor_aju'));
@@ -639,7 +641,7 @@ class DocumentController extends Controller
     public function downloadRespon(Request $request, Document $document)
     {
         $this->authorizeOwnership($request, $document);
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         // Cari path di ceisa_response atau webhookLogs
@@ -681,7 +683,7 @@ class DocumentController extends Controller
     public function cetakFormulir(Request $request, Document $document)
     {
         $this->authorizeOwnership($request, $document);
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         if (empty($document->nomor_aju)) {
@@ -712,7 +714,7 @@ class DocumentController extends Controller
     public function downloadBilling(Request $request, Document $document)
     {
         $this->authorizeOwnership($request, $document);
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
         $kodeBilling = data_get($document->ceisa_response, 'data.kodeBilling')
