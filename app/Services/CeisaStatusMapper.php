@@ -60,7 +60,11 @@ class CeisaStatusMapper
         return match (true) {
             str_contains($haystack, 'NPP'), str_contains($haystack, 'TOLAK'), str_contains($haystack, 'REJECT') => Document::STATUS_REJECTED,
             str_contains($haystack, 'TERIMA'), str_contains($haystack, 'ACCEPT'), str_contains($haystack, 'SPPB'), str_contains($haystack, 'NPE'), str_contains($haystack, 'SELESAI') => Document::STATUS_ACCEPTED,
-            default => $document->status === Document::STATUS_SUBMITTING ? Document::STATUS_SUBMITTED : $document->status,
+            // Dokumen baru dari sinkronisasi (belum punya status lokal)
+            // default ke submitted — sudah nyata ada di CEISA.
+            default => $document->status === Document::STATUS_SUBMITTING
+                ? Document::STATUS_SUBMITTED
+                : ($document->status ?? Document::STATUS_SUBMITTED),
         };
     }
 

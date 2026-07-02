@@ -16,10 +16,11 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
-        $documents = $user->documents()->latest()->paginate(15);
+        // Dashboard tim: tampilkan seluruh dokumen perusahaan.
+        $documents = Document::query()->latest()->paginate(15);
 
         // Satu query agregat alih-alih empat count() terpisah.
-        $agg = $user->documents()
+        $agg = Document::query()
             ->selectRaw('count(*) as total')
             ->selectRaw('sum(case when status = ? then 1 else 0 end) as submitted', [Document::STATUS_SUBMITTED])
             ->selectRaw('sum(case when status = ? then 1 else 0 end) as accepted', [Document::STATUS_ACCEPTED])

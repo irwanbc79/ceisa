@@ -121,12 +121,13 @@ class AiValidationTest extends TestCase
         $this->assertNotEmpty($av['rule_findings']); // aturan tetap jalan
     }
 
-    public function test_validate_ai_forbidden_for_other_users_document(): void
+    public function test_validate_ai_allowed_for_teammates_document(): void
     {
+        // Dokumen milik perusahaan: rekan kerja boleh menjalankan validasi.
         $owner = $this->authedUser();
         $doc = $this->makeDocument($owner);
 
-        $intruder = $this->authedUser();
-        $this->actingAs($intruder)->post(route('documents.validate', $doc))->assertForbidden();
+        $teammate = $this->authedUser();
+        $this->actingAs($teammate)->post(route('documents.validate', $doc))->assertRedirect();
     }
 }

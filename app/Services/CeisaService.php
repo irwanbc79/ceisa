@@ -587,8 +587,9 @@ class CeisaService
                 default => 'BC30',
             };
 
-            // Cari dokumen lokal
-            $document = $user->documents()->where('nomor_aju', $nomorAju)->first();
+            // Cari dokumen lokal COMPANY-WIDE — operator berbeda yang
+            // menjalankan sinkronisasi tidak boleh menduplikasi dokumen.
+            $document = Document::where('nomor_aju', $nomorAju)->first();
 
             $statusText = $info['status'] ?? ($document ? $document->status : Document::STATUS_SUBMITTED);
             $mappedStatus = CeisaStatusMapper::mapStatus([
