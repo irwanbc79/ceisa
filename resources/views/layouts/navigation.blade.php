@@ -30,6 +30,11 @@
                     <x-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
                         {{ __('Pengaturan CEISA') }}
                     </x-nav-link>
+                    @if (Auth::user()->isAdmin())
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            {{ __('Pengguna') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -103,6 +108,11 @@
             <x-responsive-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
                 {{ __('Pengaturan CEISA') }}
             </x-responsive-nav-link>
+            @if (Auth::user()->isAdmin())
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('Pengguna') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
