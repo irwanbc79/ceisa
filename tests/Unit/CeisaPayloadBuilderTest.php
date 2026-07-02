@@ -122,6 +122,34 @@ class CeisaPayloadBuilderTest extends TestCase
         $this->assertSame('BL-998877', $flat['dokumen'][1]['nomorDokumen']);
     }
 
+    public function test_bc20_kode_kantor_prefers_header_over_pelabuhan_bongkar(): void
+    {
+        $payload = [
+            'header' => [
+                'kode_kantor' => '040300',
+                'importir' => ['nama' => 'PT Impor', 'npwp' => '012345678901000', 'alamat' => 'Jakarta'],
+                'pemasok' => ['nama' => 'ACME', 'negara' => 'SG'],
+                'valuta' => 'USD',
+                'ndpbm' => 15800,
+                'nilai_cif' => 1000,
+                'pengangkutan' => ['pelabuhan_muat' => 'SGSIN', 'pelabuhan_bongkar' => 'IDTPP'],
+            ],
+            'barang' => [
+                ['hs_code' => '39269099', 'uraian' => 'Plastic Parts', 'jumlah_satuan' => 10, 'kode_satuan' => 'PCE', 'netto' => 5, 'nilai_cif' => 1000],
+            ],
+        ];
+
+        $flat = CeisaPayloadBuilder::make()->build('BC20', $payload, str_repeat('0', 26));
+
+        // Field wizard baru (step Data Header): kantor pabean eksplisit menang.
+        $this->assertSame('040300', $flat['kodeKantor']);
+
+        // Tanpa kode_kantor: fallback lama dari pelabuhan bongkar tetap jalan.
+        unset($payload['header']['kode_kantor']);
+        $flat = CeisaPayloadBuilder::make()->build('BC20', $payload, str_repeat('0', 26));
+        $this->assertSame('IDTPP', $flat['kodeKantor']);
+    }
+
     public function test_cara_angkut_code_mapping(): void
     {
         $b = CeisaPayloadBuilder::make();

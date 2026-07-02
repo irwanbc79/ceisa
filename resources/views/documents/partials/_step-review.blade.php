@@ -1,6 +1,6 @@
 @php
 /**
- * Step 5 — Review Data & Submit + tombol navigasi footer.
+ * Step 9 — Review Data & Submit + tombol navigasi footer.
  *
  * Berbages Alpine scope dari root x-data="documentWizard()" di create.blade.php.
  *
@@ -12,7 +12,7 @@
 @endphp
 
 {{-- Step 5: Review & Send --}}
-<div x-show="step === 7" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 9" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Review Data &amp; Submit</h3>
@@ -88,6 +88,58 @@
                     </div>
                 </template>
             </dl>
+        </div>
+
+        {{-- Pungutan (pratinjau) — selaras tab "Pungutan" Portal CEISA 4.0 --}}
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Pungutan (Pratinjau)</h4>
+
+            <template x-if="doc_type === 'BC20' || doc_type === 'BC24'">
+                <div>
+                    <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                        <div>
+                            <dt class="text-slate-400">Nilai Pabean (CIF × NDPBM)</dt>
+                            <dd class="font-bold text-slate-700 font-mono" x-text="'Rp ' + pungutanPreview().dasar.toLocaleString('id-ID', {maximumFractionDigits: 0})"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-400">Bea Masuk (tarif dasar)</dt>
+                            <dd class="font-bold text-slate-700 font-mono" x-text="'Rp ' + pungutanPreview().bm.toLocaleString('id-ID', {maximumFractionDigits: 0})"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-400">PPN 11%</dt>
+                            <dd class="font-bold text-slate-700 font-mono" x-text="'Rp ' + pungutanPreview().ppn.toLocaleString('id-ID', {maximumFractionDigits: 0})"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-400">PPh 2,5%</dt>
+                            <dd class="font-bold text-slate-700 font-mono" x-text="'Rp ' + pungutanPreview().pph.toLocaleString('id-ID', {maximumFractionDigits: 0})"></dd>
+                        </div>
+                    </dl>
+                    <p class="text-[10px] text-slate-400 mt-2">Estimasi pratinjau berdasar tarif dasar (BM 0% bila tarif per-barang belum diisi). Perhitungan resmi & billing diterbitkan sistem CEISA setelah dokumen dikirim.</p>
+                </div>
+            </template>
+
+            <template x-if="doc_type === 'BC30'">
+                <div>
+                    <dl class="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                            <dt class="text-slate-400">Nilai FOB Total</dt>
+                            <dd class="font-bold text-slate-700 font-mono" x-text="getTotalValue() + ' ' + (formData.kode_valuta || '')"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-slate-400">Bea Keluar</dt>
+                            <dd class="font-bold text-slate-700 font-mono">Dihitung CEISA</dd>
+                        </div>
+                    </dl>
+                    <p class="text-[10px] text-slate-400 mt-2">Umumnya ekspor tidak dikenai Bea Keluar kecuali komoditi tertentu (CPO, mineral, dll.) — perhitungan resmi oleh sistem CEISA.</p>
+                </div>
+            </template>
+
+            <template x-if="doc_type !== 'BC30' && doc_type !== 'BC20' && doc_type !== 'BC24'">
+                <div class="text-xs text-slate-500">
+                    Total nilai barang: <span class="font-bold font-mono" x-text="getTotalValue() + ' ' + (formData.kode_valuta || '')"></span>
+                    <span class="text-slate-400">— pungutan (bila ada) dihitung sistem CEISA.</span>
+                </div>
+            </template>
         </div>
 
         {{-- Pernyataan Penanggung Jawab --}}

@@ -1,6 +1,6 @@
 @php
 /**
- * Step 2 — Informasi Identitas Entitas (pelaku transaksi kepabeanan).
+ * Step 3 — Informasi Identitas Entitas (pelaku transaksi kepabeanan).
  *
  * Berbages Alpine scope dari root x-data="documentWizard()" di create.blade.php.
  *
@@ -10,7 +10,7 @@
 @endphp
 
 {{-- Step 2: Entities/Parties --}}
-<div x-show="step === 2" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 3" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Informasi Identitas Entitas</h3>
@@ -27,43 +27,6 @@
 
     {{-- BC 3.0 (Header Klasifikasi + Eksportir & Penerima) --}}
     <div x-show="doc_type === 'BC30'" class="space-y-6">
-        {{-- Data Header: klasifikasi ekspor sesuai CEISA 4.0 --}}
-        <div class="border-b border-slate-100 pb-4">
-            <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Data Header (Klasifikasi Ekspor)</h4>
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
-                <div>
-                    <x-input-label for="kantor_muat" value="Kantor Muat" />
-                    <x-searchable-select id="kantor_muat" name="kantor_muat" model="formData.kantor_muat" options="references.kantorMuat" placeholder="-- Pilih Kantor Muat --" />
-                </div>
-                <div>
-                    <x-input-label for="jenis_ekspor" value="Jenis Ekspor" />
-                    <x-searchable-select id="jenis_ekspor" name="jenis_ekspor" model="formData.jenis_ekspor" options="references.jenisEkspor" placeholder="-- Pilih Jenis Ekspor --" />
-                </div>
-                <div>
-                    <x-input-label for="kategori_ekspor" value="Kategori Ekspor" />
-                    <x-searchable-select id="kategori_ekspor" name="kategori_ekspor" model="formData.kategori_ekspor" options="references.kategoriEkspor" placeholder="-- Pilih Kategori Ekspor --" />
-                </div>
-                <div>
-                    <x-input-label for="cara_dagang" value="Cara Dagang" />
-                    <x-searchable-select id="cara_dagang" name="cara_dagang" model="formData.cara_dagang" options="references.caraDagang" placeholder="-- Pilih Cara Dagang --" />
-                </div>
-                <div>
-                    <x-input-label for="cara_bayar" value="Cara Bayar" />
-                    <x-searchable-select id="cara_bayar" name="cara_bayar" model="formData.cara_bayar" options="references.caraBayar" placeholder="-- Pilih Cara Bayar --" />
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <x-input-label for="komoditi" value="Komoditi" />
-                        <x-searchable-select id="komoditi" name="komoditi" model="formData.komoditi" :options="['NON_MIGAS' => 'Non Migas', 'MIGAS' => 'Migas']" placeholder="-- Pilih Komoditi --" />
-                    </div>
-                    <div>
-                        <x-input-label for="curah" value="Curah" />
-                        <x-searchable-select id="curah" name="curah" model="formData.curah" :options="['NON_CURAH' => 'Non Curah', 'CURAH' => 'Curah']" placeholder="-- Pilih Curah --" />
-                    </div>
-                </div>
-            </div>
-        </div>
-
         {{-- Entitas: Eksportir --}}
         <div class="border-b border-slate-100 pb-4">
             <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Identitas Eksportir</h4>
@@ -153,23 +116,6 @@
                 <div class="sm:col-span-2">
                     <x-input-label for="alamat_tpb" value="Alamat Lokasi TPB" />
                     <textarea id="alamat_tpb" :name="doc_type === 'TPB' ? 'alamat_tpb' : ''" x-model="formData.alamat_tpb" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'"></textarea>
-                </div>
-            </div>
-        </div>
-        <div>
-            <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Detail Fasilitas TPB</h4>
-            <div class="grid sm:grid-cols-3 gap-4 mt-3">
-                <div>
-                    <x-input-label for="jenis_tpb" value="Jenis TPB (Referensi)" />
-                    <x-searchable-select id="jenis_tpb" ::name="doc_type === 'TPB' ? 'jenis_tpb' : ''" model="formData.jenis_tpb" options="references.tpbTypes" placeholder="-- Pilih Jenis TPB --" ::required="doc_type === 'TPB'" />
-                </div>
-                <div>
-                    <x-input-label for="tujuan_tpb" value="Tujuan Pengiriman (Referensi)" />
-                    <x-searchable-select id="tujuan_tpb" ::name="doc_type === 'TPB' ? 'tujuan_tpb' : ''" model="formData.tujuan_tpb" options="references.tpbDestinations" placeholder="-- Pilih Tujuan --" ::required="doc_type === 'TPB'" />
-                </div>
-                <div>
-                    <x-input-label for="dokumen_referensi" value="No. Dokumen Referensi / Kontrak" />
-                    <input type="text" id="dokumen_referensi" :name="doc_type === 'TPB' ? 'dokumen_referensi' : ''" x-model="formData.dokumen_referensi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'TPB'" />
                 </div>
             </div>
         </div>

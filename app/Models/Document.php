@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Cache;
 class Document extends Model
 {
     use HasDocumentTimeline;
+
     public const STATUS_DRAFT = 'draft';
 
     public const STATUS_SUBMITTING = 'submitting';
@@ -336,6 +337,7 @@ class Document extends Model
                 'jenis_api' => data_get($h, 'importir.jenis_api'),
                 'nama_pemasok' => data_get($h, 'pemasok.nama'),
                 'negara_pemasok' => data_get($h, 'pemasok.negara'),
+                'kode_kantor' => data_get($h, 'kode_kantor'),
                 'jenis_impor' => data_get($h, 'jenis_impor'),
                 'cara_bayar' => data_get($h, 'cara_bayar'),
                 'pelabuhan_muat' => data_get($h, 'pengangkutan.pelabuhan_muat'),

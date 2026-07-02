@@ -1,10 +1,10 @@
 @php
 /**
- * Step 3 — Dokumen Pelengkap Kepabeanan.
+ * Step 4 — Dokumen Pelengkap Kepabeanan.
  */
 @endphp
 
-<div x-show="step === 3" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 4" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Dokumen Pelengkap Kepabeanan</h3>
