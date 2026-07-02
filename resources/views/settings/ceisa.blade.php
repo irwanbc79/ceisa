@@ -23,13 +23,30 @@
             <x-flash />
 
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-medium text-gray-900">Kredensial Host-to-Host (CEISA 4.0)</h3>
+                <h3 class="text-lg font-medium text-gray-900">Kredensial Host-to-Host (CEISA 4.0) — Perusahaan</h3>
                 <p class="mt-1 text-sm text-gray-500">
+                    Kredensial berlaku untuk <strong>seluruh staf</strong> (satu akun H2H perusahaan).
                     Login H2H memakai <strong>Username</strong> + <strong>Password</strong> akun Portal CEISA
                     (portal.beacukai.go.id) beserta <strong>Beacukai API Key</strong> (header <code class="text-xs">beacukai-api-key</code>).
                     Semua kredensial disimpan terenkripsi.
                 </p>
 
+                @if (! auth()->user()->isAdmin())
+                    <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-600 space-y-1.5">
+                        <p class="font-semibold text-slate-800">Kredensial dikelola oleh admin.</p>
+                        @if ($credential)
+                            <p>Status: <span class="font-semibold text-emerald-600">terpasang</span>
+                                @if ($credential->npwp) · NPWP {{ $credential->npwp }} @endif
+                                @if ($credential->user) · diatur oleh {{ $credential->user->name }} @endif
+                            </p>
+                            <p class="text-xs text-slate-400">Anda dapat langsung membuat & mengirim dokumen — sistem otomatis memakai kredensial perusahaan ini.</p>
+                        @else
+                            <p>Status: <span class="font-semibold text-crimson-600">belum diisi</span> — hubungi admin untuk mengisi kredensial CEISA sebelum mengirim dokumen.</p>
+                        @endif
+                    </div>
+                @endif
+
+                @if (auth()->user()->isAdmin())
                 <form method="POST" action="{{ route('settings.ceisa.update') }}" class="mt-6 space-y-4">
                     @csrf
 
@@ -94,56 +111,57 @@
                         <x-input-error :messages="$errors->get('app_id')" class="mt-2" />
                     </div>
 
-                    @if ($credential)
-                        @php
-                            $expISO = $credential->token_expires_at?->toIso8601String();
-                        @endphp
-                        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5"
-                             x-data="ceisaTokenCountdown(@js($expISO))" x-init="start()">
-                            <div class="flex items-center justify-between gap-3">
-                                <div class="flex items-center gap-2 text-sm">
-                                    <span class="text-slate-500">Status token akses:</span>
-                                    <template x-if="remaining > 0">
-                                        <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600">
-                                            <span class="relative flex h-2 w-2">
-                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                            </span>
-                                            Aktif
-                                        </span>
-                                    </template>
-                                    <template x-if="remaining <= 0">
-                                        <span class="inline-flex items-center gap-1.5 font-bold text-slate-400">
-                                            <span class="h-2 w-2 rounded-full bg-slate-300"></span>
-                                            Kedaluwarsa
-                                        </span>
-                                    </template>
-                                </div>
-                                <div class="text-right">
-                                    <template x-if="remaining > 0">
-                                        <span class="font-mono font-bold tabular-nums text-lg"
-                                              :class="remaining <= 60 ? 'text-amber-600' : 'text-slate-700'"
-                                              x-text="formatted"></span>
-                                    </template>
-                                    <template x-if="remaining <= 0">
-                                        <span class="text-xs text-slate-400 font-medium">diperbarui otomatis saat aksi berikutnya</span>
-                                    </template>
-                                </div>
-                            </div>
-                            {{-- Progress bar sisa umur token (asumsi TTL {{ (int) config('ceisa.token_ttl_fallback', 300) }} detik) --}}
-                            <div class="mt-2.5 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden" x-show="remaining > 0">
-                                <div class="h-full rounded-full transition-all duration-1000 ease-linear"
-                                     :class="remaining <= 60 ? 'bg-amber-500' : 'bg-emerald-500'"
-                                     :style="`width: ${Math.min(100, Math.max(0, (remaining / {{ (int) config('ceisa.token_ttl_fallback', 300) }}) * 100))}%`"></div>
-                            </div>
-                            <p class="text-[11px] text-slate-400 mt-2">Access token CEISA 4.0 berumur ±5 menit; sistem me-refresh otomatis (refresh token) saat dibutuhkan.</p>
-                        </div>
-                    @endif
-
                     <div class="flex items-center gap-3">
                         <x-primary-button>Simpan</x-primary-button>
                     </div>
                 </form>
+                @endif
+
+                @if ($credential)
+                    @php
+                        $expISO = $credential->token_expires_at?->toIso8601String();
+                    @endphp
+                    <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3.5"
+                         x-data="ceisaTokenCountdown(@js($expISO))" x-init="start()">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2 text-sm">
+                                <span class="text-slate-500">Status token akses:</span>
+                                <template x-if="remaining > 0">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        Aktif
+                                    </span>
+                                </template>
+                                <template x-if="remaining <= 0">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-slate-400">
+                                        <span class="h-2 w-2 rounded-full bg-slate-300"></span>
+                                        Kedaluwarsa
+                                    </span>
+                                </template>
+                            </div>
+                            <div class="text-right">
+                                <template x-if="remaining > 0">
+                                    <span class="font-mono font-bold tabular-nums text-lg"
+                                          :class="remaining <= 60 ? 'text-amber-600' : 'text-slate-700'"
+                                          x-text="formatted"></span>
+                                </template>
+                                <template x-if="remaining <= 0">
+                                    <span class="text-xs text-slate-400 font-medium">diperbarui otomatis saat aksi berikutnya</span>
+                                </template>
+                            </div>
+                        </div>
+                        {{-- Progress bar sisa umur token (asumsi TTL {{ (int) config('ceisa.token_ttl_fallback', 300) }} detik) --}}
+                        <div class="mt-2.5 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden" x-show="remaining > 0">
+                            <div class="h-full rounded-full transition-all duration-1000 ease-linear"
+                                 :class="remaining <= 60 ? 'bg-amber-500' : 'bg-emerald-500'"
+                                 :style="`width: ${Math.min(100, Math.max(0, (remaining / {{ (int) config('ceisa.token_ttl_fallback', 300) }}) * 100))}%`"></div>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-2">Access token CEISA 4.0 berumur ±5 menit; sistem me-refresh otomatis (refresh token) saat dibutuhkan.</p>
+                    </div>
+                @endif
 
                 @if ($credential)
                     <form method="POST" action="{{ route('settings.ceisa.test') }}" class="mt-4 pt-4 border-t border-gray-100">
