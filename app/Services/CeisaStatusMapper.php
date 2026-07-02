@@ -48,9 +48,18 @@ class CeisaStatusMapper
     {
         $raw = strtoupper((string) (data_get($payload, 'status') ?? data_get($payload, 'data.status') ?? ''));
 
+        // Keterangan respon resmi (skema live /v2/openapi/status: dataRespon[])
+        // menentukan status final — mis. NPE (Nota Pelayanan Ekspor, kodeRespon
+        // 3015) atau SPPB untuk impor. Hanya respon TERAKHIR yang dipakai agar
+        // dokumen yang pernah ditolak (NPP) lalu diperbaiki tidak salah peta.
+        $lastRespon = collect((array) data_get($payload, 'dataRespon', []))->last();
+        $responText = strtoupper((string) (data_get($lastRespon, 'keterangan') ?? ''));
+
+        $haystack = trim($raw.' '.$responText);
+
         return match (true) {
-            str_contains($raw, 'TERIMA'), str_contains($raw, 'ACCEPT'), str_contains($raw, 'SPPB'), str_contains($raw, 'SELESAI') => Document::STATUS_ACCEPTED,
-            str_contains($raw, 'TOLAK'), str_contains($raw, 'REJECT'), str_contains($raw, 'NPP') => Document::STATUS_REJECTED,
+            str_contains($haystack, 'NPP'), str_contains($haystack, 'TOLAK'), str_contains($haystack, 'REJECT') => Document::STATUS_REJECTED,
+            str_contains($haystack, 'TERIMA'), str_contains($haystack, 'ACCEPT'), str_contains($haystack, 'SPPB'), str_contains($haystack, 'NPE'), str_contains($haystack, 'SELESAI') => Document::STATUS_ACCEPTED,
             default => $document->status === Document::STATUS_SUBMITTING ? Document::STATUS_SUBMITTED : $document->status,
         };
     }
