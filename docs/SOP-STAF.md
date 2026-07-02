@@ -13,7 +13,10 @@
 ## 2. Membuat Dokumen (PEB/PIB)
 1. Menu **Buat Dokumen** → pilih jenis: **BC 3.0** (ekspor) atau **BC 2.0/2.4** (impor).
    ⚠ TPB & Rush Handling belum siap produksi — jangan dipakai dulu.
-2. Ikuti wizard 5 langkah: Header → Entitas → Barang → Dokumen/Kontainer → Review.
+2. Ikuti wizard 9 tahap — **urutannya sama dengan Portal CEISA 4.0 resmi**:
+   Portal Layanan → Data Header → Data Entitas → Dokumen Pelengkap →
+   Data Pengangkut → Kemasan & Peti Kemas → Data Transaksi → Data Barang →
+   Review (rekap Pungutan + Pernyataan + Submit).
    Field dropdown (negara, satuan, kantor pabean, dll.) sudah berisi kode resmi DJBC.
 3. **Simpan Draft** dulu bila data belum lengkap — draft bisa diedit kapan pun
    (tombol **Ubah**) dan tidak menyentuh sistem Bea Cukai sama sekali.

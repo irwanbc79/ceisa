@@ -134,13 +134,17 @@
                             </div>
                         </div>
 
+                        @include('documents.partials._step-header')
+
                         @include('documents.partials._step-entities')
 
                         @include('documents.partials._step-documents')
 
-                        @include('documents.partials._step-logistics')
+                        @include('documents.partials._step-transport')
 
                         @include('documents.partials._step-containers')
+
+                        @include('documents.partials._step-transaction')
 
                         @include('documents.partials._step-items')
 
@@ -170,13 +174,17 @@
                 showJson: false,
                 showDraftModal: false,
                 formError: '',
+                // Urutan tahap selaras Portal CEISA 4.0 resmi (usermanualceisa40.gitbook.io):
+                // Header -> Entitas -> Dokumen -> Pengangkut -> Kemasan -> Transaksi -> Barang -> (Pungutan+Pernyataan di Review).
                 steps: [
                     { title: 'Portal Layanan' },
+                    { title: 'Data Header' },
                     { title: 'Data Entitas' },
                     { title: 'Dokumen Pelengkap' },
-                    { title: 'Logistik & Valuta' },
-                    { title: 'Peti Kemas' },
-                    { title: 'Pos Barang' },
+                    { title: 'Data Pengangkut' },
+                    { title: 'Kemasan & Peti Kemas' },
+                    { title: 'Data Transaksi' },
+                    { title: 'Data Barang' },
                     { title: 'Review & Submit' }
                 ],
                 docTypes: [
@@ -457,44 +465,75 @@
                 },
 
                 isStepValid(s) {
+                    // Tahap 2 — Data Header
                     if (s === 2) {
                         if (this.doc_type === 'BC30') {
-                            return this.formData.kantor_muat && this.formData.jenis_ekspor && this.formData.kategori_ekspor && this.formData.cara_bayar
-                                && this.formData.nama_eksportir && this.formData.npwp_eksportir && this.formData.alamat_eksportir
+                            return this.formData.kantor_muat && this.formData.jenis_ekspor && this.formData.kategori_ekspor && this.formData.cara_bayar;
+                        }
+                        if (this.doc_type === 'TPB') {
+                            return this.formData.kode_kantor && this.formData.jenis_tpb;
+                        }
+                        if (this.doc_type === 'RUSH') {
+                            return this.formData.kode_kantor;
+                        }
+                        return true; // BC20/BC24: kantor & jenis impor opsional
+                    }
+                    // Tahap 3 — Data Entitas
+                    if (s === 3) {
+                        if (this.doc_type === 'BC30') {
+                            return this.formData.nama_eksportir && this.formData.npwp_eksportir && this.formData.alamat_eksportir
                                 && this.formData.nama_penerima && this.formData.negara_tujuan;
                         }
                         if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
                             return this.formData.nama_importir && this.formData.npwp_importir && this.formData.nama_pemasok && this.formData.negara_pemasok;
                         }
                         if (this.doc_type === 'TPB') {
-                            return this.formData.nama_tpb && this.formData.npwp_tpb && this.formData.jenis_tpb;
+                            return this.formData.nama_tpb && this.formData.npwp_tpb;
                         }
                         if (this.doc_type === 'RUSH') {
                             return this.formData.nama_pemohon && this.formData.npwp_pemohon && this.formData.alasan_segera;
                         }
                     }
-                    if (s === 3) {
+                    // Tahap 4 — Dokumen Pelengkap
+                    if (s === 4) {
                         return this.formData.dokumen.length > 0 && this.formData.dokumen.every(d => d.kode_dokumen && d.nomor_dokumen && d.tanggal_dokumen);
                     }
-                    if (s === 4) {
+                    // Tahap 5 — Data Pengangkut
+                    if (s === 5) {
                         if (this.doc_type === 'BC30') {
-                            return this.formData.pelabuhan_muat && this.formData.pelabuhan_tujuan && this.formData.kode_valuta
-                                && this.formData.ndpbm && this.formData.incoterm && this.formData.nilai_fob && this.formData.bruto;
+                            return this.formData.pelabuhan_muat && this.formData.pelabuhan_tujuan;
                         }
                         if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
-                            return this.formData.pelabuhan_muat && this.formData.pelabuhan_bongkar && this.formData.nilai_cif;
-                        }
-                        if (this.doc_type === 'TPB') {
-                            return this.formData.nilai_barang;
+                            return this.formData.pelabuhan_muat && this.formData.pelabuhan_bongkar;
                         }
                         if (this.doc_type === 'RUSH') {
                             return this.formData.nama_sarana_pengangkut && this.formData.nomor_awb_bl;
                         }
+                        return true;
                     }
-                    if (s === 5) {
-                        return this.formData.kontainer.every(c => c.nomor_kontainer && c.kode_ukuran && c.kode_tipe && c.kode_status);
-                    }
+                    // Tahap 6 — Kemasan & Peti Kemas
                     if (s === 6) {
+                        const kontainerOk = this.formData.kontainer.every(c => c.nomor_kontainer && c.kode_ukuran && c.kode_tipe && c.kode_status);
+                        if (this.doc_type === 'RUSH') {
+                            return kontainerOk && this.formData.jumlah_kemasan && this.formData.jenis_kemasan;
+                        }
+                        return kontainerOk;
+                    }
+                    // Tahap 7 — Data Transaksi
+                    if (s === 7) {
+                        if (this.doc_type === 'BC30') {
+                            return this.formData.kode_valuta && this.formData.ndpbm && this.formData.incoterm && this.formData.nilai_fob && this.formData.bruto;
+                        }
+                        if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
+                            return this.formData.kode_valuta && this.formData.nilai_cif;
+                        }
+                        if (this.doc_type === 'TPB') {
+                            return this.formData.kode_valuta && this.formData.nilai_barang;
+                        }
+                        return true;
+                    }
+                    // Tahap 8 — Data Barang
+                    if (s === 8) {
                         return this.formData.barang.length > 0 && this.formData.barang.every(b => b.hs_code && b.uraian && b.jumlah_satuan && b.kode_satuan && b.netto);
                     }
                     return true;
@@ -791,24 +830,31 @@
                 // yang belum lengkap, atau null bila valid. Hanya memeriksa field
                 // yang relevan dengan doc_type (field tersembunyi diabaikan).
                 firstInvalidStep() {
-                    if (!this.isStepValid(2)) {
-                        return { step: 2, message: 'Lengkapi data identitas entitas (Tahap 2) terlebih dahulu.' };
-                    }
-                    if (!this.isStepValid(3)) {
-                        return { step: 3, message: 'Lengkapi data pengangkutan & nilai transaksi (Tahap 3).' };
+                    const labels = {
+                        2: 'Lengkapi Data Header (Tahap 2) terlebih dahulu.',
+                        3: 'Lengkapi Data Entitas (Tahap 3).',
+                        4: 'Lengkapi Dokumen Pelengkap (Tahap 4).',
+                        5: 'Lengkapi Data Pengangkut (Tahap 5).',
+                        6: 'Lengkapi data Kemasan & Peti Kemas (Tahap 6).',
+                        7: 'Lengkapi Data Transaksi (Tahap 7).',
+                    };
+                    for (const st of [2, 3, 4, 5, 6, 7]) {
+                        if (!this.isStepValid(st)) {
+                            return { step: st, message: labels[st] };
+                        }
                     }
                     if (!this.formData.barang.length) {
-                        return { step: 4, message: 'Tambahkan minimal satu pos barang (Tahap 4).' };
+                        return { step: 8, message: 'Tambahkan minimal satu pos barang (Tahap 8).' };
                     }
                     const vf = this.valueField();
                     for (let i = 0; i < this.formData.barang.length; i++) {
                         const b = this.formData.barang[i];
                         if (!b.hs_code || !b.uraian || !b.jumlah_satuan || !b.kode_satuan || !b.netto || !b[vf]) {
-                            return { step: 4, message: `Lengkapi seluruh isian pada Pos Barang #${i + 1} (Tahap 4).` };
+                            return { step: 8, message: `Lengkapi seluruh isian pada Pos Barang #${i + 1} (Tahap 8).` };
                         }
                     }
                     if (this.doc_type === 'BC30' && (!this.formData.pernyataan_nama || !this.formData.pernyataan_jabatan)) {
-                        return { step: 5, message: 'Lengkapi Pernyataan Penanggung Jawab (nama & jabatan) di Tahap 5.' };
+                        return { step: 9, message: 'Lengkapi Pernyataan Penanggung Jawab (nama & jabatan) di Tahap 9.' };
                     }
                     return null;
                 },
@@ -885,6 +931,23 @@
 
                 todayFormatted() {
                     return new Date().toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'});
+                },
+
+                // Estimasi pungutan impor (pratinjau step Review; perhitungan
+                // resmi tetap oleh CEISA). Tarif dasar: BM 0%, PPN 11%, PPh 2,5%
+                // — sama dengan default CeisaPayloadBuilder barangTarif.
+                pungutanPreview() {
+                    const cif = parseFloat(this.formData.nilai_cif) || 0;
+                    const kurs = parseFloat(this.formData.ndpbm) || 0;
+                    const dasar = cif * kurs;
+                    const bm = 0;
+                    const nilaiImpor = dasar + bm;
+                    return {
+                        dasar: dasar,
+                        bm: bm,
+                        ppn: nilaiImpor * 0.11,
+                        pph: nilaiImpor * 0.025,
+                    };
                 }
             };
         }
