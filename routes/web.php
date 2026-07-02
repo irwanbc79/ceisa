@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CeisaSettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
@@ -56,6 +57,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/settings/ceisa', [CeisaSettingController::class, 'edit'])->name('settings.ceisa.edit');
     Route::post('/settings/ceisa', [CeisaSettingController::class, 'update'])->name('settings.ceisa.update');
     Route::post('/settings/ceisa/test', [CeisaSettingController::class, 'test'])->name('settings.ceisa.test');
+
+    // Manajemen pengguna (khusus admin)
+    Route::middleware('admin')->group(function () {
+        Route::get('/pengguna', [UserController::class, 'index'])->name('users.index');
+        Route::post('/pengguna', [UserController::class, 'store'])->name('users.store');
+        Route::put('/pengguna/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::post('/pengguna/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
+        Route::post('/pengguna/{user}/toggle-active', [UserController::class, 'toggleActive'])->name('users.toggle-active');
+    });
 });
 
 Route::middleware('auth')->group(function () {
