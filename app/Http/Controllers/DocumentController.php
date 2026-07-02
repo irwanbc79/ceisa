@@ -116,7 +116,9 @@ class DocumentController extends Controller
             'bumn' => $request->boolean('bumn'),
         ];
 
-        $query = $request->user()->documents()
+        // Dokumen milik PERUSAHAAN: seluruh staf melihat semua dokumen
+        // (kepemilikan user_id tetap tercatat untuk audit).
+        $query = Document::query()
             ->when($filters['q'] !== '', function ($query) use ($filters) {
                 $term = '%'.$filters['q'].'%';
                 $query->where(fn ($q) => $q
@@ -525,7 +527,7 @@ class DocumentController extends Controller
         $nomorAju = trim($request->input('nomor_aju'));
         $result = null;
         $error = null;
-        $localDoc = Document::where('nomor_aju', $nomorAju)->where('user_id', $user->id)->first();
+        $localDoc = Document::where('nomor_aju', $nomorAju)->first();
 
         try {
             $service = CeisaService::forCredential($credential);
@@ -559,7 +561,7 @@ class DocumentController extends Controller
         $user = $request->user();
 
         // 1. Cek duplikasi
-        $exists = Document::where('nomor_aju', $request->input('nomor_aju'))->where('user_id', $user->id)->exists();
+        $exists = Document::where('nomor_aju', $request->input('nomor_aju'))->exists();
         if ($exists) {
             return back()->with('error', 'Dokumen dengan nomor aju ini sudah ada di database lokal.');
         }
@@ -748,10 +750,13 @@ class DocumentController extends Controller
     }
 
     /**
-     * Pastikan dokumen milik user yang sedang login.
+     * Otorisasi akses dokumen. Dokumen bersifat milik PERUSAHAAN — seluruh
+     * staf (admin & operator) berbagi akses penuh; user_id hanya mencatat
+     * pembuatnya untuk audit. Method dipertahankan sebagai satu titik untuk
+     * scoping multi-perusahaan di masa depan (M2B One).
      */
     protected function authorizeOwnership(Request $request, Document $document): void
     {
-        abort_unless($document->user_id === $request->user()->id, 403);
+        abort_unless($request->user() !== null, 403);
     }
 }
