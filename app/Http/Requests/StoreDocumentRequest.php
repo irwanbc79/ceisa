@@ -110,7 +110,8 @@ class StoreDocumentRequest extends FormRequest
                 'nama_pemasok' => ['required', 'string', 'max:255'],
                 'negara_pemasok' => ['required', 'string', 'size:2'],
 
-                // Data Header impor (kode jenis impor / cara bayar CEISA)
+                // Data Header impor (kantor pabean / kode jenis impor / cara bayar CEISA)
+                'kode_kantor' => ['nullable', 'string', 'max:10'],
                 'jenis_impor' => ['nullable', 'string', 'max:5'],
                 'cara_bayar' => ['nullable', 'string', 'max:5'],
 
@@ -367,6 +368,7 @@ class StoreDocumentRequest extends FormRequest
                         'nama' => $v['nama_pemasok'],
                         'negara' => strtoupper($v['negara_pemasok']),
                     ],
+                    'kode_kantor' => $v['kode_kantor'] ?? null,
                     'jenis_impor' => $v['jenis_impor'] ?? null,
                     'cara_bayar' => $v['cara_bayar'] ?? null,
                     'pengangkutan' => [

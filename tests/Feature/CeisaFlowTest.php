@@ -333,6 +333,35 @@ class CeisaFlowTest extends TestCase
             ->assertSee('IDKTJ - Kuala Tanjung, Sumut');
     }
 
+    public function test_create_wizard_steps_match_official_portal_order(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'secret-key',
+        ]);
+
+        // 9 tahap wizard selaras urutan perekaman Portal CEISA 4.0 resmi
+        // (usermanualceisa40.gitbook.io): Header -> Entitas -> Dokumen ->
+        // Pengangkut -> Kemasan -> Transaksi -> Barang -> Review(Pungutan+Pernyataan).
+        $response = $this->actingAs($user)->get('/dokumen/buat')->assertOk();
+
+        $html = $response->getContent();
+        $order = [
+            'Portal Layanan', 'Data Header', 'Data Entitas', 'Dokumen Pelengkap',
+            'Data Pengangkut', 'Kemasan & Peti Kemas', 'Data Transaksi',
+            'Data Barang', 'Review & Submit',
+        ];
+        $pos = -1;
+        foreach ($order as $title) {
+            $next = strpos($html, $title, $pos + 1);
+            $this->assertNotFalse($next, "Judul tahap '{$title}' tidak ditemukan setelah posisi {$pos}.");
+            $pos = $next;
+        }
+
+        // Tab Pungutan portal terwakili sebagai rekap pratinjau di step Review.
+        $response->assertSee('Pungutan (Pratinjau)');
+    }
+
     public function test_submit_document_sends_to_ceisa_and_persists(): void
     {
         Http::fake([

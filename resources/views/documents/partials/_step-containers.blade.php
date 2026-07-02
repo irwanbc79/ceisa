@@ -1,19 +1,34 @@
 @php
 /**
- * Step 5 — Peti Kemas / Kontainer.
+ * Step 6 — Kemasan & Peti Kemas (selaras urutan Portal CEISA 4.0).
  */
 @endphp
 
-<div x-show="step === 5" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 6" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h3 class="text-lg font-bold text-slate-800">Detail Peti Kemas (Kontainer)</h3>
+            <h3 class="text-lg font-bold text-slate-800">Kemasan &amp; Peti Kemas</h3>
             <p class="text-xs text-slate-500 mt-0.5">Input nomor kontainer, ukuran, tipe, dan status isi jika menggunakan kontainer</p>
         </div>
         <button type="button" @click="addContainer()"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-indigo-100">
             + Tambah Kontainer
         </button>
+    </div>
+
+    {{-- RUSH: Informasi Kemasan (selaras tahap Kemasan portal resmi) --}}
+    <div x-show="doc_type === 'RUSH'" class="mb-6 pb-4 border-b border-slate-100">
+        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Informasi Kemasan</h4>
+        <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+                <x-input-label for="jumlah_kemasan" value="Jumlah Kemasan" />
+                <input type="number" min="1" id="jumlah_kemasan" :name="doc_type === 'RUSH' ? 'jumlah_kemasan' : ''" x-model="formData.jumlah_kemasan" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'RUSH'" />
+            </div>
+            <div>
+                <x-input-label for="jenis_kemasan" value="Jenis Kemasan (Referensi)" />
+                <x-searchable-select id="jenis_kemasan" ::name="doc_type === 'RUSH' ? 'jenis_kemasan' : ''" model="formData.jenis_kemasan" options="references.packages" placeholder="-- Pilih Jenis Kemasan --" ::required="doc_type === 'RUSH'" />
+            </div>
+        </div>
     </div>
 
     {{-- Empty State Info --}}

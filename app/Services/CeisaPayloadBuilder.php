@@ -151,7 +151,7 @@ class CeisaPayloadBuilder
             'tanggalPkb' => date('Y-m-d'),
             'waktuSiapPeriksa' => date('Y-m-d\TH:i:s.000\Z'),
         ]];
-        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && !empty($payload['dokumen'])) {
+        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && ! empty($payload['dokumen'])) {
             $flat['dokumen'] = array_map(fn ($d, $idx) => [
                 'seriDokumen' => $idx + 1,
                 'kodeDokumen' => $d['kode_dokumen'] ?? '',
@@ -165,7 +165,7 @@ class CeisaPayloadBuilder
             ];
         }
 
-        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && !empty($payload['kontainer'])) {
+        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && ! empty($payload['kontainer'])) {
             $flat['kontainer'] = array_map(fn ($c, $idx) => [
                 'seriKontainer' => $idx + 1,
                 'nomorKontainer' => $c['nomor_kontainer'] ?? '',
@@ -344,7 +344,7 @@ class CeisaPayloadBuilder
             'nomorAju' => $nomorAju,
             'tanggalAju' => date('Y-m-d'),
 
-            'kodeKantor' => $header['pengangkutan']['pelabuhan_bongkar'] ?? '040100',
+            'kodeKantor' => $header['kode_kantor'] ?? $header['pengangkutan']['pelabuhan_bongkar'] ?? '040100',
             'kodeJenisImpor' => $header['jenis_impor'] ?? '1',
             'kodeCaraBayar' => $header['cara_bayar'] ?? '1',
             'kodeValuta' => $header['valuta'] ?? 'USD',
@@ -389,7 +389,7 @@ class CeisaPayloadBuilder
         $flat['barang'] = $this->barangBc20($barang, $header);
         $flat['kemasan'] = [$this->kemasanDefault()];
         $flat['pengangkut'] = [$this->pengangkutImpor($header)];
-        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && !empty($payload['dokumen'])) {
+        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && ! empty($payload['dokumen'])) {
             $flat['dokumen'] = array_map(fn ($d, $idx) => [
                 'seriDokumen' => $idx + 1,
                 'kodeDokumen' => $d['kode_dokumen'] ?? '',
@@ -400,7 +400,7 @@ class CeisaPayloadBuilder
             $flat['dokumen'] = $this->dokumenImpor($header, $nomorAju);
         }
 
-        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && !empty($payload['kontainer'])) {
+        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && ! empty($payload['kontainer'])) {
             $flat['kontainer'] = array_map(fn ($c, $idx) => [
                 'seriKontainer' => $idx + 1,
                 'nomorKontainer' => $c['nomor_kontainer'] ?? '',
@@ -645,7 +645,7 @@ class CeisaPayloadBuilder
             'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Laut'),
         ]];
 
-        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && !empty($payload['dokumen'])) {
+        if (isset($payload['dokumen']) && is_array($payload['dokumen']) && ! empty($payload['dokumen'])) {
             $flat['dokumen'] = array_map(fn ($d, $idx) => [
                 'seriDokumen' => $idx + 1,
                 'kodeDokumen' => $d['kode_dokumen'] ?? '',
@@ -656,7 +656,7 @@ class CeisaPayloadBuilder
             $flat['dokumen'] = [$this->dokumenInvoice($nomorAju)];
         }
 
-        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && !empty($payload['kontainer'])) {
+        if (isset($payload['kontainer']) && is_array($payload['kontainer']) && ! empty($payload['kontainer'])) {
             $flat['kontainer'] = array_map(fn ($c, $idx) => [
                 'seriKontainer' => $idx + 1,
                 'nomorKontainer' => $c['nomor_kontainer'] ?? '',
