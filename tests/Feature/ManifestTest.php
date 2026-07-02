@@ -76,14 +76,15 @@ class ManifestTest extends TestCase
             ->assertSessionHas('error');
     }
 
-    public function test_user_only_sees_own_manifests(): void
+    public function test_all_staff_see_company_manifests(): void
     {
+        // Manifes milik perusahaan: seluruh staf melihat data yang sama.
         $owner = $this->user();
         $other = $this->user();
-        Manifest::create(['user_id' => $other->id, 'jenis_manifes' => 'inward', 'nama_sarana' => 'KAPAL ORANG LAIN']);
+        Manifest::create(['user_id' => $other->id, 'jenis_manifes' => 'inward', 'nama_sarana' => 'KAPAL REKAN KERJA']);
 
         $this->actingAs($owner)->get(route('manifests.index'))
             ->assertOk()
-            ->assertDontSee('KAPAL ORANG LAIN');
+            ->assertSee('KAPAL REKAN KERJA');
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\WebhookController;
-use App\Models\Document;
 use App\Models\WebhookLog;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,12 +15,11 @@ class NotificationController extends Controller
      */
     public function index(Request $request): View
     {
-        $docIds = Document::where('user_id', $request->user()->id)->pluck('id');
-
+        // Notifikasi tim: seluruh staf melihat notifikasi semua dokumen perusahaan.
         $logs = WebhookLog::query()
             ->with('document:id,doc_type,nomor_aju,status')
-            ->where(function ($q) use ($docIds) {
-                $q->whereIn('document_id', $docIds)
+            ->where(function ($q) {
+                $q->whereNotNull('document_id')
                     // Pengumuman sistem (Informasi) tanpa dokumen bersifat global.
                     ->orWhere(fn ($qq) => $qq->whereNull('document_id')
                         ->where('notification_type', WebhookController::TYPE_INFORMASI));
