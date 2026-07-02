@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CeisaException;
+use App\Models\CeisaCredential;
 use App\Services\CeisaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,17 +12,17 @@ use Illuminate\View\View;
 class CeisaSettingController extends Controller
 {
     /**
-     * Form input app_id & api_key CEISA.
+     * Halaman kredensial CEISA perusahaan (form edit hanya untuk admin).
      */
     public function edit(Request $request): View
     {
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
 
         return view('settings.ceisa', compact('credential'));
     }
 
     /**
-     * Simpan / perbarui kredensial CEISA milik user.
+     * Simpan / perbarui kredensial CEISA perusahaan (khusus admin, via route).
      */
     public function update(Request $request): RedirectResponse
     {
@@ -37,7 +38,7 @@ class CeisaSettingController extends Controller
             'custom_base_url' => ['required_if:environment,custom', 'nullable', 'string', 'max:500'],
         ]);
 
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
 
         // Saat pertama kali menyimpan, password & beacukai-api-key wajib diisi.
         if (! $credential) {
@@ -87,12 +88,15 @@ class CeisaSettingController extends Controller
             $attributes['token_expires_at'] = null;
         }
 
-        $request->user()->ceisaCredential()->updateOrCreate(
-            ['user_id' => $request->user()->id],
-            $attributes,
-        );
+        // Perbarui baris kredensial PERUSAHAAN (bukan per-user) — bila belum
+        // ada, buat baru dan tandai admin ini sebagai pengelolanya.
+        if ($credential) {
+            $credential->update($attributes);
+        } else {
+            $request->user()->ceisaCredential()->create($attributes);
+        }
 
-        return back()->with('success', 'Kredensial CEISA berhasil disimpan.');
+        return back()->with('success', 'Kredensial CEISA perusahaan berhasil disimpan.');
     }
 
     /**
@@ -100,7 +104,7 @@ class CeisaSettingController extends Controller
      */
     public function test(Request $request): RedirectResponse
     {
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
 
         if (! $credential) {
             return back()->with('error', 'Simpan kredensial terlebih dahulu sebelum menguji koneksi.');

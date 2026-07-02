@@ -48,6 +48,20 @@ class CeisaCredential extends Model
     }
 
     /**
+     * Kredensial CEISA PERUSAHAAN (dipakai bersama seluruh staf).
+     *
+     * Aplikasi ini satu-perusahaan per instalasi: admin mengisi kredensial
+     * portal CEISA sekali via Pengaturan, semua operator memakainya —
+     * termasuk access/refresh token yang tersimpan di baris yang sama,
+     * sehingga tidak ada login CEISA ganda antar staf. user_id pada baris
+     * hanya menandai admin yang mengelola.
+     */
+    public static function shared(): ?self
+    {
+        return static::query()->orderBy('id')->first();
+    }
+
+    /**
      * Apakah token masih ada & belum kadaluarsa (dengan margin keamanan).
      */
     public function hasValidToken(): bool

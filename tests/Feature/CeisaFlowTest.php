@@ -24,6 +24,11 @@ class CeisaFlowTest extends TestCase
         return User::factory()->create(['role' => User::ROLE_OPERATOR]);
     }
 
+    protected function adminUser(): User
+    {
+        return User::factory()->create(['role' => User::ROLE_ADMIN]);
+    }
+
     /**
      * Payload form BC 3.0 ekspor lengkap (struktur CEISA 4.0).
      *
@@ -84,7 +89,7 @@ class CeisaFlowTest extends TestCase
 
     public function test_user_can_save_ceisa_credential(): void
     {
-        $user = $this->authedUser();
+        $user = $this->adminUser();
 
         $this->actingAs($user)
             ->post('/settings/ceisa', [
@@ -138,7 +143,7 @@ class CeisaFlowTest extends TestCase
 
     public function test_user_can_save_ceisa_credential_with_sandbox(): void
     {
-        $user = $this->authedUser();
+        $user = $this->adminUser();
 
         $this->actingAs($user)
             ->post('/settings/ceisa', [
@@ -159,7 +164,7 @@ class CeisaFlowTest extends TestCase
 
     public function test_user_can_save_ceisa_credential_with_custom_url(): void
     {
-        $user = $this->authedUser();
+        $user = $this->adminUser();
 
         $this->actingAs($user)
             ->post('/settings/ceisa', [
