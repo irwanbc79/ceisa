@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CeisaException;
+use App\Models\CeisaCredential;
 use App\Models\Manifest;
 use App\Services\CeisaService;
 use Illuminate\Http\RedirectResponse;
@@ -49,7 +50,7 @@ class ManifestController extends Controller
      */
     public function sync(Request $request): RedirectResponse
     {
-        $credential = $request->user()->ceisaCredential;
+        $credential = CeisaCredential::shared();
 
         if (! $credential) {
             return back()->with('error', 'Simpan kredensial CEISA terlebih dahulu di Pengaturan sebelum menarik data manifes.');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CeisaCredential;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -32,7 +33,7 @@ class DashboardController extends Controller
             'rejected' => (int) $agg->rejected,
         ];
 
-        $hasCredential = $user->ceisaCredential()->exists();
+        $hasCredential = CeisaCredential::shared() !== null;
 
         return view('dashboard', compact('documents', 'stats', 'hasCredential'));
     }
