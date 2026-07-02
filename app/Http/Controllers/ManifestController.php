@@ -25,8 +25,8 @@ class ManifestController extends Controller
             'to' => $request->input('to'),
         ];
 
+        // Manifes milik perusahaan: seluruh staf melihat data yang sama.
         $manifests = Manifest::query()
-            ->forUser((int) $request->user()->id)
             ->when($filters['jenis'], fn ($q, $v) => $q->where('jenis_manifes', $v))
             ->when($filters['kantor'], fn ($q, $v) => $q->where('kode_kantor', $v))
             ->when($filters['q'], fn ($q, $v) => $q->where(function ($qq) use ($v) {
@@ -69,13 +69,15 @@ class ManifestController extends Controller
         $count = 0;
         foreach ($rows as $row) {
             $nomorDaftar = data_get($row, 'nomorDaftar') ?? data_get($row, 'nomor_daftar');
+            // Dedup company-wide (tanpa user_id di key) — user_id mencatat
+            // staf yang terakhir menarik data.
             Manifest::updateOrCreate(
                 [
-                    'user_id' => $request->user()->id,
                     'nomor_daftar' => $nomorDaftar,
                     'nomor_voyage' => data_get($row, 'nomorVoyage') ?? data_get($row, 'nomor_voyage'),
                 ],
                 [
+                    'user_id' => $request->user()->id,
                     'jenis_manifes' => $jenis,
                     'nama_sarana' => data_get($row, 'namaSarana') ?? data_get($row, 'nama_sarana'),
                     'nomor_imo' => data_get($row, 'nomorImo') ?? data_get($row, 'nomor_imo'),

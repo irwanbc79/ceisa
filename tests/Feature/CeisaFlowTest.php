@@ -1117,18 +1117,23 @@ class CeisaFlowTest extends TestCase
         $this->assertSame(1, $user->documents()->count());
     }
 
-    public function test_user_cannot_duplicate_other_users_document(): void
+    public function test_teammate_can_duplicate_company_document(): void
     {
+        // Dokumen milik perusahaan: rekan kerja boleh menduplikasi;
+        // salinan tercatat atas nama yang menduplikasi (audit).
         $owner = $this->authedUser();
         $doc = $owner->documents()->create([
             'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
             'payload' => ['x' => 1], 'status' => Document::STATUS_DRAFT,
         ]);
 
-        $intruder = $this->authedUser();
-        $this->actingAs($intruder)
+        $teammate = $this->authedUser();
+        $this->actingAs($teammate)
             ->post(route('documents.duplicate', $doc))
-            ->assertForbidden();
+            ->assertRedirect();
+
+        $this->assertSame(1, $teammate->documents()->count());
+        $this->assertSame(2, Document::count());
     }
 
     public function test_document_index_shows_rekap_counts(): void
@@ -1338,8 +1343,10 @@ class CeisaFlowTest extends TestCase
         $this->assertSame(1, $user->documents()->count());
     }
 
-    public function test_user_cannot_delete_other_users_document(): void
+    public function test_teammate_can_delete_company_draft_document(): void
     {
+        // Dokumen milik perusahaan: rekan kerja boleh menghapus draft
+        // (guard status canBeDeleted tetap berlaku untuk dokumen terkirim).
         $owner = $this->authedUser();
         $doc = $owner->documents()->create([
             'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
@@ -1348,9 +1355,9 @@ class CeisaFlowTest extends TestCase
 
         $this->actingAs($this->authedUser())
             ->delete(route('documents.destroy', $doc))
-            ->assertForbidden();
+            ->assertRedirect();
 
-        $this->assertSame(1, Document::count());
+        $this->assertSame(0, Document::count());
     }
 
     public function test_user_can_update_archived_document(): void
@@ -1515,13 +1522,13 @@ class CeisaFlowTest extends TestCase
             'received_at' => now(),
         ]);
 
-        // Notifikasi milik user lain tidak boleh tampil.
+        // Notifikasi dokumen rekan kerja IKUT tampil (visibilitas tim).
         $otherDoc = $this->authedUser()->documents()->create([
             'doc_type' => 'BC30', 'source' => Document::SOURCE_H2H,
             'nomor_aju' => 'AJU-OTHER', 'payload' => ['x' => 1], 'status' => Document::STATUS_SUBMITTED,
         ]);
         WebhookLog::create([
-            'document_id' => $otherDoc->id, 'event' => 'RAHASIA', 'notification_type' => 'Respon',
+            'document_id' => $otherDoc->id, 'event' => 'Respon Rekan Kerja', 'notification_type' => 'Respon',
             'nomor_aju' => 'AJU-OTHER', 'payload' => ['status' => 'X'], 'received_at' => now(),
         ]);
 
@@ -1530,7 +1537,7 @@ class CeisaFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Pusat Notifikasi DJBC')
             ->assertSee('SPPB Terbit')
-            ->assertDontSee('RAHASIA');
+            ->assertSee('Respon Rekan Kerja');
     }
 
     public function test_refresh_status_pulls_and_applies_from_ceisa(): void
