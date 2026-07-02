@@ -396,14 +396,17 @@ class CeisaService
      */
     public function downloadRespon(string $path): Response
     {
-        $token = $this->refreshTokenIfExpired();
         $endpoint = config('ceisa.endpoints.download_respon');
 
         try {
-            return $this->baseRequest()
-                ->withToken($token)
-                ->accept('application/pdf')
-                ->get($endpoint, ['path' => $path]);
+            // authorizedRequest: 401 -> login ulang + retry sekali,
+            // konsisten dgn submit/status/sync.
+            return $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()
+                    ->withToken($token)
+                    ->accept('application/pdf')
+                    ->get($endpoint, ['path' => $path]),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal download respon dari CEISA: '.$e->getMessage(),
@@ -419,14 +422,17 @@ class CeisaService
      */
     public function cetakFormulir(string $nomorAju): Response
     {
-        $token = $this->refreshTokenIfExpired();
         $endpoint = config('ceisa.endpoints.cetak_formulir');
 
         try {
-            return $this->baseRequest()
-                ->withToken($token)
-                ->accept('application/pdf')
-                ->get($endpoint, ['nomorAju' => $nomorAju]);
+            // authorizedRequest: 401 -> login ulang + retry sekali,
+            // konsisten dgn submit/status/sync.
+            return $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()
+                    ->withToken($token)
+                    ->accept('application/pdf')
+                    ->get($endpoint, ['nomorAju' => $nomorAju]),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal cetak formulir dari CEISA: '.$e->getMessage(),
@@ -442,14 +448,17 @@ class CeisaService
      */
     public function downloadBilling(string $kodeBilling): Response
     {
-        $token = $this->refreshTokenIfExpired();
         $endpoint = config('ceisa.endpoints.billing');
 
         try {
-            return $this->baseRequest()
-                ->withToken($token)
-                ->accept('application/pdf')
-                ->get($endpoint, ['kodeBilling' => $kodeBilling]);
+            // authorizedRequest: 401 -> login ulang + retry sekali,
+            // konsisten dgn submit/status/sync.
+            return $this->authorizedRequest(
+                fn (string $token) => $this->baseRequest()
+                    ->withToken($token)
+                    ->accept('application/pdf')
+                    ->get($endpoint, ['kodeBilling' => $kodeBilling]),
+            );
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal download billing dari CEISA: '.$e->getMessage(),
