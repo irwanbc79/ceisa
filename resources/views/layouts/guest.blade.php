@@ -13,7 +13,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased min-h-screen bg-cream text-ink-900">
+<body class="font-sans antialiased min-h-screen text-slate-700">
     <div class="min-h-screen grid lg:grid-cols-[1.05fr_1fr]">
 
         {{-- ── Left brand panel ─────────────────────────────── --}}
@@ -125,8 +125,8 @@
                     <img src="{{ asset('images/m2b-logo.png') }}" alt="M2B" class="h-8 w-8 object-contain">
                 </span>
                 <div class="leading-tight">
-                    <span class="font-display text-xl font-semibold tracking-tighter text-ink-900">M2B<span class="text-gold-500">·</span>Customs</span>
-                    <span class="block text-[9px] font-mono uppercase tracking-[0.25em] text-ink-400">CEISA 4.0 H2H</span>
+                    <span class="font-display text-xl font-semibold tracking-tighter text-slate-800">M2B<span class="text-gold-500">·</span>Customs</span>
+                    <span class="block text-[9px] font-mono uppercase tracking-[0.25em] text-slate-500">CEISA 4.0 H2H</span>
                 </div>
             </a>
 
@@ -134,7 +134,7 @@
                 {{ $slot }}
             </div>
 
-            <div class="mt-auto pt-12 text-[10px] font-mono text-ink-300 max-w-md mx-auto lg:mx-0 flex items-center justify-between">
+            <div class="mt-auto pt-12 text-[10px] font-mono text-slate-400 max-w-md mx-auto lg:mx-0 flex items-center justify-between">
                 <span>© {{ date('Y') }} morabangun.com · PT Mora Multi Berkah</span>
                 <span class="hidden sm:inline">All systems secure</span>
             </div>

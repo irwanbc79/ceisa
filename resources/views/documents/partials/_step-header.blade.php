@@ -9,19 +9,19 @@
 @endphp
 
 {{-- Step 2: Data Header --}}
-<div x-show="step === 2" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 2" class="bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Data Header</h3>
             <p class="text-xs text-slate-500 mt-0.5">Data dasar dokumen: kantor pabean, klasifikasi, dan nomor pengajuan</p>
         </div>
-        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap <span x-text="step"></span> dari <span x-text="steps.length"></span></span>
+        <span class="px-3 py-1 bg-indigo-50 text-indigo-300 text-xs font-bold rounded-full border border-indigo-100">Tahap <span x-text="step"></span> dari <span x-text="steps.length"></span></span>
     </div>
 
     {{-- Common: Nomor AJU Kustom --}}
     <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-slate-50/50">
         <div class="flex items-center gap-2 mb-2">
-            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <svg class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
             </svg>
             <h4 class="text-xs font-black text-slate-700 uppercase tracking-wider">Nomor AJU Kustom (Opsional)</h4>

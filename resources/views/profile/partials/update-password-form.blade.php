@@ -1,8 +1,8 @@
 <section>
     <header>
-        <p class="eyebrow text-gold-700">Security</p>
-        <h2 class="font-display text-2xl font-semibold text-ink-900 mt-3">Ganti Password</h2>
-        <p class="mt-2 text-sm text-ink-500">Pastikan akun Anda menggunakan password yang panjang &amp; acak untuk keamanan.</p>
+        <p class="eyebrow text-gold-300">Security</p>
+        <h2 class="font-display text-2xl font-semibold text-slate-800 mt-3">Ganti Password</h2>
+        <p class="mt-2 text-sm text-slate-500">Pastikan akun Anda menggunakan password yang panjang &amp; acak untuk keamanan.</p>
     </header>
 
     <form method="post" action="{{ route('password.update') }}" class="mt-6 space-y-5">
@@ -30,7 +30,7 @@
         <div class="flex items-center gap-4">
             <x-primary-button>Simpan</x-primary-button>
             @if (session('status') === 'password-updated')
-                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)" class="text-xs text-sea-700 font-bold uppercase tracking-widest">Tersimpan ✓</p>
+                <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)" class="text-xs text-sea-300 font-bold uppercase tracking-widest">Tersimpan ✓</p>
             @endif
         </div>
     </form>

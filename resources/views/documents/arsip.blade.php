@@ -14,13 +14,13 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <x-flash />
 
-            <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-4 text-xs text-indigo-900">
+            <div class="rounded-xl bg-indigo-50 border border-indigo-100 p-4 text-xs text-indigo-300">
                 Fitur ini hanya <strong>mencatat</strong> dokumen lama ke database M2B agar muncul di riwayat &amp; Dashboard.
                 Dokumen <strong>tidak</strong> dikirim ulang ke CEISA.
             </div>
 
             @if ($errors->any())
-                <div class="rounded-xl bg-rose-50 border border-rose-200 p-4 text-sm text-rose-800">
+                <div class="rounded-xl bg-rose-50 border border-rose-200 p-4 text-sm text-rose-300">
                     <span class="font-semibold">Periksa kembali isian:</span>
                     <ul class="mt-2 list-disc pl-5 space-y-0.5">
                         @foreach ($errors->all() as $message)
@@ -30,7 +30,7 @@
                 </div>
             @endif
 
-            <form method="POST" action="{{ isset($editDocument) ? route('documents.archive.update', $editDocument) : route('documents.archive.store') }}" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-6">
+            <form method="POST" action="{{ isset($editDocument) ? route('documents.archive.update', $editDocument) : route('documents.archive.store') }}" class="bg-panel rounded-2xl p-6 shadow-sm border border-slate-100 space-y-6">
                 @csrf
                 @isset($editDocument)
                     @method('PUT')
@@ -123,7 +123,7 @@
 
                 <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
                     <a href="{{ route('dashboard') }}" class="text-slate-500 hover:text-slate-800 text-sm">Batal</a>
-                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-black/25">
                         {{ isset($editDocument) ? 'Simpan Perubahan' : 'Simpan ke Arsip' }}
                     </button>
                 </div>

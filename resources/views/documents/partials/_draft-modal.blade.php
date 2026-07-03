@@ -1,20 +1,20 @@
     <div x-show="showDraftModal" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
          @keydown.escape.window="showDraftModal = false">
 
         <div x-show="showDraftModal" x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-             class="bg-white w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl border border-slate-100"
+             class="bg-panel w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-2xl shadow-2xl border border-slate-100"
              @click.stop>
 
             {{-- Modal Header --}}
-            <div class="sticky top-0 z-10 bg-white border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+            <div class="sticky top-0 z-10 bg-panel border-b border-slate-100 px-6 py-4 flex items-center justify-between">
                 <div>
                     <h3 class="font-extrabold text-slate-900 text-base tracking-tight">Preview Dokumen Draft</h3>
                     <p class="text-xs text-slate-400 mt-0.5">Periksa kembali sebelum disimpan ke sistem M2B</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full border border-amber-200">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-300 text-xs font-bold rounded-full border border-amber-200">
                         <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                         DRAFT — Belum Dikirim ke CEISA
                     </span>
@@ -47,7 +47,7 @@
                         <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px]">
                             <div>
                                 <span class="text-slate-500">Nomor Pengajuan</span>
-                                <span class="ml-2 font-bold text-amber-700">: [DRAFT — Belum Digenerate]</span>
+                                <span class="ml-2 font-bold text-amber-300">: [DRAFT — Belum Digenerate]</span>
                             </div>
                             <div>
                                 <span class="text-slate-500">Tanggal Input</span>
@@ -55,11 +55,11 @@
                             </div>
                             <div>
                                 <span class="text-slate-500">Jenis Dokumen</span>
-                                <span class="ml-2 font-bold text-indigo-700" x-text="': ' + doc_type"></span>
+                                <span class="ml-2 font-bold text-indigo-300" x-text="': ' + doc_type"></span>
                             </div>
                             <div>
                                 <span class="text-slate-500">Status</span>
-                                <span class="ml-2 font-bold text-amber-600">: DRAFT LOKAL</span>
+                                <span class="ml-2 font-bold text-amber-300">: DRAFT LOKAL</span>
                             </div>
                         </div>
                     </div>
@@ -74,7 +74,7 @@
                                 <div class="space-y-1 text-[11px]">
                                     <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">Nama</span><span class="font-bold text-slate-800" x-text="': ' + getPartyName()"></span></div>
                                     <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">NPWP</span><span class="font-mono font-semibold" x-text="': ' + getPartyNPWP()"></span></div>
-                                    <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">PPJK</span><span class="font-bold text-indigo-700">: PT. MORA MULTI BERKAH</span></div>
+                                    <div class="flex gap-2"><span class="text-slate-500 w-16 shrink-0">PPJK</span><span class="font-bold text-indigo-300">: PT. MORA MULTI BERKAH</span></div>
                                 </div>
                             </div>
                             {{-- Counter Party --}}
@@ -110,7 +110,7 @@
                             </div>
                             <div class="col-span-2">
                                 <span class="text-slate-500 block" x-text="getValueLabel()"></span>
-                                <span class="font-bold text-lg text-indigo-700" x-text="getTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
+                                <span class="font-bold text-lg text-indigo-300" x-text="getTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
                             </div>
                             <div>
                                 <span class="text-slate-500 block">Cara Pembayaran</span>
@@ -138,7 +138,7 @@
                                 <template x-for="(item, idx) in formData.barang" :key="idx">
                                     <tr class="even:bg-slate-50/50">
                                         <td class="border border-slate-300 px-2 py-1.5 text-center font-semibold" x-text="idx + 1"></td>
-                                        <td class="border border-slate-300 px-2 py-1.5 font-mono font-bold text-indigo-700" x-text="item.hs_code || '—'"></td>
+                                        <td class="border border-slate-300 px-2 py-1.5 font-mono font-bold text-indigo-300" x-text="item.hs_code || '—'"></td>
                                         <td class="border border-slate-300 px-2 py-1.5" x-text="item.uraian || '—'"></td>
                                         <td class="border border-slate-300 px-2 py-1.5 text-right" x-text="item.jumlah_satuan || 0"></td>
                                         <td class="border border-slate-300 px-2 py-1.5 text-center font-bold" x-text="item.kode_satuan || '—'"></td>
@@ -153,7 +153,7 @@
                         {{-- Footer Note --}}
                         <div class="mt-4 pt-4 border-t border-slate-200 text-[10px] text-slate-400 leading-relaxed">
                             <p class="font-semibold text-slate-500">Catatan:</p>
-                            <p>Dokumen ini merupakan pratinjau <strong class="text-amber-600">DRAFT LOKAL</strong> yang belum disubmit ke portal CEISA 4.0 Bea Cukai (DJBC). Nomor Aju akan digenerate setelah dokumen dikirim secara resmi via gateway H2H.</p>
+                            <p>Dokumen ini merupakan pratinjau <strong class="text-amber-300">DRAFT LOKAL</strong> yang belum disubmit ke portal CEISA 4.0 Bea Cukai (DJBC). Nomor Aju akan digenerate setelah dokumen dikirim secara resmi via gateway H2H.</p>
                             <p class="mt-1">PPJK: PT. MORA MULTI BERKAH — Sistem H2H CEISA 4.0</p>
                         </div>
                     </div>
@@ -161,20 +161,20 @@
             </div>
 
             {{-- Action Buttons --}}
-            <div class="sticky bottom-0 bg-white border-t border-slate-100 px-6 py-4 flex items-center justify-between gap-3">
+            <div class="sticky bottom-0 bg-panel border-t border-slate-100 px-6 py-4 flex items-center justify-between gap-3">
                 <button type="button" @click="showDraftModal = false"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-slate-700 text-sm font-bold rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-sm">
+                        class="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-slate-700 text-sm font-bold rounded-xl bg-panel hover:bg-slate-50 transition-colors shadow-sm">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
                     Edit Kembali
                 </button>
                 <div class="flex items-center gap-3">
                     <button type="button" @click="submitForm('submit')"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-indigo-100">
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md shadow-black/25">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>
                         Kirim ke CEISA Sekarang
                     </button>
                     <button type="button" @click="confirmSaveDraft()"
-                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-200">
+                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-ink-800 hover:bg-ink-950 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-black/25">
                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
                         Konfirmasi Simpan Draft
                     </button>

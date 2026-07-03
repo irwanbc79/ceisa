@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col">
-            <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-ink-400">Lookup · Live DJBC</p>
-            <h1 class="font-display text-2xl sm:text-3xl font-semibold text-ink-900 tracking-tightest leading-none mt-1">Cek Status &amp; Riwayat CEISA</h1>
+            <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-500">Lookup · Live DJBC</p>
+            <h1 class="font-display text-2xl sm:text-3xl font-semibold text-slate-800 tracking-tightest leading-none mt-1">Cek Status &amp; Riwayat CEISA</h1>
         </div>
     </x-slot>
 
@@ -40,7 +40,7 @@
                            class="field-mono"
                            placeholder="000020MOT83720260301000015" required />
                     @error('nomor_aju')
-                        <p class="text-xs text-crimson-600 mt-1.5 font-medium">{{ $message }}</p>
+                        <p class="text-xs text-crimson-300 mt-1.5 font-medium">{{ $message }}</p>
                     @enderror
                 </div>
                 <div class="flex items-end">
@@ -54,14 +54,14 @@
 
         {{-- Error --}}
         @isset($error)
-            <div class="rounded-2xl bg-white border-l-[3px] border-crimson-500 shadow-soft p-5 flex items-start gap-4">
-                <span class="h-10 w-10 rounded-xl bg-crimson-50 text-crimson-600 flex items-center justify-center shrink-0">
+            <div class="rounded-2xl bg-panel border-l-[3px] border-crimson-500 shadow-soft p-5 flex items-start gap-4">
+                <span class="h-10 w-10 rounded-xl bg-crimson-50 text-crimson-300 flex items-center justify-center shrink-0">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/></svg>
                 </span>
                 <div class="flex-1">
-                    <p class="font-bold text-ink-900">Tidak dapat mengambil data dari CEISA</p>
-                    <p class="text-sm text-ink-600 mt-1">{{ $error }}</p>
-                    <p class="text-xs text-ink-400 mt-2">Kemungkinan: nomor aju tidak ditemukan di sistem CEISA, token expired, atau endpoint status belum diaktifkan untuk akun ini.</p>
+                    <p class="font-bold text-slate-800">Tidak dapat mengambil data dari CEISA</p>
+                    <p class="text-sm text-slate-600 mt-1">{{ $error }}</p>
+                    <p class="text-xs text-slate-500 mt-2">Kemungkinan: nomor aju tidak ditemukan di sistem CEISA, token expired, atau endpoint status belum diaktifkan untuk akun ini.</p>
                     <a href="{{ route('documents.archive.create', ['nomor_aju' => $nomorAju]) }}" class="btn-danger mt-4 !py-2 !px-4 !text-xs">Rekam Manual Sebagai Arsip Lokal →</a>
                 </div>
             </div>
@@ -69,17 +69,17 @@
 
         {{-- Local Match --}}
         @isset($localDoc)
-            <div class="rounded-2xl bg-white border-l-[3px] border-sea-500 shadow-soft p-5 flex items-start gap-4">
-                <span class="h-10 w-10 rounded-xl bg-sea-50 text-sea-700 flex items-center justify-center shrink-0">
+            <div class="rounded-2xl bg-panel border-l-[3px] border-sea-500 shadow-soft p-5 flex items-start gap-4">
+                <span class="h-10 w-10 rounded-xl bg-sea-50 text-sea-300 flex items-center justify-center shrink-0">
                     <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
                 </span>
                 <div class="flex-1">
-                    <p class="font-bold text-ink-900">Dokumen sudah ada di database lokal M2B</p>
+                    <p class="font-bold text-slate-800">Dokumen sudah ada di database lokal M2B</p>
                     <div class="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                        <div><span class="text-ink-400 uppercase tracking-wider text-[10px] font-bold block">Jenis</span><span class="font-bold text-ink-900">{{ $localDoc->doc_type }}</span></div>
-                        <div><span class="text-ink-400 uppercase tracking-wider text-[10px] font-bold block mb-0.5">Status</span><x-status-badge :status="$localDoc->status" /></div>
-                        <div><span class="text-ink-400 uppercase tracking-wider text-[10px] font-bold block">Dibuat</span><span class="font-semibold text-ink-900 font-mono">{{ $localDoc->created_at->format('d/m/Y H:i') }}</span></div>
-                        <div class="flex items-end"><a href="{{ route('documents.show', $localDoc) }}" class="font-bold text-ink-900 link-gold text-xs">Lihat Detail →</a></div>
+                        <div><span class="text-slate-500 uppercase tracking-wider text-[10px] font-bold block">Jenis</span><span class="font-bold text-slate-800">{{ $localDoc->doc_type }}</span></div>
+                        <div><span class="text-slate-500 uppercase tracking-wider text-[10px] font-bold block mb-0.5">Status</span><x-status-badge :status="$localDoc->status" /></div>
+                        <div><span class="text-slate-500 uppercase tracking-wider text-[10px] font-bold block">Dibuat</span><span class="font-semibold text-slate-800 font-mono">{{ $localDoc->created_at->format('d/m/Y H:i') }}</span></div>
+                        <div class="flex items-end"><a href="{{ route('documents.show', $localDoc) }}" class="font-bold text-slate-800 link-gold text-xs">Lihat Detail →</a></div>
                     </div>
                 </div>
             </div>
@@ -119,15 +119,15 @@
                             ['Tanggal Daftar', data_get($result, 'tanggal_daftar', data_get($result, 'data.tanggal_daftar', '—'))],
                             ['Nilai Pabean', data_get($result, 'nilai_pabean', data_get($result, 'data.nilai_pabean', '—'))],
                         ] as [$label, $value])
-                            <div class="bg-cream-100 rounded-xl p-3 border border-cream-300">
-                                <dt class="text-[10px] font-bold text-ink-400 uppercase tracking-[0.18em]">{{ $label }}</dt>
-                                <dd class="font-bold text-ink-900 text-sm mt-1 font-mono">{{ $value ?? '—' }}</dd>
+                            <div class="bg-panel-2 rounded-xl p-3 border border-white/10">
+                                <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">{{ $label }}</dt>
+                                <dd class="font-bold text-slate-800 text-sm mt-1 font-mono">{{ $value ?? '—' }}</dd>
                             </div>
                         @endforeach
                     </div>
 
-                    <div x-data="{ open: false }" class="border border-cream-300 rounded-xl overflow-hidden">
-                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-cream-100 hover:bg-cream-200 transition-colors text-xs font-bold text-ink-700 uppercase tracking-widest">
+                    <div x-data="{ open: false }" class="border border-white/10 rounded-xl overflow-hidden">
+                        <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-panel-2 hover:bg-white/[0.05] transition-colors text-xs font-bold text-slate-600 uppercase tracking-widest">
                             <span>Raw Response JSON · Developer</span>
                             <svg class="h-4 w-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                         </button>
@@ -137,10 +137,10 @@
                     </div>
 
                     @if (!$localDoc)
-                        <div class="mt-6 border-t border-cream-200 pt-6">
+                        <div class="mt-6 border-t border-white/10 pt-6">
                             <div class="bg-sea-50/50 border border-sea-100 rounded-xl p-4">
-                                <h4 class="eyebrow text-sea-700 mb-3">Impor ke arsip lokal</h4>
-                                <p class="text-xs text-ink-500 mb-4">Simpan dokumen historis dari portal CEISA ini ke database lokal M2B agar tampil di dashboard.</p>
+                                <h4 class="eyebrow text-sea-300 mb-3">Impor ke arsip lokal</h4>
+                                <p class="text-xs text-slate-500 mb-4">Simpan dokumen historis dari portal CEISA ini ke database lokal M2B agar tampil di dashboard.</p>
                                 <form method="POST" action="{{ route('documents.import') }}" class="space-y-4">
                                     @csrf
                                     <input type="hidden" name="nomor_aju" value="{{ data_get($result, 'nomor_aju', data_get($result, 'data.nomor_aju', $nomorAju)) }}" />
@@ -173,7 +173,7 @@
 
         {{-- Examples --}}
         <div class="card p-5">
-            <p class="eyebrow text-gold-700 mb-3">Nomor aju yang diketahui</p>
+            <p class="eyebrow text-gold-300 mb-3">Nomor aju yang diketahui</p>
             <div class="space-y-2">
                 @foreach ([
                     ['000020MOT83720260301000015', 'PIB BC 2.0 — PT. Pomeurah Acindo, KPPBC Belawan, 04/03/2026', 'sea'],
@@ -181,13 +181,13 @@
                 ] as [$aju, $desc, $tone])
                     @php
                         $bg = ['sea'=>'bg-sea-50 border-sea-200','gold'=>'bg-gold-50 border-gold-200'][$tone];
-                        $codeColor = ['sea'=>'text-sea-700','gold'=>'text-gold-700'][$tone];
+                        $codeColor = ['sea'=>'text-sea-300','gold'=>'text-gold-300'][$tone];
                         $btn = ['sea'=>'btn-primary !bg-sea-600 hover:!bg-sea-700','gold'=>'btn-gold'][$tone];
                     @endphp
                     <div class="flex items-center justify-between p-3 rounded-xl border {{ $bg }} gap-3">
                         <div>
                             <code class="font-mono font-bold text-sm {{ $codeColor }}">{{ $aju }}</code>
-                            <p class="text-xs text-ink-500 mt-0.5">{{ $desc }}</p>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ $desc }}</p>
                         </div>
                         <form method="POST" action="{{ route('documents.lookup.search') }}">
                             @csrf
@@ -197,7 +197,7 @@
                     </div>
                 @endforeach
             </div>
-            <p class="text-[11px] text-ink-400 mt-3">* Pastikan nomor aju yang dicek adalah dokumen yang diajukan menggunakan App ID yang sama dengan kredensial M2B.</p>
+            <p class="text-[11px] text-slate-500 mt-3">* Pastikan nomor aju yang dicek adalah dokumen yang diajukan menggunakan App ID yang sama dengan kredensial M2B.</p>
         </div>
     </div>
 </x-app-layout>
