@@ -13,14 +13,14 @@
 @endphp
 
 {{-- Step 4: Items (Dynamic Grid) --}}
-<div x-show="step === 8" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 8" class="bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Detail Pos Barang</h3>
             <p class="text-xs text-slate-500 mt-0.5">Input pos-pos komoditas barang ekspor / impor secara terperinci</p>
         </div>
         <button type="button" @click="addItem()"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-indigo-100">
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-black/25">
             + Tambah Barang
         </button>
     </div>
@@ -29,12 +29,12 @@
         <template x-for="(item, index) in formData.barang" :key="index">
             <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50 hover:border-slate-300 transition-all relative group">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
-                    <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">Barang #<span x-text="index + 1"></span></span>
+                    <span class="text-xs font-extrabold text-indigo-300 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">Barang #<span x-text="index + 1"></span></span>
                     <div class="flex items-center gap-3">
                         <button type="button" @click="copyItem(index)"
-                                class="text-xs text-indigo-600 hover:underline">Salin Pos</button>
+                                class="text-xs text-indigo-300 hover:underline">Salin Pos</button>
                         <button type="button" @click="removeItem(index)" x-show="formData.barang.length > 1"
-                                class="text-xs text-rose-600 hover:underline">Hapus Pos</button>
+                                class="text-xs text-rose-300 hover:underline">Hapus Pos</button>
                     </div>
                 </div>
 
@@ -129,7 +129,7 @@
         </div>
         <div>
             <span class="text-slate-500">Total Nilai Barang:</span>
-            <span class="font-bold text-indigo-700 ml-1" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
+            <span class="font-bold text-indigo-300 ml-1" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></span>
         </div>
     </div>
 </div>

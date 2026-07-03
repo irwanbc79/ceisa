@@ -9,13 +9,13 @@
 @endphp
 
 {{-- Step 5: Data Pengangkut --}}
-<div x-show="step === 5" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 5" class="bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Data Pengangkut</h3>
             <p class="text-xs text-slate-500 mt-0.5">Sarana pengangkut, pelabuhan, dan jadwal pengangkutan</p>
         </div>
-        <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap <span x-text="step"></span> dari <span x-text="steps.length"></span></span>
+        <span class="px-3 py-1 bg-indigo-50 text-indigo-300 text-xs font-bold rounded-full border border-indigo-100">Tahap <span x-text="step"></span> dari <span x-text="steps.length"></span></span>
     </div>
 
     {{-- BC 3.0 --}}
