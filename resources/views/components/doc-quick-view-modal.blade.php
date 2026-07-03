@@ -13,7 +13,7 @@
     <div
         x-show="open"
         x-transition.opacity.duration.200ms
-        class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm"
+        class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
         x-on:click="open = false"
         style="display:none"
     ></div>
@@ -30,7 +30,7 @@
         class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pointer-events-none"
         style="display:none"
     >
-        <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl ring-1 ring-slate-900/5 pointer-events-auto overflow-hidden"
+        <div class="w-full max-w-lg bg-panel rounded-3xl shadow-2xl ring-1 ring-slate-900/5 pointer-events-auto overflow-hidden"
              x-on:click.stop>
             {{-- Header --}}
             <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-5 flex items-start justify-between">
@@ -48,13 +48,13 @@
             <div class="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
                 <div class="flex flex-wrap items-center gap-2">
                     <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200" x-text="doc.source"></span>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100 capitalize" x-text="doc.status"></span>
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-300 border border-indigo-100 capitalize" x-text="doc.status"></span>
                     <template x-if="doc.jalur">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
                               :class="{
-                                'bg-emerald-50 text-emerald-700 border border-emerald-100': doc.jalur_color === 'emerald',
-                                'bg-amber-50 text-amber-700 border border-amber-100': doc.jalur_color === 'amber',
-                                'bg-rose-50 text-rose-700 border border-rose-100': doc.jalur_color === 'rose',
+                                'bg-emerald-50 text-emerald-300 border border-emerald-100': doc.jalur_color === 'emerald',
+                                'bg-amber-50 text-amber-300 border border-amber-100': doc.jalur_color === 'amber',
+                                'bg-rose-50 text-rose-300 border border-rose-100': doc.jalur_color === 'rose',
                               }"
                               x-text="doc.jalur"></span>
                     </template>
@@ -96,13 +96,13 @@
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2.5">
                 <template x-if="doc.editable">
                     <a :href="doc.edit_url"
-                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-amber-200 hover:bg-amber-50 text-amber-700 text-xs font-bold rounded-xl shadow-sm transition-colors">
+                       class="inline-flex items-center gap-1.5 px-4 py-2 bg-panel border border-amber-200 hover:bg-amber-50 text-amber-300 text-xs font-bold rounded-xl shadow-sm transition-colors">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
                         Ubah
                     </a>
                 </template>
                 <a :href="doc.show_url"
-                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-100 transition-all">
+                   class="inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-bold rounded-xl shadow-md shadow-black/25 transition-all">
                     Halaman Detail Lengkap
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
                 </a>

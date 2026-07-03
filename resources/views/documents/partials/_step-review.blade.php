@@ -12,13 +12,13 @@
 @endphp
 
 {{-- Step 5: Review & Send --}}
-<div x-show="step === 9" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 9" class="bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Review Data &amp; Submit</h3>
             <p class="text-xs text-slate-500 mt-0.5">Konfirmasi seluruh isian sebelum didaftarkan ke Bea Cukai</p>
         </div>
-        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-100">Siap Submit</span>
+        <span class="px-3 py-1 bg-emerald-50 text-emerald-300 text-xs font-bold rounded-full border border-emerald-100">Siap Submit</span>
     </div>
 
     <div class="space-y-6">
@@ -32,7 +32,7 @@
                 </div>
                 <div>
                     <dt class="text-slate-500">Valuta &amp; Nilai:</dt>
-                    <dd class="font-bold text-indigo-700" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></dd>
+                    <dd class="font-bold text-indigo-300" x-text="calculateTotalValue() + ' ' + (formData.kode_valuta || 'USD')"></dd>
                 </div>
 
                 {{-- Conditional review labels --}}
@@ -163,8 +163,8 @@
         </div>
 
         {{-- Validation Guard Message --}}
-        <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-900 flex items-start gap-2.5">
-            <svg class="h-4 w-4 shrink-0 text-indigo-600 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <div class="rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 text-xs text-indigo-300 flex items-start gap-2.5">
+            <svg class="h-4 w-4 shrink-0 text-indigo-300 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
             <div>
@@ -177,31 +177,31 @@
 {{-- Footer Buttons (navigasi antar step) --}}
 <div class="mt-6 flex items-center justify-between border-t border-slate-200/50 pt-4">
     <button type="button" @click="prevStep()" x-show="step > 1"
-            class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-bold rounded-xl bg-white hover:bg-slate-50 transition-colors shadow-sm">
+            class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-bold rounded-xl bg-panel hover:bg-slate-50 transition-colors shadow-sm">
         Sebelumnya
     </button>
     <div class="ml-auto flex items-center gap-3">
         <a href="{{ route('dashboard') }}" class="text-slate-500 hover:text-slate-800 text-sm transition-colors">Batal</a>
 
         <button type="button" @click="nextStep()" x-show="step < steps.length"
-                class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
+                class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-black/25">
             Lanjutkan &rarr;
         </button>
 
         <button type="button" @click="openDraftPreview()" x-show="step === steps.length"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-100">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-ink-700 hover:bg-ink-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-black/25">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
             Preview
         </button>
 
         <button type="button" @click="submitForm('draft')" x-show="step === steps.length"
-                class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all shadow-sm">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-panel border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all shadow-sm">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" /></svg>
             Simpan Draft
         </button>
 
         <button type="button" @click="submitForm('submit')" x-show="step === steps.length"
-                class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-indigo-100">
+                class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-black/25">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" /></svg>
             Kirim ke CEISA
         </button>

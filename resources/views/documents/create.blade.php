@@ -26,7 +26,7 @@
             <x-flash />
 
             @if ($errors->any())
-                <div class="mb-6 rounded-xl bg-rose-50 border border-rose-200 p-4 shadow-sm text-sm text-rose-800 flex items-start gap-3">
+                <div class="mb-6 rounded-xl bg-rose-50 border border-rose-200 p-4 shadow-sm text-sm text-rose-300 flex items-start gap-3">
                     <svg class="h-5 w-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                     </svg>
@@ -43,7 +43,7 @@
 
             {{-- Client-side validation banner (Alpine) --}}
             <div x-show="formError" x-transition style="display:none"
-                 class="mb-6 rounded-xl bg-rose-50 border border-rose-200 p-4 shadow-sm text-sm text-rose-800 flex items-start gap-3">
+                 class="mb-6 rounded-xl bg-rose-50 border border-rose-200 p-4 shadow-sm text-sm text-rose-300 flex items-start gap-3">
                 <svg class="h-5 w-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
                 </svg>
@@ -51,7 +51,7 @@
             </div>
 
             {{-- Stepper Progress Bar --}}
-            <div class="mb-8 bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6">
+            <div class="mb-8 bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6">
                 <div class="relative flex items-center justify-between">
                     {{-- Progress Line Background --}}
                     <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-100 rounded"></div>
@@ -66,17 +66,17 @@
                                 class="relative z-10 flex flex-col items-center group focus:outline-none disabled:cursor-not-allowed">
                             <div class="h-10 w-10 rounded-full flex items-center justify-center font-semibold text-sm border-2 transition-all duration-300"
                                  :class="step === idx + 1 
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100 scale-110' 
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-black/25 scale-110' 
                                     : (step > idx + 1 
                                         ? 'bg-emerald-500 border-emerald-500 text-white' 
-                                        : 'bg-white border-slate-200 text-slate-400 group-hover:border-slate-300')">
+                                        : 'bg-panel border-slate-200 text-slate-400 group-hover:border-slate-300')">
                                 <span x-show="step <= idx + 1" x-text="idx + 1"></span>
                                 <svg x-show="step > idx + 1" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                 </svg>
                             </div>
                             <span class="text-xs font-semibold mt-2 transition-colors duration-300"
-                                  :class="step === idx + 1 ? 'text-indigo-600 font-bold' : (step > idx + 1 ? 'text-emerald-600' : 'text-slate-400')"
+                                  :class="step === idx + 1 ? 'text-indigo-300 font-bold' : (step > idx + 1 ? 'text-emerald-300' : 'text-slate-400')"
                                   x-text="s.title"></span>
                         </button>
                     </template>
@@ -97,13 +97,13 @@
                         <input type="hidden" name="submit_action" id="submit_action" value="submit" />
 
                         {{-- Step 1: Portal Selection --}}
-                        <div x-show="step === 1" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
+                        <div x-show="step === 1" class="bg-panel rounded-2xl p-6 shadow-sm border border-slate-100 transition-all duration-300">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
                                     <h3 class="text-lg font-bold text-slate-800">Pilih Jenis Layanan Portal</h3>
                                     <p class="text-xs text-slate-500 mt-0.5">Tentukan jenis dokumen kepabeanan yang ingin Anda rekam</p>
                                 </div>
-                                <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">Tahap 1 dari 5</span>
+                                <span class="px-3 py-1 bg-indigo-50 text-indigo-300 text-xs font-bold rounded-full border border-indigo-100">Tahap 1 dari <span x-text="steps.length"></span></span>
                             </div>
 
                             <div class="grid gap-4 sm:grid-cols-2">
@@ -112,7 +112,7 @@
                                             class="flex items-start text-left p-5 border-2 rounded-2xl transition-all duration-300 hover:shadow-md group relative overflow-hidden"
                                             :class="doc_type === item.code 
                                                 ? 'border-indigo-600 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-600' 
-                                                : 'border-slate-100 bg-white hover:border-slate-300'">
+                                                : 'border-slate-100 bg-panel hover:border-slate-300'">
                                         <div class="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
                                              :class="doc_type === item.code ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-500 group-hover:bg-slate-100'">
                                             <span x-html="item.icon"></span>
@@ -192,7 +192,7 @@
                         code: 'BC30',
                         label: 'BC 3.0 (Ekspor)',
                         description: 'Pemberitahuan Ekspor Barang (PEB) untuk pelaporan komoditas ke luar negeri.',
-                        badgeClass: 'bg-indigo-100 text-indigo-800',
+                        badgeClass: 'bg-indigo-100 text-indigo-300',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                                </svg>`
@@ -201,7 +201,7 @@
                         code: 'BC20',
                         label: 'BC 2.0 (Impor)',
                         description: 'Pemberitahuan Impor Barang (PIB) untuk penyelesaian kewajiban pabean barang masuk.',
-                        badgeClass: 'bg-emerald-100 text-emerald-800',
+                        badgeClass: 'bg-emerald-100 text-emerald-300',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
                                </svg>`
@@ -210,7 +210,7 @@
                         code: 'BC24',
                         label: 'BC 2.4 (Impor TPB)',
                         description: 'Impor Barang yang dimasukkan untuk ditimbun di Tempat Penimbunan Berikat.',
-                        badgeClass: 'bg-blue-100 text-blue-800',
+                        badgeClass: 'bg-blue-100 text-blue-300',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
                                </svg>`
@@ -228,7 +228,7 @@
                         code: 'RUSH',
                         label: 'Rush Handling',
                         description: 'Pengajuan persetujuan pengeluaran barang segera karena sifatnya yang mendesak.',
-                        badgeClass: 'bg-rose-100 text-rose-800',
+                        badgeClass: 'bg-rose-100 text-rose-300',
                         icon: `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                </svg>`

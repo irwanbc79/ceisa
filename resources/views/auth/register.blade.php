@@ -1,9 +1,9 @@
 <x-guest-layout>
-    <p class="eyebrow text-gold-700">Mulai gratis</p>
-    <h1 class="font-display text-4xl lg:text-5xl font-light tracking-tightest leading-tight mt-5 text-ink-900">
+    <p class="eyebrow text-gold-300">Mulai gratis</p>
+    <h1 class="font-display text-4xl lg:text-5xl font-light tracking-tightest leading-tight mt-5 text-slate-800">
         Buka <em class="font-semibold not-italic">workspace H2H</em>,<br>kirim PIB pertama Anda.
     </h1>
-    <p class="mt-3 text-ink-500 leading-relaxed">Tanpa kartu kredit · Sandbox CEISA siap pakai · Setup &lt; 5 menit</p>
+    <p class="mt-3 text-slate-500 leading-relaxed">Tanpa kartu kredit · Sandbox CEISA siap pakai · Setup &lt; 5 menit</p>
 
     <form method="POST" action="{{ route('register') }}" class="mt-10 space-y-5">
         @csrf
@@ -37,8 +37,8 @@
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
         </button>
 
-        <p class="text-center text-sm text-ink-500 pt-2">
-            Sudah punya akun? <a href="{{ route('login') }}" class="font-bold text-ink-900 link-gold">Masuk di sini</a>
+        <p class="text-center text-sm text-slate-500 pt-2">
+            Sudah punya akun? <a href="{{ route('login') }}" class="font-bold text-slate-800 link-gold">Masuk di sini</a>
         </p>
     </form>
 </x-guest-layout>

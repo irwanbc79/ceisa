@@ -22,7 +22,7 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <x-flash />
 
-            <div class="bg-white shadow-sm sm:rounded-lg p-6">
+            <div class="bg-panel shadow-sm sm:rounded-lg p-6">
                 <h3 class="text-lg font-medium text-gray-900">Kredensial Host-to-Host (CEISA 4.0) — Perusahaan</h3>
                 <p class="mt-1 text-sm text-gray-500">
                     Kredensial berlaku untuk <strong>seluruh staf</strong> (satu akun H2H perusahaan).
@@ -35,13 +35,13 @@
                     <div class="mt-6 rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-sm text-slate-600 space-y-1.5">
                         <p class="font-semibold text-slate-800">Kredensial dikelola oleh admin.</p>
                         @if ($credential)
-                            <p>Status: <span class="font-semibold text-emerald-600">terpasang</span>
+                            <p>Status: <span class="font-semibold text-emerald-300">terpasang</span>
                                 @if ($credential->npwp) · NPWP {{ $credential->npwp }} @endif
                                 @if ($credential->user) · diatur oleh {{ $credential->user->name }} @endif
                             </p>
                             <p class="text-xs text-slate-400">Anda dapat langsung membuat & mengirim dokumen — sistem otomatis memakai kredensial perusahaan ini.</p>
                         @else
-                            <p>Status: <span class="font-semibold text-crimson-600">belum diisi</span> — hubungi admin untuk mengisi kredensial CEISA sebelum mengirim dokumen.</p>
+                            <p>Status: <span class="font-semibold text-crimson-300">belum diisi</span> — hubungi admin untuk mengisi kredensial CEISA sebelum mengirim dokumen.</p>
                         @endif
                     </div>
                 @endif
@@ -127,7 +127,7 @@
                             <div class="flex items-center gap-2 text-sm">
                                 <span class="text-slate-500">Status token akses:</span>
                                 <template x-if="remaining > 0">
-                                    <span class="inline-flex items-center gap-1.5 font-bold text-emerald-600">
+                                    <span class="inline-flex items-center gap-1.5 font-bold text-emerald-300">
                                         <span class="relative flex h-2 w-2">
                                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                             <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -145,7 +145,7 @@
                             <div class="text-right">
                                 <template x-if="remaining > 0">
                                     <span class="font-mono font-bold tabular-nums text-lg"
-                                          :class="remaining <= 60 ? 'text-amber-600' : 'text-slate-700'"
+                                          :class="remaining <= 60 ? 'text-amber-300' : 'text-slate-700'"
                                           x-text="formatted"></span>
                                 </template>
                                 <template x-if="remaining <= 0">

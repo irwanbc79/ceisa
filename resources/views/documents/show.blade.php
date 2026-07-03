@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 py-2">
             <div class="flex items-center gap-3">
-                <div class="h-12 w-12 rounded-2xl bg-indigo-50/60 border border-indigo-100/80 flex items-center justify-center text-indigo-600 shadow-sm shrink-0">
+                <div class="h-12 w-12 rounded-2xl bg-indigo-50/60 border border-indigo-100/80 flex items-center justify-center text-indigo-300 shadow-sm shrink-0">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" />
                     </svg>
@@ -37,7 +37,7 @@
                     $errors = collect($all)->where('level', 'error')->count();
                     $warnings = collect($all)->where('level', 'warning')->count();
                 @endphp
-                <div class="bg-white rounded-3xl shadow-sm border border-violet-150 overflow-hidden transition-all duration-300 hover:shadow-md">
+                <div class="bg-panel rounded-3xl shadow-sm border border-violet-150 overflow-hidden transition-all duration-300 hover:shadow-md">
                     <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 border-b border-violet-100 flex items-center justify-between">
                         <div class="flex items-center gap-2.5 text-white">
                             <svg class="h-5 w-5 text-violet-100 animate-pulse" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
@@ -62,14 +62,14 @@
                                 </svg>
                                 <div>
                                     <span class="font-bold">Analisis AI tidak tersedia:</span> {{ $av['ai_error'] }}
-                                    <span class="block mt-1 text-amber-700">Hasil di bawah hanya didasarkan dari pemeriksaan aturan deterministik.</span>
+                                    <span class="block mt-1 text-amber-300">Hasil di bawah hanya didasarkan dari pemeriksaan aturan deterministik.</span>
                                 </div>
                             </div>
                         @endif
 
                         @if (empty($all))
                             <div class="flex items-center gap-2.5 text-sm text-emerald-750 font-bold p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
-                                <svg class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                                <svg class="h-5 w-5 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                                 Tidak ada masalah terdeteksi. Dokumen lengkap dan siap disubmit ke CEISA.
                             </div>
                         @else
@@ -77,13 +77,13 @@
                                 @foreach ($all as $item)
                                     @php
                                         $c = [
-                                            'error' => ['bg-rose-50/45','border-rose-150','text-rose-900','text-rose-700','border-l-rose-500'], 
-                                            'warning' => ['bg-amber-50/45','border-amber-150','text-amber-900','text-amber-700','border-l-amber-500'], 
-                                            'info' => ['bg-sky-50/45','border-sky-150','text-sky-900','text-sky-700','border-l-sky-500']
+                                            'error' => ['bg-rose-50/45','border-rose-150','text-rose-300','text-rose-300','border-l-rose-500'], 
+                                            'warning' => ['bg-amber-50/45','border-amber-150','text-amber-300','text-amber-300','border-l-amber-500'], 
+                                            'info' => ['bg-sky-50/45','border-sky-150','text-sky-300','text-sky-300','border-l-sky-500']
                                         ][$item['level']] ?? ['bg-slate-50/45','border-slate-150','text-slate-900','text-slate-700','border-l-slate-500'];
                                     @endphp
                                     <li class="flex items-start gap-3 rounded-2xl border {{ $c[0] }} {{ $c[1] }} border-l-4 {{ $c[4] }} p-3.5 text-xs shadow-sm hover:shadow transition-shadow">
-                                        <span class="shrink-0 text-[9px] font-black uppercase px-2 py-0.5 rounded-md {{ $c[3] }} bg-white border {{ $c[1] }}">{{ $item['level'] }}</span>
+                                        <span class="shrink-0 text-[9px] font-black uppercase px-2 py-0.5 rounded-md {{ $c[3] }} bg-panel border {{ $c[1] }}">{{ $item['level'] }}</span>
                                         <div class="{{ $c[2] }} font-medium">
                                             @if ($item['field'])<span class="font-extrabold">{{ $item['field'] }}:</span> @endif{{ $item['message'] }}
                                         </div>
@@ -100,7 +100,7 @@
             @endif
 
             {{-- 1. Stepper Progress & Aksi Utama --}}
-            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100/90 space-y-8 relative overflow-hidden transition-all duration-300 hover:shadow-md">
+            <div class="bg-panel rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100/90 space-y-8 relative overflow-hidden transition-all duration-300 hover:shadow-md">
                 <div class="absolute top-0 left-0 right-0 h-[4px] bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
 
                 @php
@@ -135,14 +135,14 @@
                     <div class="relative z-10 flex flex-col items-center group cursor-default">
                         <div @class([
                             'h-12 w-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-350 font-bold text-sm shadow-sm transform group-hover:scale-110',
-                            'bg-gradient-to-tr from-indigo-550 to-indigo-650 border-indigo-600 text-white shadow-md shadow-indigo-150 ring-4 ring-indigo-50' => $step >= 1,
-                            'bg-white border-slate-200 text-slate-400' => $step < 1
+                            'bg-gradient-to-tr from-indigo-550 to-indigo-650 border-indigo-600 text-white shadow-md shadow-black/25 ring-4 ring-indigo-50' => $step >= 1,
+                            'bg-panel border-slate-200 text-slate-400' => $step < 1
                         ])>
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                             </svg>
                         </div>
-                        <span class="text-[11px] font-black tracking-wider text-slate-800 uppercase mt-3 transition-colors group-hover:text-indigo-600">Draft</span>
+                        <span class="text-[11px] font-black tracking-wider text-slate-800 uppercase mt-3 transition-colors group-hover:text-indigo-300">Draft</span>
                         <span class="text-[9px] text-slate-400 mt-0.5 font-medium">Buat Dokumen</span>
                     </div>
 
@@ -151,7 +151,7 @@
                         <div @class([
                             'h-12 w-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-350 font-bold text-sm shadow-sm transform group-hover:scale-110',
                             'bg-gradient-to-tr from-violet-550 to-violet-650 border-violet-600 text-white shadow-md shadow-violet-150 ring-4 ring-violet-50' => $step >= 2 || $document->isArchived(),
-                            'bg-white border-slate-200 text-slate-400' => $step < 2 && !$document->isArchived()
+                            'bg-panel border-slate-200 text-slate-400' => $step < 2 && !$document->isArchived()
                         ])>
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
@@ -165,14 +165,14 @@
                     <div class="relative z-10 flex flex-col items-center group cursor-default">
                         <div @class([
                             'h-12 w-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-350 font-bold text-sm shadow-sm transform group-hover:scale-110',
-                            'bg-gradient-to-tr from-blue-550 to-blue-655 border-blue-600 text-white shadow-md shadow-blue-150 ring-4 ring-blue-55' => $step >= 3,
-                            'bg-white border-slate-200 text-slate-400' => $step < 3
+                            'bg-gradient-to-tr from-blue-550 to-blue-655 border-blue-600 text-white shadow-md shadow-black/25 ring-4 ring-blue-55' => $step >= 3,
+                            'bg-panel border-slate-200 text-slate-400' => $step < 3
                         ])>
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
                             </svg>
                         </div>
-                        <span class="text-[11px] font-black tracking-wider text-slate-500 uppercase mt-3 transition-colors group-hover:text-blue-650" :class="{'text-blue-700': {{ $step >= 3 ? 'true' : 'false' }} }">Terkirim</span>
+                        <span class="text-[11px] font-black tracking-wider text-slate-500 uppercase mt-3 transition-colors group-hover:text-blue-650" :class="{'text-blue-300': {{ $step >= 3 ? 'true' : 'false' }} }">Terkirim</span>
                         <span class="text-[9px] text-slate-400 mt-0.5 font-medium">Kirim ke Bea Cukai</span>
                     </div>
 
@@ -180,9 +180,9 @@
                     <div class="relative z-10 flex flex-col items-center group cursor-default">
                         <div @class([
                             'h-12 w-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-350 font-bold text-sm shadow-sm transform group-hover:scale-110',
-                            'bg-gradient-to-tr from-emerald-500 to-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-150 ring-4 ring-emerald-50' => $isAccepted,
-                            'bg-gradient-to-tr from-rose-550 to-rose-650 border-rose-600 text-white shadow-md shadow-rose-150 ring-4 ring-rose-50' => $isRejected,
-                            'bg-white border-slate-200 text-slate-400' => !$isAccepted && !$isRejected
+                            'bg-gradient-to-tr from-emerald-500 to-emerald-600 border-emerald-600 text-white shadow-md shadow-black/25 ring-4 ring-emerald-50' => $isAccepted,
+                            'bg-gradient-to-tr from-rose-550 to-rose-650 border-rose-600 text-white shadow-md shadow-black/25 ring-4 ring-rose-50' => $isRejected,
+                            'bg-panel border-slate-200 text-slate-400' => !$isAccepted && !$isRejected
                         ])>
                             @if($isAccepted)
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
@@ -200,8 +200,8 @@
                         </div>
                         <span @class([
                             'text-[11px] font-black tracking-wider text-slate-500 uppercase mt-3 transition-colors',
-                            'group-hover:text-emerald-600 text-emerald-700' => $isAccepted,
-                            'group-hover:text-rose-600 text-rose-700' => $isRejected,
+                            'group-hover:text-emerald-300 text-emerald-300' => $isAccepted,
+                            'group-hover:text-rose-300 text-rose-300' => $isRejected,
                             'group-hover:text-slate-700' => !$isAccepted && !$isRejected
                         ])>Respon DJBC</span>
                         <span class="text-[9px] text-slate-400 mt-0.5 font-medium">Hasil Rekam Pabean</span>
@@ -212,11 +212,11 @@
                 <div class="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-6 pt-8 border-t border-slate-100">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 grow">
                         <!-- Nomor Aju -->
-                        <div x-data="{ copied: false }" class="relative bg-slate-50/50 hover:bg-white border border-slate-100 hover:border-indigo-150 hover:shadow-sm rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between group">
+                        <div x-data="{ copied: false }" class="relative bg-slate-50/50 hover:bg-white/[0.06] border border-slate-100 hover:border-indigo-150 hover:shadow-sm rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between group">
                             <div class="flex items-center justify-between">
                                 <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider block">Nomor Aju</span>
                                 <button type="button" @click="navigator.clipboard.writeText('{{ $document->nomor_aju }}'); copied = true; setTimeout(() => copied = false, 1500)" 
-                                        class="text-slate-400 hover:text-indigo-600 transition-colors p-1 rounded-lg hover:bg-indigo-50/50 opacity-0 group-hover:opacity-100" 
+                                        class="text-slate-400 hover:text-indigo-300 transition-colors p-1 rounded-lg hover:bg-indigo-50/50 opacity-0 group-hover:opacity-100" 
                                         title="Salin Nomor Aju">
                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5" />
@@ -227,11 +227,11 @@
                             <span x-show="copied" x-transition class="absolute top-2 right-2 bg-indigo-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow">Tersalin!</span>
                         </div>
                         <!-- Nomor Pendaftaran -->
-                        <div x-data="{ copied: false }" class="relative bg-slate-50/50 hover:bg-white border border-slate-100 hover:border-indigo-150 hover:shadow-sm rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between group">
+                        <div x-data="{ copied: false }" class="relative bg-slate-50/50 hover:bg-white/[0.06] border border-slate-100 hover:border-indigo-150 hover:shadow-sm rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between group">
                             <div class="flex items-center justify-between">
                                 <span class="text-slate-400 font-bold uppercase text-[9px] tracking-wider block">No. Pendaftaran</span>
                                 <button type="button" @click="navigator.clipboard.writeText('{{ $document->nomor_daftar }}'); copied = true; setTimeout(() => copied = false, 1500)" 
-                                        class="text-slate-400 hover:text-indigo-600 transition-colors p-1 rounded-lg hover:bg-indigo-50/50 opacity-0 group-hover:opacity-100" 
+                                        class="text-slate-400 hover:text-indigo-300 transition-colors p-1 rounded-lg hover:bg-indigo-50/50 opacity-0 group-hover:opacity-100" 
                                         title="Salin Nomor Pendaftaran" @disabled(empty($document->nomor_daftar))>
                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5" />
@@ -255,12 +255,12 @@
 
                     <div class="flex flex-wrap items-center gap-3 shrink-0 lg:justify-end">
                         @if ($document->error_message)
-                            <div class="rounded-2xl bg-rose-50 border border-rose-100 p-4 text-xs text-rose-800 max-w-xs shadow-sm flex items-start gap-2">
+                            <div class="rounded-2xl bg-rose-50 border border-rose-100 p-4 text-xs text-rose-300 max-w-xs shadow-sm flex items-start gap-2">
                                 <svg class="h-5 w-5 text-rose-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
                                 </svg>
                                 <div>
-                                    <span class="font-extrabold block text-rose-900 mb-0.5">Pemberitahuan Rejeksi</span>
+                                    <span class="font-extrabold block text-rose-300 mb-0.5">Pemberitahuan Rejeksi</span>
                                     {{ $document->error_message }}
                                 </div>
                             </div>
@@ -277,7 +277,7 @@
                                 </form>
                                 <form method="POST" action="{{ route('documents.duplicate', $document) }}">
                                     @csrf
-                                    <button type="submit" class="px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-black rounded-xl shadow-sm hover:border-slate-350 transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0"
+                                    <button type="submit" class="px-4 py-2.5 bg-panel border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-black rounded-xl shadow-sm hover:border-slate-350 transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0"
                                             onclick="return confirm('Duplikasi dokumen ini sebagai draft baru?')">
                                         Duplikasi
                                     </button>
@@ -286,7 +286,7 @@
 
                             @if ($document->isEditable())
                                 <a href="{{ route('documents.edit', $document) }}"
-                                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-amber-200 hover:bg-amber-50 text-amber-700 text-xs font-black rounded-xl shadow-sm transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
+                                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-panel border border-amber-200 hover:bg-amber-50 text-amber-300 text-xs font-black rounded-xl shadow-sm transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" /></svg>
                                     Ubah
                                 </a>
@@ -296,7 +296,7 @@
                                 @if (in_array($document->status, ['submitting', 'submitted', 'accepted', 'rejected']) && $document->nomor_aju)
                                     <form method="POST" action="{{ route('documents.refresh-status', $document) }}">
                                         @csrf
-                                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-black rounded-xl shadow-sm hover:border-slate-300 transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
+                                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-panel border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-black rounded-xl shadow-sm hover:border-slate-300 transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
                                             <svg class="h-4 w-4 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
                                             Perbarui Status
                                         </button>
@@ -308,9 +308,9 @@
                                 @if (in_array($document->doc_type, ['BC30', 'TPB']) && in_array($document->status, ['submitted', 'accepted']))
                                     <form method="POST" action="{{ route('documents.submit-revision', $document) }}">
                                         @csrf
-                                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-amber-200 hover:bg-amber-50 text-amber-700 text-xs font-black rounded-xl shadow-sm hover:border-amber-300 transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0"
+                                        <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-panel border border-amber-200 hover:bg-amber-50 text-amber-300 text-xs font-black rounded-xl shadow-sm hover:border-amber-300 transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0"
                                                 onclick="return confirm('Kirim perbaikan data / Nota Pembetulan (NOTUL) untuk dokumen ini?')">
-                                            <svg class="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
+                                            <svg class="h-4 w-4 text-amber-300" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
                                             </svg>
                                             Kirim Pembetulan (NOTUL)
@@ -322,7 +322,7 @@
                             @if (in_array($document->status, ['draft', 'error']))
                                 <form method="POST" action="{{ route('documents.submit', $document) }}">
                                     @csrf
-                                    <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-black rounded-xl shadow-md shadow-indigo-100 hover:shadow-lg transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
+                                    <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-black rounded-xl shadow-md shadow-black/25 hover:shadow-lg transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
                                         {{ $document->status === 'draft' ? 'Submit ke CEISA H2H' : 'Kirim Ulang ke CEISA' }}
                                     </button>
                                 </form>
@@ -332,7 +332,7 @@
                                 <form method="POST" action="{{ route('documents.destroy', $document) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-black rounded-xl shadow-sm transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0"
+                                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-panel border border-rose-200 hover:bg-rose-50 text-rose-300 text-xs font-black rounded-xl shadow-sm transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0"
                                             onclick="return confirm('Hapus dokumen ini secara permanen? Tindakan ini tidak dapat dibatalkan.')">
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
                                         Hapus
@@ -351,15 +351,15 @@
                 <div class="lg:col-span-2 space-y-6">
                     
                     {{-- Structured Document Content --}}
-                    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-md">
-                        <div class="bg-gradient-to-r from-slate-50 to-white px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+                    <div class="bg-panel rounded-3xl shadow-sm border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-md">
+                        <div class="bg-gradient-to-r from-slate-50 to-panel px-6 py-5 border-b border-slate-100 flex items-center justify-between">
                             <h3 class="font-extrabold text-slate-800 text-sm tracking-tight flex items-center gap-2">
-                                <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <svg class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3m3-6v6m-6-10.5h3c.199 0 .39.078.53.22l5.03 5.03c.14.14.22.331.22.53v10.5c0 .621-.504 1.125-1.125 1.125h-12.75c-.621 0-1.125-.504-1.125-1.125v-17.25c0-.621.504-1.125 1.125-1.125Z" />
                                 </svg>
                                 Informasi Dokumen Terstruktur
                             </h3>
-                            <span class="text-[9px] bg-indigo-50 border border-indigo-100/50 text-indigo-700 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">H2H Data Payload</span>
+                            <span class="text-[9px] bg-indigo-50 border border-indigo-100/50 text-indigo-300 font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">H2H Data Payload</span>
                         </div>
                         
                         <div class="p-6 md:p-8 space-y-8">
@@ -389,7 +389,7 @@
                                         </div>
                                         <div class="flex flex-col gap-1 pb-2 border-b border-slate-200/40 sm:col-span-2">
                                             <span class="text-slate-400 text-[9px] uppercase font-bold tracking-wider">Nilai Transaksi</span>
-                                            <span class="font-black text-indigo-700 text-sm">{{ data_get($document->payload, 'nilai') !== null ? number_format(data_get($document->payload, 'nilai'), 2, ',', '.').' '.(data_get($document->payload, 'valuta') ?? '') : '—' }}</span>
+                                            <span class="font-black text-indigo-300 text-sm">{{ data_get($document->payload, 'nilai') !== null ? number_format(data_get($document->payload, 'nilai'), 2, ',', '.').' '.(data_get($document->payload, 'valuta') ?? '') : '—' }}</span>
                                         </div>
                                         <div class="flex flex-col gap-1 sm:col-span-2">
                                             <span class="text-slate-400 text-[9px] uppercase font-bold tracking-wider">Uraian Ringkas</span>
@@ -413,7 +413,7 @@
                                     @if ($document->doc_type === 'BC30')
                                         <div class="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-2xl p-5 transition-all duration-300">
                                             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200/40">
-                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21h10.5V3.75c0-.621-.504-1.125-1.125-1.125h-8.25C6.146 2.625 5.625 3.146 5.625 3.75V21Z" />
                                                     </svg>
@@ -428,7 +428,7 @@
                                         </div>
                                         <div class="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-2xl p-5 transition-all duration-300">
                                             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200/40">
-                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                                                     </svg>
@@ -439,14 +439,14 @@
                                                 <p class="font-extrabold text-slate-800 text-sm tracking-tight">{{ data_get($document->payload, 'header.penerima.nama') }}</p>
                                                 <div class="text-xs text-slate-500 font-bold mt-2 flex items-center gap-2">
                                                     <span>Negara Tujuan:</span>
-                                                    <span class="font-black text-indigo-700 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-lg">{{ data_get($document->payload, 'header.penerima.negara') }}</span>
+                                                    <span class="font-black text-indigo-300 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-lg">{{ data_get($document->payload, 'header.penerima.negara') }}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     @elseif ($document->doc_type === 'BC20' || $document->doc_type === 'BC24')
                                         <div class="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-2xl p-5 transition-all duration-300">
                                             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200/40">
-                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21h10.5V3.75c0-.621-.504-1.125-1.125-1.125h-8.25C6.146 2.625 5.625 3.146 5.625 3.75V21Z" />
                                                     </svg>
@@ -461,7 +461,7 @@
                                         </div>
                                         <div class="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-2xl p-5 transition-all duration-300">
                                             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200/40">
-                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                                                     </svg>
@@ -472,14 +472,14 @@
                                                 <p class="font-extrabold text-slate-800 text-sm tracking-tight">{{ data_get($document->payload, 'header.pemasok.nama') }}</p>
                                                 <div class="text-xs text-slate-500 font-bold mt-2 flex items-center gap-2">
                                                     <span>Negara Pengirim:</span>
-                                                    <span class="font-black text-indigo-700 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-lg">{{ data_get($document->payload, 'header.pemasok.negara') }}</span>
+                                                    <span class="font-black text-indigo-300 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded-lg">{{ data_get($document->payload, 'header.pemasok.negara') }}</span>
                                                 </div>
                                             </div>
                                         </div>
                                     @elseif ($document->doc_type === 'TPB')
                                         <div class="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-2xl p-5 transition-all duration-300">
                                             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200/40">
-                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21h10.5V3.75c0-.621-.504-1.125-1.125-1.125h-8.25C6.146 2.625 5.625 3.146 5.625 3.75V21Z" />
                                                     </svg>
@@ -494,7 +494,7 @@
                                         </div>
                                         <div class="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-2xl p-5 transition-all duration-300 space-y-2">
                                             <div class="flex items-center gap-2 mb-2 pb-2 border-b border-slate-200/40">
-                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-.621-.504-1.125-1.125-1.125H9.75M2.25 12a9.75 9.75 0 1 1 19.5 0 9.75 9.75 0 0 1-19.5 0Z" />
                                                     </svg>
@@ -517,7 +517,7 @@
                                     @elseif ($document->doc_type === 'RUSH')
                                         <div class="bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 rounded-2xl p-5 transition-all duration-300">
                                             <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-200/40">
-                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                                                     </svg>
@@ -532,12 +532,12 @@
                                         </div>
                                         <div class="bg-rose-50/50 border border-rose-100 rounded-2xl p-5">
                                             <div class="flex items-center gap-2 mb-2 pb-2 border-b border-rose-200/30">
-                                                <div class="h-6 w-6 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600 font-bold shrink-0">
+                                                <div class="h-6 w-6 rounded-lg bg-rose-100 flex items-center justify-center text-rose-300 font-bold shrink-0">
                                                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                                     </svg>
                                                 </div>
-                                                <h4 class="text-[10px] font-black text-rose-700 uppercase tracking-wider">Alasan Pengeluaran Segera</h4>
+                                                <h4 class="text-[10px] font-black text-rose-300 uppercase tracking-wider">Alasan Pengeluaran Segera</h4>
                                             </div>
                                             <p class="text-xs text-rose-950 font-bold leading-relaxed">{{ data_get($document->payload, 'header.alasan_rush_handling') }}</p>
                                         </div>
@@ -606,7 +606,7 @@
                                     </div>
                                     
                                     <div>
-                                        <div class="bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-3xl p-6 shadow-md shadow-indigo-950/10 space-y-4 relative overflow-hidden">
+                                        <div class="bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-3xl p-6 shadow-md shadow-black/25 space-y-4 relative overflow-hidden">
                                             <div class="absolute -right-8 -bottom-8 h-28 w-28 rounded-full bg-indigo-800/20 blur-xl"></div>
                                             <div class="flex items-center justify-between">
                                                 <span class="text-indigo-200 text-[10px] font-black uppercase tracking-wider">Mata Uang &amp; Nilai</span>
@@ -675,7 +675,7 @@
                                                 <th class="px-4 py-3.5 text-right">Nilai Barang</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-slate-100 bg-white">
+                                        <tbody class="divide-y divide-slate-100 bg-panel">
                                             @php
                                                 $totalNetto = 0;
                                                 $totalValue = 0;
@@ -709,7 +709,7 @@
                                                         </span>
                                                     </td>
                                                     <td class="px-4 py-3 text-right text-slate-600 font-mono">{{ number_format(data_get($item, 'netto'), 2, ',', '.') }} kg</td>
-                                                    <td class="px-4 py-3 text-right font-extrabold text-indigo-600 bg-indigo-50/10">
+                                                    <td class="px-4 py-3 text-right font-extrabold text-indigo-300 bg-indigo-50/10">
                                                         {{ number_format(data_get($item, $valueKey, 0), 2, ',', '.') }}
                                                     </td>
                                                 </tr>
@@ -735,7 +735,7 @@
                     </div>
 
                     {{-- JSON Tabs (Payload & Response) --}}
-                    <div class="bg-slate-950 text-slate-350 rounded-3xl shadow-lg border border-slate-900 overflow-hidden" 
+                    <div class="bg-black/40 text-slate-500 rounded-3xl shadow-lg border border-white/10 overflow-hidden" 
                          x-data="{ 
                             activeTab: 'payload', 
                             copied: false,
@@ -748,7 +748,7 @@
                                 setTimeout(() => this.copied = false, 1500);
                             }
                          }">
-                        <div class="bg-slate-900 px-6 py-4 border-b border-slate-950 flex items-center justify-between">
+                        <div class="bg-ink-950 px-6 py-4 border-b border-black/40 flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <!-- Mac Window Controls Mockup -->
                                 <div class="flex items-center gap-1.5 shrink-0">
@@ -756,16 +756,16 @@
                                     <span class="h-3 w-3 rounded-full bg-amber-500"></span>
                                     <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
                                 </div>
-                                <div class="flex gap-1 bg-slate-950/40 p-1 rounded-xl border border-slate-800">
+                                <div class="flex gap-1 bg-black/30 p-1 rounded-xl border border-white/10">
                                     <button type="button" @click="activeTab = 'payload'"
                                             class="text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all duration-200"
-                                            :class="activeTab === 'payload' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'">
+                                            :class="activeTab === 'payload' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-cream-100'">
                                         Payload Kirim
                                     </button>
                                     @if ($document->ceisa_response)
                                         <button type="button" @click="activeTab = 'response'"
                                                 class="text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg transition-all duration-200"
-                                                :class="activeTab === 'response' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'">
+                                                :class="activeTab === 'response' ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-cream-100'">
                                             Response CEISA
                                         </button>
                                     @endif
@@ -773,7 +773,7 @@
                             </div>
                             
                             <button type="button" @click="copyJson()" 
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/80 hover:bg-slate-850 hover:text-white border border-slate-700/60 rounded-xl text-xs font-bold transition-all duration-200 text-slate-350 relative group">
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ink-800/80 hover:bg-ink-700 hover:text-white border border-white/10 rounded-xl text-xs font-bold transition-all duration-200 text-slate-500 relative group">
                                 <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5" />
                                 </svg>
@@ -826,9 +826,9 @@
                             if ((float)data_get($item, $valueKey, 0) <= 0) $nilaiValid = false;
                         }
                     @endphp
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100/90 space-y-4 transition-all duration-300 hover:shadow-md">
+                    <div class="bg-panel rounded-3xl p-6 shadow-sm border border-slate-100/90 space-y-4 transition-all duration-300 hover:shadow-md">
                         <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
-                            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <svg class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
                             </svg>
                             <h3 class="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Radar Kepatuhan</h3>
@@ -843,8 +843,8 @@
                                 <span class="text-slate-600">Pihak Utama</span>
                                 <span @class([
                                     'inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm border',
-                                    'bg-white border-emerald-200 text-emerald-700' => $hasEntity,
-                                    'bg-white border-rose-200 text-rose-700' => !$hasEntity
+                                    'bg-panel border-emerald-200 text-emerald-300' => $hasEntity,
+                                    'bg-panel border-rose-200 text-rose-300' => !$hasEntity
                                 ])>
                                     @if ($hasEntity)
                                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Lengkap
@@ -863,8 +863,8 @@
                                 <span class="text-slate-600">NPWP Pihak</span>
                                 <span @class([
                                     'inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm border',
-                                    'bg-white border-emerald-200 text-emerald-700' => $hasNpwp,
-                                    'bg-white border-amber-200 text-amber-700' => !$hasNpwp
+                                    'bg-panel border-emerald-200 text-emerald-300' => $hasNpwp,
+                                    'bg-panel border-amber-200 text-amber-300' => !$hasNpwp
                                 ])>
                                     @if ($hasNpwp)
                                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Valid
@@ -883,8 +883,8 @@
                                 <span class="text-slate-600">Pos Barang</span>
                                 <span @class([
                                     'inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm border',
-                                    'bg-white border-emerald-200 text-emerald-700' => $hasBarang,
-                                    'bg-white border-rose-200 text-rose-700' => !$hasBarang
+                                    'bg-panel border-emerald-200 text-emerald-300' => $hasBarang,
+                                    'bg-panel border-rose-200 text-rose-300' => !$hasBarang
                                 ])>
                                     @if ($hasBarang)
                                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Terisi
@@ -904,8 +904,8 @@
                                     <span class="text-slate-600">HS Code 8-Digit</span>
                                     <span @class([
                                         'inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm border',
-                                        'bg-white border-emerald-200 text-emerald-700' => $hsValid,
-                                        'bg-white border-amber-200 text-amber-700' => !$hsValid
+                                        'bg-panel border-emerald-200 text-emerald-300' => $hsValid,
+                                        'bg-panel border-amber-200 text-amber-300' => !$hsValid
                                     ])>
                                         @if ($hsValid)
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Ok
@@ -924,8 +924,8 @@
                                     <span class="text-slate-600">Massa Netto</span>
                                     <span @class([
                                         'inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm border',
-                                        'bg-white border-emerald-200 text-emerald-700' => $nettoValid,
-                                        'bg-white border-amber-200 text-amber-700' => !$nettoValid
+                                        'bg-panel border-emerald-200 text-emerald-300' => $nettoValid,
+                                        'bg-panel border-amber-200 text-amber-300' => !$nettoValid
                                     ])>
                                         @if ($nettoValid)
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Ok
@@ -944,8 +944,8 @@
                                     <span class="text-slate-600">Nilai Barang</span>
                                     <span @class([
                                         'inline-flex items-center gap-1 text-[10px] font-black uppercase px-2 py-0.5 rounded-lg shadow-sm border',
-                                        'bg-white border-emerald-200 text-emerald-700' => $nilaiValid,
-                                        'bg-white border-amber-200 text-amber-700' => !$nilaiValid
+                                        'bg-panel border-emerald-200 text-emerald-300' => $nilaiValid,
+                                        'bg-panel border-amber-200 text-amber-300' => !$nilaiValid
                                     ])>
                                         @if ($nilaiValid)
                                             <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Ok
@@ -960,9 +960,9 @@
 
                     {{-- Quick Action PDF Downloads Toolbar --}}
                     @if(in_array($document->status, ['accepted', 'submitted']))
-                        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100/90 space-y-4 transition-all duration-300 hover:shadow-md">
+                        <div class="bg-panel rounded-3xl p-6 shadow-sm border border-slate-100/90 space-y-4 transition-all duration-300 hover:shadow-md">
                             <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
-                                <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <svg class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
                                 </svg>
                                 <h3 class="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Unduh Dokumen Pabean</h3>
@@ -970,32 +970,32 @@
                             <div class="flex flex-col gap-2.5">
                                 <!-- Cetak Formulir -->
                                 <a href="{{ route('documents.cetak-formulir', $document) }}" 
-                                   class="flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-indigo-50/40 hover:text-indigo-900 text-slate-700 rounded-2xl text-xs font-bold transition-all duration-200 border border-slate-200/60 hover:border-indigo-200 group">
+                                   class="flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-indigo-50/40 hover:text-indigo-300 text-slate-700 rounded-2xl text-xs font-bold transition-all duration-200 border border-slate-200/60 hover:border-indigo-200 group">
                                     <span class="flex items-center gap-2">
-                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12-1.227H7.231c-.662 0-1.18-.567-1.12-1.227L6.34 18m11.318 0h-11.32" /></svg>
+                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12-1.227H7.231c-.662 0-1.18-.567-1.12-1.227L6.34 18m11.318 0h-11.32" /></svg>
                                         Formulir Pabean (PDF)
                                     </span>
-                                    <span class="text-[9px] bg-indigo-150 text-indigo-700 font-extrabold px-2 py-0.5 rounded-lg border border-indigo-200/30">PRINT</span>
+                                    <span class="text-[9px] bg-indigo-150 text-indigo-300 font-extrabold px-2 py-0.5 rounded-lg border border-indigo-200/30">PRINT</span>
                                 </a>
 
                                 <!-- Download Respon -->
                                 <a href="{{ route('documents.download-respon', $document) }}" 
-                                   class="flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-emerald-50/40 hover:text-emerald-900 text-slate-700 rounded-2xl text-xs font-bold transition-all duration-200 border border-slate-200/60 hover:border-emerald-200 group">
+                                   class="flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-emerald-50/40 hover:text-emerald-300 text-slate-700 rounded-2xl text-xs font-bold transition-all duration-200 border border-slate-200/60 hover:border-emerald-200 group">
                                     <span class="flex items-center gap-2">
-                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
+                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-emerald-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" /></svg>
                                         Surat Persetujuan (SPPB)
                                     </span>
-                                    <span class="text-[9px] bg-emerald-100 text-emerald-700 font-extrabold px-2 py-0.5 rounded-lg border border-emerald-200/30">SPPB</span>
+                                    <span class="text-[9px] bg-emerald-100 text-emerald-300 font-extrabold px-2 py-0.5 rounded-lg border border-emerald-200/30">SPPB</span>
                                 </a>
 
                                 <!-- Download Billing -->
                                 <a href="{{ route('documents.download-billing', $document) }}" 
-                                   class="flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-amber-50/40 hover:text-amber-900 text-slate-700 rounded-2xl text-xs font-bold transition-all duration-200 border border-slate-200/60 hover:border-amber-200 group">
+                                   class="flex items-center justify-between px-4 py-3 bg-slate-50 hover:bg-amber-50/40 hover:text-amber-300 text-slate-700 rounded-2xl text-xs font-bold transition-all duration-200 border border-slate-200/60 hover:border-amber-200 group">
                                     <span class="flex items-center gap-2">
-                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-amber-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" /></svg>
+                                        <svg class="h-4 w-4 text-slate-400 group-hover:text-amber-300" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" /></svg>
                                         Billing / SPJM (PDF)
                                     </span>
-                                    <span class="text-[9px] bg-amber-100 text-amber-700 font-extrabold px-2 py-0.5 rounded-lg border border-amber-200/30">BILLING</span>
+                                    <span class="text-[9px] bg-amber-100 text-amber-300 font-extrabold px-2 py-0.5 rounded-lg border border-amber-200/30">BILLING</span>
                                 </a>
                             </div>
                         </div>
@@ -1003,9 +1003,9 @@
 
                     {{-- Local Webhook Simulator Widget --}}
                     @if(config('app.env') === 'local')
-                        <div class="bg-slate-900 text-white rounded-3xl p-6 shadow-lg border border-slate-800 space-y-4 shadow-indigo-950/20 relative overflow-hidden">
+                        <div class="bg-ink-950 text-white rounded-3xl p-6 shadow-lg border border-white/10 space-y-4 shadow-black/25 relative overflow-hidden">
                             <div class="absolute -right-8 -bottom-8 h-24 w-24 rounded-full bg-indigo-500/10 blur-xl"></div>
-                            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                            <div class="flex items-center justify-between pb-2 border-b border-white/10">
                                 <div class="flex items-center gap-2">
                                     <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                     <h3 class="font-extrabold text-[11px] uppercase tracking-wider text-slate-250">CEISA Simulator Deck</h3>
@@ -1062,7 +1062,7 @@
                                     <input type="hidden" name="nomor_aju" value="{{ $document->nomor_aju }}" />
                                     <input type="hidden" name="status" value="DITOLAK/NPP" />
                                     <input type="hidden" name="jenis" value="Respon" />
-                                    <button type="submit" class="w-full text-center py-2 bg-slate-800 hover:bg-slate-700 text-slate-350 border border-slate-700/65 rounded-xl text-[10px] font-black transition-all duration-200 transform active:translate-y-0.5">
+                                    <button type="submit" class="w-full text-center py-2 bg-ink-800 hover:bg-ink-600 text-slate-500 border border-white/10 rounded-xl text-[10px] font-black transition-all duration-200 transform active:translate-y-0.5">
                                         ⚫ Ditolak / NPP
                                     </button>
                                 </form>
@@ -1071,9 +1071,9 @@
                     @endif
 
                     {{-- Webhook Logs History --}}
-                    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100/90 transition-all duration-300 hover:shadow-md">
+                    <div class="bg-panel rounded-3xl p-6 shadow-sm border border-slate-100/90 transition-all duration-300 hover:shadow-md">
                         <div class="flex items-center gap-2 pb-3 border-b border-slate-100 mb-4">
-                            <svg class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                            <svg class="h-5 w-5 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
                             <h3 class="text-xs font-black text-slate-800 uppercase tracking-wider">Log Webhook Gateway</h3>
@@ -1090,14 +1090,14 @@
                                                 <div class="relative flex space-x-3">
                                                     <div>
                                                         <span class="h-8 w-8 rounded-full bg-emerald-50 border-2 border-emerald-500 flex items-center justify-center ring-8 ring-white shadow-sm shrink-0">
-                                                            <svg class="h-4 w-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                                            <svg class="h-4 w-4 text-emerald-300" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                                             </svg>
                                                         </span>
                                                     </div>
                                                     <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                                                         <div>
-                                                            <p class="text-xs text-slate-800 font-extrabold">Callback: <span class="font-mono text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded">{{ $log->event ?? 'DITERIMA' }}</span></p>
+                                                            <p class="text-xs text-slate-800 font-extrabold">Callback: <span class="font-mono text-indigo-300 bg-indigo-50 border border-indigo-100/50 px-2 py-0.5 rounded">{{ $log->event ?? 'DITERIMA' }}</span></p>
                                                         </div>
                                                         <div class="whitespace-nowrap text-right text-[10px] text-slate-400 font-bold uppercase">
                                                             <time>{{ $log->received_at?->format('d/m H:i') }}</time>
@@ -1111,7 +1111,7 @@
                             </div>
                         @else
                             <div class="text-center py-6 text-slate-400">
-                                <svg class="h-8 w-8 mx-auto text-slate-300 mb-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <svg class="h-8 w-8 mx-auto text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                                 </svg>
                                 <p class="text-[11px] font-medium">Menunggu callback webhook resmi...</p>
@@ -1123,7 +1123,7 @@
             </div>
 
             <div class="flex items-center justify-start pt-4">
-                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl px-5 py-3 shadow-sm hover:shadow">
+                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-slate-800 transition-colors bg-panel hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-2xl px-5 py-3 shadow-sm hover:shadow">
                     <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                     </svg>
