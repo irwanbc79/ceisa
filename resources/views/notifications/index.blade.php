@@ -22,12 +22,12 @@
             <x-flash />
 
             {{-- Tab bar --}}
-            <div class="bg-white border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-panel border border-slate-200/70 rounded-2xl shadow-sm overflow-hidden">
                 <div class="flex border-b border-slate-100">
                     @foreach ($tabs as $key => $tab)
                         <button type="button" @click="tab = '{{ $key }}'"
                                 class="flex-1 px-4 py-4 text-sm font-bold transition-colors relative focus:outline-none"
-                                :class="tab === '{{ $key }}' ? 'text-indigo-700 bg-indigo-50/40' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'">
+                                :class="tab === '{{ $key }}' ? 'text-indigo-300 bg-indigo-50/40' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'">
                             <span class="inline-flex items-center gap-2 justify-center">
                                 {{ $tab['label'] }}
                                 <span class="inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[10px] font-extrabold
@@ -55,7 +55,7 @@
                                             <div class="flex flex-wrap items-center gap-2">
                                                 <span class="font-bold text-slate-800 text-sm">{{ $log->event ?? 'Notifikasi' }}</span>
                                                 @if ($log->document)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">{{ $log->document->doc_type }}</span>
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-300 border border-indigo-100">{{ $log->document->doc_type }}</span>
                                                 @endif
                                             </div>
                                             @if ($log->nomor_aju)
@@ -69,14 +69,14 @@
                                         <div class="text-right shrink-0">
                                             <p class="text-[11px] text-slate-400 font-medium whitespace-nowrap">{{ optional($log->received_at)->format('d/m/Y H:i') }}</p>
                                             @if ($log->document)
-                                                <a href="{{ route('documents.show', $log->document) }}" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 hover:underline mt-1 inline-block">Lihat dokumen &rarr;</a>
+                                                <a href="{{ route('documents.show', $log->document) }}" class="text-[11px] font-bold text-indigo-300 hover:text-indigo-300 hover:underline mt-1 inline-block">Lihat dokumen &rarr;</a>
                                             @endif
                                         </div>
                                     </div>
                                 </li>
                             @empty
                                 <li class="px-5 py-12 text-center">
-                                    <svg class="h-8 w-8 text-slate-300 mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <svg class="h-8 w-8 text-slate-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                                     </svg>
                                     <p class="text-xs font-semibold text-slate-400 mt-2">Belum ada notifikasi {{ strtolower($tab['label']) }}.</p>

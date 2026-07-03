@@ -1,9 +1,9 @@
 <x-guest-layout>
-    <p class="eyebrow text-gold-700">Reset password</p>
-    <h1 class="font-display text-3xl lg:text-4xl font-light tracking-tightest leading-tight mt-5 text-ink-900">
+    <p class="eyebrow text-gold-300">Reset password</p>
+    <h1 class="font-display text-3xl lg:text-4xl font-light tracking-tightest leading-tight mt-5 text-slate-800">
         Lupa password? <em class="font-semibold not-italic">Tenang.</em>
     </h1>
-    <p class="mt-4 text-sm text-ink-500 leading-relaxed">
+    <p class="mt-4 text-sm text-slate-500 leading-relaxed">
         Masukkan email Anda — kami akan mengirim tautan untuk mengatur ulang password.
     </p>
 
@@ -20,8 +20,8 @@
             Kirim Tautan Reset
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
         </button>
-        <p class="text-center text-sm text-ink-500">
-            Ingat password lagi? <a href="{{ route('login') }}" class="font-bold text-ink-900 link-gold">Masuk</a>
+        <p class="text-center text-sm text-slate-500">
+            Ingat password lagi? <a href="{{ route('login') }}" class="font-bold text-slate-800 link-gold">Masuk</a>
         </p>
     </form>
 </x-guest-layout>

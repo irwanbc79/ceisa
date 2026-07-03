@@ -1,8 +1,8 @@
 <section class="space-y-6">
     <header>
-        <p class="eyebrow text-crimson-700">Danger zone</p>
-        <h2 class="font-display text-2xl font-semibold text-ink-900 mt-3">Hapus Akun</h2>
-        <p class="mt-2 text-sm text-ink-500">
+        <p class="eyebrow text-crimson-300">Danger zone</p>
+        <h2 class="font-display text-2xl font-semibold text-slate-800 mt-3">Hapus Akun</h2>
+        <p class="mt-2 text-sm text-slate-500">
             Setelah akun dihapus, semua data &amp; dokumen akan terhapus permanen. Mohon unduh data penting sebelum menghapus akun.
         </p>
     </header>
@@ -17,8 +17,8 @@
             @csrf
             @method('delete')
 
-            <h2 class="font-display text-xl font-semibold text-ink-900">Apakah Anda yakin ingin menghapus akun?</h2>
-            <p class="mt-2 text-sm text-ink-500">
+            <h2 class="font-display text-xl font-semibold text-slate-800">Apakah Anda yakin ingin menghapus akun?</h2>
+            <p class="mt-2 text-sm text-slate-500">
                 Setelah akun dihapus, semua data &amp; dokumen akan terhapus permanen. Ketik password Anda untuk konfirmasi.
             </p>
 

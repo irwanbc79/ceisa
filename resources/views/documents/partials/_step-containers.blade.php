@@ -4,14 +4,14 @@
  */
 @endphp
 
-<div x-show="step === 6" class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-xl shadow-slate-100/30 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 6" class="bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Kemasan &amp; Peti Kemas</h3>
             <p class="text-xs text-slate-500 mt-0.5">Input nomor kontainer, ukuran, tipe, dan status isi jika menggunakan kontainer</p>
         </div>
         <button type="button" @click="addContainer()"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-indigo-100">
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-black/25">
             + Tambah Kontainer
         </button>
     </div>
@@ -44,9 +44,9 @@
         <template x-for="(cont, index) in formData.kontainer" :key="index">
             <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50 hover:border-slate-300 transition-all relative group">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
-                    <span class="text-xs font-extrabold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">Kontainer #<span x-text="index + 1"></span></span>
+                    <span class="text-xs font-extrabold text-indigo-300 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">Kontainer #<span x-text="index + 1"></span></span>
                     <button type="button" @click="removeContainer(index)"
-                            class="text-xs text-rose-600 hover:underline">Hapus Kontainer</button>
+                            class="text-xs text-rose-300 hover:underline">Hapus Kontainer</button>
                 </div>
 
                 <div class="grid sm:grid-cols-4 gap-4">

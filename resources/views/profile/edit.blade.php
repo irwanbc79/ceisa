@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col">
-            <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-ink-400">System · Account</p>
-            <h1 class="font-display text-2xl sm:text-3xl font-semibold text-ink-900 tracking-tightest leading-none mt-1">Akun Saya</h1>
+            <p class="text-[10px] font-mono uppercase tracking-[0.3em] text-slate-500">System · Account</p>
+            <h1 class="font-display text-2xl sm:text-3xl font-semibold text-slate-800 tracking-tightest leading-none mt-1">Akun Saya</h1>
         </div>
     </x-slot>
 
