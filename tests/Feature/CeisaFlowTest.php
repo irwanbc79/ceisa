@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\CeisaException;
 use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Models\User;
@@ -403,6 +404,101 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('SGSIN', data_get($doc->payload, 'header.pengangkutan.pelabuhan_tujuan'));
     }
 
+    public function test_submit_blocks_document_already_being_processed_before_http_call(): void
+    {
+        Http::fake();
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $document = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '040130ABCDEF20260718000001',
+            'payload' => $this->bc30Payload(),
+            'status' => Document::STATUS_SUBMITTING,
+        ]);
+
+        try {
+            CeisaService::forCredential($credential)->submit($document);
+            $this->fail('Pengiriman paralel seharusnya ditolak.');
+        } catch (CeisaException $e) {
+            $this->assertStringContainsString('sedang dikirim', $e->getMessage());
+        }
+
+        Http::assertNothingSent();
+        $this->assertSame(Document::STATUS_SUBMITTING, $document->fresh()->status);
+    }
+
+    public function test_unexpected_payload_failure_releases_submission_lock(): void
+    {
+        Http::fake();
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $document = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '040130ABCDEF20260718000002',
+            'payload' => ['header' => 'invalid-legacy-payload'],
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        try {
+            CeisaService::forCredential($credential)->submit($document);
+            $this->fail('Payload rusak seharusnya gagal sebelum HTTP call.');
+        } catch (CeisaException $e) {
+            $this->assertStringContainsString('aman untuk dicoba ulang', $e->getMessage());
+        }
+
+        Http::assertNothingSent();
+        $this->assertSame(Document::STATUS_ERROR, $document->fresh()->status);
+        $this->assertNotSame(Document::STATUS_SUBMITTING, $document->fresh()->status);
+    }
+
+    public function test_connection_failure_keeps_submission_locked_until_status_check(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::failedConnection('connection lost'),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $document = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '040130ABCDEF20260718000004',
+            'payload' => $this->bc30Payload(),
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        try {
+            CeisaService::forCredential($credential)->submit($document);
+            $this->fail('Koneksi terputus seharusnya menghasilkan status delivery unknown.');
+        } catch (CeisaException $e) {
+            $this->assertSame('unknown', data_get($e->context, 'delivery_state'));
+        }
+
+        $document->refresh();
+        $this->assertSame(Document::STATUS_SUBMITTING, $document->status);
+        $this->assertStringContainsString('Tarik status dari CEISA', $document->error_message);
+    }
+
     public function test_submit_document_with_supporting_documents_and_containers(): void
     {
         Http::fake([
@@ -565,6 +661,50 @@ class CeisaFlowTest extends TestCase
         Http::assertSent(function (Request $request) {
             return str_contains($request->url(), 'isRevision=true');
         });
+    }
+
+    public function test_failed_revision_preserves_official_document_status(): void
+    {
+        Http::fake([
+            '*user/login*' => Http::response([
+                'access_token' => 'TOKEN-XYZ',
+                'expires_in' => 3600,
+            ], 200),
+            '*/openapi/document*' => Http::response([
+                'error_code' => '1028',
+            ], 422),
+        ]);
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'KEY-123',
+        ]);
+
+        $submittedAt = now()->subDay();
+        $document = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '040130ABCDEF20260718000003',
+            'source' => Document::SOURCE_H2H,
+            'payload' => $this->bc30Payload(),
+            'status' => Document::STATUS_ACCEPTED,
+            'submitted_at' => $submittedAt,
+            'ceisa_response' => ['status' => 'NPE'],
+        ]);
+
+        try {
+            CeisaService::forCredential($credential)->submit($document, isRevision: true);
+            $this->fail('Pembetulan invalid seharusnya ditolak CEISA.');
+        } catch (CeisaException) {
+            // Status resmi lama harus tetap utuh walaupun pembetulan gagal.
+        }
+
+        $document->refresh();
+        $this->assertSame(Document::STATUS_ACCEPTED, $document->status);
+        $this->assertSame($submittedAt->toDateTimeString(), $document->submitted_at->toDateTimeString());
+        $this->assertSame(['status' => 'NPE'], $document->ceisa_response);
+        $this->assertNotNull($document->error_message);
     }
 
     public function test_submit_sends_is_final_query_and_persists_id_header(): void

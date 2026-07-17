@@ -95,6 +95,10 @@ class CeisaService
         } catch (Throwable $e) {
             throw new CeisaException(
                 'Gagal terhubung ke server CEISA saat submit dokumen: '.$e->getMessage(),
+                context: [
+                    'delivery_state' => 'unknown',
+                    'exception' => $e::class,
+                ],
                 previous: $e,
             );
         }
@@ -117,6 +121,21 @@ class CeisaService
      */
     public function submit(Document $document, bool $isRevision = false): Document
     {
+        $document->refresh();
+
+        $previousStatus = $document->status;
+        $previousSubmittedAt = $document->submitted_at;
+        $previousCeisaResponse = $document->ceisa_response;
+        $previousResponseAt = $document->response_at;
+
+        if ($previousStatus === Document::STATUS_SUBMITTING) {
+            throw new CeisaException('Dokumen sedang dikirim oleh proses lain. Tunggu respons CEISA sebelum mencoba lagi.');
+        }
+
+        if (! $isRevision && ! in_array($previousStatus, [Document::STATUS_DRAFT, Document::STATUS_ERROR], true)) {
+            throw new CeisaException('Dokumen tidak dapat dikirim karena statusnya sudah berubah. Muat ulang halaman sebelum mencoba lagi.');
+        }
+
         // Generate a unique 26-digit nomor_aju if missing
         $nomorAju = $document->nomor_aju;
         if (empty($nomorAju)) {
@@ -143,14 +162,30 @@ class CeisaService
             $document->forceFill(['nomor_aju' => $nomorAju])->save();
         }
 
-        $document->forceFill([
-            'status' => Document::STATUS_SUBMITTING,
-            'submitted_at' => Carbon::now(),
-            'error_message' => null,
-        ])->save();
+        // Klaim status secara atomik. Dua request paralel hanya boleh menghasilkan
+        // satu pengiriman ke CEISA; request yang kalah berhenti sebelum HTTP call.
+        $claimed = Document::query()
+            ->whereKey($document->getKey())
+            ->where('status', $previousStatus)
+            ->update([
+                'status' => Document::STATUS_SUBMITTING,
+                'submitted_at' => Carbon::now(),
+                'error_message' => null,
+                'updated_at' => Carbon::now(),
+            ]);
+
+        if ($claimed !== 1) {
+            throw new CeisaException('Dokumen sedang diproses atau statusnya sudah berubah. Pengiriman ganda dibatalkan.');
+        }
+
+        $document->refresh();
+
+        $requestStarted = false;
+        $data = null;
 
         try {
             $formattedPayload = $this->transformPayloadForCeisa($document->doc_type, $document->payload, $nomorAju);
+            $requestStarted = true;
             $data = $this->submitDocument($document->doc_type, $formattedPayload, [
                 'is_final' => true,
                 'is_revision' => $isRevision,
@@ -164,21 +199,60 @@ class CeisaService
                 'ceisa_response' => $data,
                 'response_at' => Carbon::now(),
             ])->save();
-        } catch (CeisaException $e) {
+        } catch (Throwable $e) {
+            $deliveryUnknown = $requestStarted && (
+                ! $e instanceof CeisaException
+                || data_get($e->context, 'delivery_state') === 'unknown'
+            );
+
+            if ($deliveryUnknown) {
+                $ceisaException = new CeisaException(
+                    'Status pengiriman belum pasti. Tarik status dari CEISA sebelum mengirim ulang.',
+                    context: $e instanceof CeisaException
+                        ? $e->context
+                        : [
+                            'delivery_state' => 'unknown',
+                            'exception' => $e::class,
+                        ],
+                    previous: $e,
+                );
+            } elseif ($e instanceof CeisaException) {
+                $ceisaException = $e;
+            } else {
+                $ceisaException = new CeisaException(
+                    'Submit gagal sebelum request dikirim ke CEISA. Dokumen aman untuk dicoba ulang.',
+                    context: ['exception' => $e::class],
+                    previous: $e,
+                );
+            }
+
             Log::warning('CEISA submit gagal', [
                 'document_id' => $document->id,
-                'ceisa_code' => $e->ceisaCode,
-                'context' => $e->context,
+                'ceisa_code' => $ceisaException->ceisaCode,
+                'context' => $ceisaException->context,
+                'exception' => $e::class,
             ]);
 
             $document->forceFill([
-                'status' => Document::STATUS_ERROR,
-                'error_message' => $e->getMessage(),
-                'ceisa_response' => $e->context,
-                'response_at' => Carbon::now(),
+                // Jika delivery tidak pasti, pertahankan lock agar operator wajib
+                // menarik status CEISA sebelum berisiko mengirim ulang.
+                'status' => $deliveryUnknown
+                    ? Document::STATUS_SUBMITTING
+                    : ($isRevision ? $previousStatus : Document::STATUS_ERROR),
+                'submitted_at' => $isRevision && ! $deliveryUnknown
+                    ? $previousSubmittedAt
+                    : $document->submitted_at,
+                'error_message' => $ceisaException->getMessage(),
+                // Pembetulan yang ditolak tidak boleh menghapus respons resmi lama.
+                'ceisa_response' => $isRevision
+                    ? $previousCeisaResponse
+                    : ($data ?? $ceisaException->context),
+                'response_at' => $isRevision && ! $deliveryUnknown
+                    ? $previousResponseAt
+                    : Carbon::now(),
             ])->save();
 
-            throw $e;
+            throw $ceisaException;
         }
 
         return $document;
