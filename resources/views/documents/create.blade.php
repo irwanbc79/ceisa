@@ -71,7 +71,7 @@
                                         ? 'bg-emerald-500 border-emerald-500 text-white' 
                                         : 'bg-panel border-slate-200 text-slate-400 group-hover:border-slate-300')">
                                 <span x-show="step <= idx + 1" x-text="idx + 1"></span>
-                                <svg x-show="step > idx + 1" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <svg x-show="step > idx + 1" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                 </svg>
                             </div>
