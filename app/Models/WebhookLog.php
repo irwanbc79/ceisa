@@ -14,6 +14,8 @@ class WebhookLog extends Model
         'nomor_aju',
         'payload',
         'ip_address',
+        'fingerprint',
+        'verified',
         'processed',
         'received_at',
     ];
@@ -22,6 +24,7 @@ class WebhookLog extends Model
     {
         return [
             'payload' => 'array',
+            'verified' => 'boolean',
             'processed' => 'boolean',
             'received_at' => 'datetime',
         ];

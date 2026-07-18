@@ -8,6 +8,10 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Schedule::command('ceisa:sync-documents')
+    ->everyTenMinutes()
+    ->withoutOverlapping(15);
+
 // Sinkron master data referensi CEISA setiap hari (03:00) agar HS Code, pelabuhan,
 // kurs, kemasan, dll tidak kedaluwarsa. No-op bila reference_endpoints belum diisi.
 Schedule::command('ceisa:sync-references')
