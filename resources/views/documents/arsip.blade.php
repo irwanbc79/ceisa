@@ -123,7 +123,7 @@
 
                 <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
                     <a href="{{ route('dashboard') }}" class="text-slate-500 hover:text-slate-800 text-sm">Batal</a>
-                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-black/25">
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-slate-900/10">
                         {{ isset($editDocument) ? 'Simpan Perubahan' : 'Simpan ke Arsip' }}
                     </button>
                 </div>

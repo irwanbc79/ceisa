@@ -36,18 +36,18 @@
                     <div class="lg:col-span-1">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Nama</label>
                         <input type="text" name="name" value="{{ old('name') }}" required
-                               class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                               class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                         <x-input-error :messages="$errors->get('name')" class="mt-1" />
                     </div>
                     <div class="lg:col-span-1">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
                         <input type="email" name="email" value="{{ old('email') }}" required
-                               class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                               class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                         <x-input-error :messages="$errors->get('email')" class="mt-1" />
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Peran</label>
-                        <select name="role" class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                        <select name="role" class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                             <option value="operator" @selected(old('role', 'operator') === 'operator')>Operator</option>
                             <option value="admin" @selected(old('role') === 'admin')>Admin</option>
                         </select>
@@ -56,7 +56,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Password <span class="font-normal text-slate-500">(opsional)</span></label>
                         <input type="text" name="password" autocomplete="new-password" placeholder="Otomatis jika kosong"
-                               class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                               class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                         <x-input-error :messages="$errors->get('password')" class="mt-1" />
                     </div>
                     <div>
@@ -70,7 +70,7 @@
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead>
-                            <tr class="text-left text-[11px] font-mono uppercase tracking-wider text-slate-500 border-b border-white/10">
+                            <tr class="text-left text-[11px] font-mono uppercase tracking-wider text-slate-500 border-b border-slate-200">
                                 <th class="px-4 sm:px-6 py-3">Pengguna</th>
                                 <th class="px-4 py-3">Peran</th>
                                 <th class="px-4 py-3">Status</th>
@@ -95,7 +95,7 @@
                                         @if ($user->isAdmin())
                                             <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gold-50 text-gold-300 border border-gold-200">Admin</span>
                                         @else
-                                            <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-panel-2 text-slate-600 border border-white/10">Operator</span>
+                                            <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-panel-2 text-slate-600 border border-slate-200">Operator</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3">

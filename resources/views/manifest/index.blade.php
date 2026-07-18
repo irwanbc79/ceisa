@@ -24,11 +24,11 @@
                     <div class="lg:col-span-2">
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Cari (Sarana / Voyage / IMO / No. Daftar)</label>
                         <input type="text" name="q" value="{{ $filters['q'] }}" placeholder="Ketik kata kunci…"
-                               class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                               class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis</label>
-                        <select name="jenis" class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                        <select name="jenis" class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                             <option value="">Semua</option>
                             <option value="inward" @selected($filters['jenis'] === 'inward')>Kedatangan</option>
                             <option value="outward" @selected($filters['jenis'] === 'outward')>Keberangkatan</option>
@@ -36,11 +36,11 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">Dari Tgl</label>
-                        <input type="date" name="from" value="{{ $filters['from'] }}" class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                        <input type="date" name="from" value="{{ $filters['from'] }}" class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 mb-1">s.d Tgl</label>
-                        <input type="date" name="to" value="{{ $filters['to'] }}" class="w-full rounded-lg border-white/10 text-sm focus:ring-ink-700/20 focus:border-ink-700">
+                        <input type="date" name="to" value="{{ $filters['to'] }}" class="w-full rounded-lg border-slate-300 text-sm focus:ring-indigo-500/20 focus:border-indigo-500">
                     </div>
                     <div class="flex gap-2">
                         <button type="submit" class="btn-primary !py-2 flex-1">Filter</button>
@@ -51,7 +51,7 @@
 
             {{-- Tabel monitoring --}}
             <div class="card overflow-hidden">
-                <div class="flex items-center justify-between px-5 py-3 border-b border-white/10">
+                <div class="flex items-center justify-between px-5 py-3 border-b border-slate-200">
                     <p class="text-sm text-slate-500">Total <span class="font-semibold text-slate-800">{{ $manifests->total() }}</span> manifes</p>
                     <form method="POST" action="{{ route('manifests.sync') }}">
                         @csrf
@@ -103,7 +103,7 @@
                 </div>
 
                 @if ($manifests->hasPages())
-                    <div class="px-5 py-3 border-t border-white/10">{{ $manifests->links() }}</div>
+                    <div class="px-5 py-3 border-t border-slate-200">{{ $manifests->links() }}</div>
                 @endif
             </div>
 

@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#F4F7FB">
 
     <title>{{ isset($title) ? $title.' · ' : '' }}{{ config('app.name', 'M2B Customs') }}</title>
     <meta name="description" content="Portal Host-to-Host CEISA 4.0 Bea Cukai — PT Mora Multi Berkah. Pengelolaan dokumen kepabeanan impor, ekspor & TPB.">
@@ -38,15 +39,16 @@
                     </div>
                 </a>
 
-                {{-- Lambang resmi DJBC — penanda integrasi Host-to-Host --}}
+                {{-- Penanda koneksi gateway tanpa bergantung pada aset eksternal. --}}
                 <div class="mt-12 flex items-center gap-5">
-                    <span class="h-20 w-20 inline-flex items-center justify-center rounded-2xl bg-cream/[0.06] ring-1 ring-gold-300/20 backdrop-blur-sm">
-                        <img src="{{ asset('images/bea-cukai.png') }}" alt="Direktorat Jenderal Bea dan Cukai"
-                             class="h-16 w-16 object-contain drop-shadow-[0_2px_14px_rgba(201,165,92,0.3)]">
+                    <span class="h-20 w-20 inline-flex items-center justify-center rounded-2xl bg-cream/[0.06] ring-1 ring-gold-300/20 backdrop-blur-sm text-gold-400">
+                        <svg class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke-width="1.4" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.96 11.96 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751A11.96 11.96 0 0 1 12 2.714Z" />
+                        </svg>
                     </span>
                     <div class="leading-tight">
-                        <p class="eyebrow text-gold-300 !mb-1.5">Terintegrasi resmi</p>
-                        <p class="font-display text-lg font-medium text-cream">Direktorat Jenderal<br>Bea &amp; Cukai</p>
+                        <p class="eyebrow text-gold-300 !mb-1.5">Terhubung ke gateway</p>
+                        <p class="font-display text-lg font-medium text-cream">CEISA 4.0<br>Bea &amp; Cukai</p>
                         <p class="text-[11px] font-mono text-cream/55 mt-1.5">Gateway CEISA 4.0 · Host-to-Host</p>
                     </div>
                 </div>
@@ -118,7 +120,9 @@
         </aside>
 
         {{-- ── Right form panel ─────────────────────────────── --}}
-        <main class="relative flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24">
+        <main class="relative flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24 bg-white/55 backdrop-blur-[2px] overflow-hidden">
+            <div class="absolute -top-24 -right-32 h-80 w-80 rounded-full bg-indigo-100/55 blur-3xl pointer-events-none" aria-hidden="true"></div>
+            <div class="absolute -bottom-24 left-8 h-64 w-64 rounded-full bg-sea-100/45 blur-3xl pointer-events-none" aria-hidden="true"></div>
             {{-- Mobile brand (hidden lg+) --}}
             <a href="/" class="lg:hidden inline-flex items-center gap-3 mb-10">
                 <span class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-ink-900">
@@ -130,7 +134,7 @@
                 </div>
             </a>
 
-            <div class="w-full max-w-md mx-auto lg:mx-0">
+            <div class="w-full max-w-md mx-auto lg:mx-0 relative z-10">
                 {{ $slot }}
             </div>
 

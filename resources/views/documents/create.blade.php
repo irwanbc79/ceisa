@@ -51,7 +51,7 @@
             </div>
 
             {{-- Stepper Progress Bar --}}
-            <div class="mb-8 bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6">
+            <div class="mb-8 bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6">
                 <div class="relative flex items-center justify-between">
                     {{-- Progress Line Background --}}
                     <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-100 rounded"></div>
@@ -66,7 +66,7 @@
                                 class="relative z-10 flex flex-col items-center group focus:outline-none disabled:cursor-not-allowed">
                             <div class="h-10 w-10 rounded-full flex items-center justify-center font-semibold text-sm border-2 transition-all duration-300"
                                  :class="step === idx + 1 
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-black/25 scale-110' 
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-slate-900/10 scale-110'
                                     : (step > idx + 1 
                                         ? 'bg-emerald-500 border-emerald-500 text-white' 
                                         : 'bg-panel border-slate-200 text-slate-400 group-hover:border-slate-300')">

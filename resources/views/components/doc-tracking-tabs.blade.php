@@ -19,19 +19,19 @@
     {{-- Tab headers --}}
     <div class="flex flex-wrap items-center gap-1.5 mb-5">
         <button type="button" @click="tab='status'"
-                :class="tab==='status' ? 'bg-indigo-600 text-white shadow-sm shadow-black/25' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'"
+                :class="tab==='status' ? 'bg-indigo-600 text-white shadow-sm shadow-slate-900/10' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'"
                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-extrabold uppercase tracking-wide transition-all cursor-pointer">
             Riwayat Status
             <span :class="tab==='status' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'" class="px-1.5 py-0.5 rounded-md text-[9px]">{{ count($timeline) }}</span>
         </button>
         <button type="button" @click="tab='respon'"
-                :class="tab==='respon' ? 'bg-indigo-600 text-white shadow-sm shadow-black/25' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'"
+                :class="tab==='respon' ? 'bg-indigo-600 text-white shadow-sm shadow-slate-900/10' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'"
                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-extrabold uppercase tracking-wide transition-all cursor-pointer">
             Riwayat Respon
             <span :class="tab==='respon' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'" class="px-1.5 py-0.5 rounded-md text-[9px]">{{ count($responses) }}</span>
         </button>
         <button type="button" @click="tab='petugas'"
-                :class="tab==='petugas' ? 'bg-indigo-600 text-white shadow-sm shadow-black/25' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'"
+                :class="tab==='petugas' ? 'bg-indigo-600 text-white shadow-sm shadow-slate-900/10' : 'bg-slate-50 text-slate-500 hover:bg-slate-100 hover:text-slate-700'"
                 class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[11px] font-extrabold uppercase tracking-wide transition-all cursor-pointer">
             Riwayat Petugas
             <span :class="tab==='petugas' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-500'" class="px-1.5 py-0.5 rounded-md text-[9px]">{{ count($petugas) }}</span>
