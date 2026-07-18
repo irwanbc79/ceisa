@@ -32,19 +32,19 @@
   - ⚠️ Varian path `/status/{nomorAju}` TIDAK didukung — endpoint mengembalikan SEMUA dokumen perusahaan; filter per-aju dilakukan di sisi klien (`queryDocumentStatus`).
 - 🟡 File: `/v2/openapi/file/dokumen`, `/v2/openapi/file/barang` (cocok dgn Postman resmi, belum diprobe live)
 
-### Skema respons status (live 2026-07-02, dokumen BC 3.0 riil `000030MOT83720260525000009`)
+### Skema respons status (struktur disanitasi dari pengujian produksi)
 ```json
 {
   "status": "Success", "message": "Data Ditemukan",
   "dataStatus": [
-    {"nomorAju":"...", "nomorDaftar":"003574", "tanggalDaftar":"01-07-2026",
-     "kodeProses":"400", "waktuStatus":"2026-07-01 13:13:00.03",
+    {"nomorAju":"[REDACTED]", "nomorDaftar":"[REDACTED]", "tanggalDaftar":"[REDACTED]",
+     "kodeProses":"400", "waktuStatus":"[REDACTED]",
      "keterangan":"Pemeriksaan Dokumen", "kodeDokumen":"30"}
   ],
   "dataRespon": [
-    {"nomorAju":"...", "kodeRespon":"3015", "nomorDaftar":"003574",
-     "nomorRespon":"003570/KBC.0207/2026", "keterangan":"NPE",
-     "pdf":"respon/2026/7/1/....pdf", "kodeDokumen":"30", "billingPungutans":null}
+    {"nomorAju":"[REDACTED]", "kodeRespon":"3015", "nomorDaftar":"[REDACTED]",
+     "nomorRespon":"[REDACTED]", "keterangan":"NPE",
+     "pdf":"[REDACTED]", "kodeDokumen":"30", "billingPungutans":null}
   ]
 }
 ```
@@ -61,10 +61,9 @@ Catatan penting:
 - H2H Cukai (`/v1/...`) — cukai
 
 ## Identitas Pengguna Jasa (kredensial → DB `ceisa_credentials`, terenkripsi)
-- Perusahaan: PT Mora Multi Berkah — peran **PPJK** (kode entitas `4` di payload)
-- NPWP: `960208833125000` · NITKU: `0960208833125000000000`
-- Username: `mayank.harahap` (Eka Mayang Sari Harahap)
-- App ID & API Key & password → JANGAN commit; isi via halaman Pengaturan CEISA.
+- Perusahaan menggunakan peran **PPJK** (kode entitas `4` di payload).
+- NPWP, NITKU, username, App ID, API key, dan password produksi tidak boleh ditulis di dokumentasi atau repository.
+- Seluruh kredensial produksi hanya diisi melalui halaman Pengaturan CEISA dan disimpan terenkripsi di database.
 - Webhook portal: aktif → `https://ceisa.m2b.co.id/api/webhook/ceisa`
 - IP Whitelist: OFF (biarkan, karena call keluar dari IP server, bukan IP user).
 
@@ -97,5 +96,5 @@ Penting:
 - REST/HTTP: standar RFC2616. ~~401 belum auto re-login+retry~~ ✅ FIXED (94ea14e): `authorizedRequest()` re-login + retry sekali; `httpStatusMessage()` pesan Indonesia per kode.
 
 ## Status operasional (2026-07-02)
-- Webhook `https://ceisa.m2b.co.id/api/webhook/ceisa` terdaftar di portal DJBC; `CEISA_WEBHOOK_SECRET` di server KOSONG (webhook TIDAK tertolak). `webhook_logs` masih 0 baris — wajar, belum pernah submit `isFinal=true`.
-- Ada 1 dokumen BC 3.0 RIIL milik Mora di CEISA (direkam via portal): `000030MOT83720260525000009`, nomorDaftar 003574, respon NPE — bisa ditarik ke aplikasi via tombol Sinkronisasi (documents.sync).
+- Webhook `https://ceisa.m2b.co.id/api/webhook/ceisa` terdaftar di portal DJBC. Mulai hardening Juli 2026, callback wajib memakai shared secret/HMAC dan retry identik diproses secara idempoten.
+- Detail dokumen produksi tidak dicatat di repository. Verifikasi status dilakukan langsung melalui Sinkronisasi (`documents.sync`) dan audit log aplikasi.
