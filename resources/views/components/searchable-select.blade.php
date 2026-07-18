@@ -17,59 +17,73 @@
     search: '',
     optionsList: [],
     selectedVal: null,
-    selectedLabel: '',
+    selectedLabel: @js($placeholder),
+    normalizeOptions(value) {
+        if (Array.isArray(value)) {
+            return value.map((option) => {
+                if (option !== null && typeof option === 'object') return option;
+                return { value: option, label: String(option ?? '') };
+            });
+        }
+
+        if (value !== null && typeof value === 'object') {
+            return Object.entries(value).map(([optionValue, label]) => ({
+                value: optionValue,
+                label: String(label ?? optionValue),
+            }));
+        }
+
+        return [];
+    },
     init() {
-        // Load options
         @if($isJsExpr)
-            this.optionsList = {{ $jsOptions }} || [];
-            this.$watch('{{ $jsOptions }}', function(val) {
-                this.optionsList = val || [];
+            this.optionsList = this.normalizeOptions({{ $jsOptions }} || []);
+            this.$watch('{{ $jsOptions }}', (value) => {
+                this.optionsList = this.normalizeOptions(value);
                 this.updateLabel();
-            }.bind(this));
+            });
         @else
-            this.optionsList = {!! $jsOptions !!} || [];
+            this.optionsList = this.normalizeOptions(@js($options));
         @endif
 
-        // Watch external model changes
-        this.$watch('{{ $model }}', function(val) {
-            this.selectedVal = val;
-            this.updateLabel();
-        }.bind(this));
-        
-        this.selectedVal = this.{{ $model }};
-        this.updateLabel();
+        this.$watch('selectedVal', () => this.updateLabel());
+        this.$nextTick(() => this.updateLabel());
     },
     updateLabel() {
-        const self = this;
-        const option = this.optionsList.find(function(opt) {
-            return opt.code === self.selectedVal || opt.value === self.selectedVal || opt.id === self.selectedVal;
+        const selected = String(this.selectedVal ?? '');
+        const option = this.optionsList.find((opt) => {
+            const optionValue = opt.code ?? opt.value ?? opt.id ?? '';
+            return String(optionValue) === selected;
         });
+
         if (option) {
-            const lbl = option.label || option.name || option.uraian || option.value || '';
-            const cd = option.code || '';
+            const lbl = String(option.label ?? option.name ?? option.uraian ?? option.value ?? '');
+            const cd = String(option.code ?? '');
             this.selectedLabel = cd && cd !== lbl ? cd + ' - ' + lbl : lbl || cd;
         } else {
-            this.selectedLabel = this.selectedVal || '{{ $placeholder }}';
+            this.selectedLabel = selected || @js($placeholder);
         }
     },
     get filteredOptions() {
         if (!this.search) return this.optionsList;
-        const self = this;
-        return this.optionsList.filter(function(opt) {
-            const label = (opt.label || opt.name || opt.uraian || opt.value || '').toLowerCase();
-            const code = (opt.code || opt.id || '').toLowerCase();
-            const searchLower = self.search.toLowerCase();
+        const searchLower = String(this.search).toLowerCase();
+        return this.optionsList.filter((opt) => {
+            const label = String(opt.label ?? opt.name ?? opt.uraian ?? opt.value ?? '').toLowerCase();
+            const code = String(opt.code ?? opt.id ?? '').toLowerCase();
             return label.includes(searchLower) || code.includes(searchLower);
         });
     },
     select(val) {
         this.selectedVal = val;
-        this.{{ $model }} = val;
         this.updateLabel();
         this.open = false;
         this.search = '';
     }
-}" class="relative mt-1">
+}"
+    x-modelable="selectedVal"
+    @if($model) x-model="{{ $model }}" @endif
+    x-cloak
+    class="relative mt-1">
     <!-- Trigger Button -->
     <button type="button" @click="open = !open" 
             class="w-full flex items-center justify-between bg-panel/90 border border-slate-200/80 rounded-xl px-4 py-2 text-sm shadow-sm hover:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-left transition-all duration-200"
