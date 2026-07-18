@@ -12,7 +12,7 @@
 @endphp
 
 {{-- Step 5: Review & Send --}}
-<div x-show="step === 9" class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 9" x-cloak class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Review Data &amp; Submit</h3>
