@@ -50,6 +50,9 @@ return [
 
     'webhook_secret' => env('CEISA_WEBHOOK_SECRET'),
 
+    // Tolak payload berukuran abnormal sebelum disimpan ke audit log.
+    'webhook_max_payload_bytes' => (int) env('CEISA_WEBHOOK_MAX_PAYLOAD_BYTES', 1_048_576),
+
     /*
     | Endpoint relatif terhadap base_url (host gateway).
     | Diselaraskan dengan Beacukai Developer Portal (API Gallery + halaman Authentication)

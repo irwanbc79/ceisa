@@ -30,6 +30,14 @@ class CeisaFlowTest extends TestCase
         return User::factory()->create(['role' => User::ROLE_ADMIN]);
     }
 
+    protected function postCeisaWebhook(array $payload, string $secret = 'test-webhook-secret')
+    {
+        config(['ceisa.webhook_secret' => 'test-webhook-secret']);
+
+        return $this->withHeader('X-Webhook-Secret', $secret)
+            ->postJson('/api/webhook/ceisa', $payload);
+    }
+
     /**
      * Payload form BC 3.0 ekspor lengkap (struktur CEISA 4.0).
      *
@@ -788,7 +796,7 @@ class CeisaFlowTest extends TestCase
             'status' => Document::STATUS_SUBMITTED,
         ]);
 
-        $this->postJson('/api/webhook/ceisa', [
+        $this->postCeisaWebhook([
             'nomor_aju' => '000001-PEB',
             'nomor_daftar' => 'REG-999',
             'status' => 'DITERIMA / SPPB',
@@ -797,7 +805,11 @@ class CeisaFlowTest extends TestCase
         $doc->refresh();
         $this->assertSame(Document::STATUS_ACCEPTED, $doc->status);
         $this->assertSame('REG-999', $doc->nomor_daftar);
-        $this->assertDatabaseHas('webhook_logs', ['document_id' => $doc->id, 'processed' => true]);
+        $this->assertDatabaseHas('webhook_logs', [
+            'document_id' => $doc->id,
+            'verified' => true,
+            'processed' => true,
+        ]);
     }
 
     public function test_webhook_respon_sets_status_and_jalur(): void
@@ -810,7 +822,7 @@ class CeisaFlowTest extends TestCase
             'status' => Document::STATUS_SUBMITTED,
         ]);
 
-        $this->postJson('/api/webhook/ceisa', [
+        $this->postCeisaWebhook([
             'nomor_aju' => '000010-PEB',
             'status' => 'DITERIMA / SPPB',
             'jalur' => 'HIJAU',
@@ -833,7 +845,7 @@ class CeisaFlowTest extends TestCase
         ]);
 
         // Notifikasi Informasi tidak boleh mengubah status/jalur dokumen.
-        $this->postJson('/api/webhook/ceisa', [
+        $this->postCeisaWebhook([
             'jenis' => 'Informasi',
             'nomor_aju' => '000011-PEB',
             'pesan' => 'Pengumuman pemeliharaan sistem',
@@ -856,13 +868,102 @@ class CeisaFlowTest extends TestCase
         ]);
 
         // Payload tanpa nomor_aju & nomor_daftar tidak boleh mencocokkan dokumen acak.
-        $this->postJson('/api/webhook/ceisa', [
+        $this->postCeisaWebhook([
             'status' => 'DITERIMA / SPPB',
         ])->assertOk();
 
         $doc->refresh();
         $this->assertSame(Document::STATUS_SUBMITTED, $doc->status);
         $this->assertDatabaseHas('webhook_logs', ['document_id' => null, 'processed' => false]);
+    }
+
+    public function test_webhook_fails_closed_when_secret_is_missing(): void
+    {
+        config(['ceisa.webhook_secret' => null]);
+
+        $this->postJson('/api/webhook/ceisa', [
+            'nomor_aju' => '000001-PEB',
+            'status' => 'DITERIMA / SPPB',
+        ])->assertStatus(503);
+
+        $this->assertDatabaseCount('webhook_logs', 0);
+    }
+
+    public function test_webhook_rejects_invalid_secret_without_mutating_document(): void
+    {
+        $user = $this->authedUser();
+        $document = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '000001-PEB',
+            'payload' => ['x' => 1],
+            'status' => Document::STATUS_SUBMITTED,
+        ]);
+
+        $this->postCeisaWebhook([
+            'nomor_aju' => '000001-PEB',
+            'status' => 'DITERIMA / SPPB',
+        ], secret: 'wrong-secret')->assertUnauthorized();
+
+        $this->assertSame(Document::STATUS_SUBMITTED, $document->fresh()->status);
+        $this->assertDatabaseCount('webhook_logs', 0);
+    }
+
+    public function test_webhook_retry_is_idempotent(): void
+    {
+        $user = $this->authedUser();
+        $document = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'nomor_aju' => '000001-PEB',
+            'payload' => ['x' => 1],
+            'status' => Document::STATUS_SUBMITTED,
+        ]);
+        $payload = [
+            'nomor_aju' => '000001-PEB',
+            'nomor_daftar' => 'REG-999',
+            'status' => 'DITERIMA / SPPB',
+        ];
+
+        $this->postCeisaWebhook($payload)->assertOk()->assertJson(['message' => 'received']);
+        $this->postCeisaWebhook($payload)->assertOk()->assertJson(['message' => 'duplicate']);
+
+        $this->assertSame(Document::STATUS_ACCEPTED, $document->fresh()->status);
+        $this->assertDatabaseCount('webhook_logs', 1);
+    }
+
+    public function test_webhook_accepts_hmac_and_redacts_secrets_from_audit_log(): void
+    {
+        $payload = [
+            'jenis' => 'Informasi',
+            'message' => 'Pemeliharaan layanan',
+            'access_token' => 'must-not-be-stored',
+            'data' => ['api_key' => 'must-not-be-stored'],
+        ];
+        $secret = 'test-webhook-secret';
+        $signature = 'sha256='.hash_hmac('sha256', json_encode($payload), $secret);
+        config(['ceisa.webhook_secret' => $secret]);
+
+        $this->withHeader('X-CEISA-Signature', $signature)
+            ->postJson('/api/webhook/ceisa', $payload)
+            ->assertOk();
+
+        $log = WebhookLog::firstOrFail();
+        $this->assertTrue($log->verified);
+        $this->assertArrayNotHasKey('access_token', $log->payload);
+        $this->assertArrayNotHasKey('api_key', $log->payload['data']);
+    }
+
+    public function test_webhook_rejects_oversized_payload(): void
+    {
+        config([
+            'ceisa.webhook_secret' => 'test-webhook-secret',
+            'ceisa.webhook_max_payload_bytes' => 32,
+        ]);
+
+        $this->withHeader('X-Webhook-Secret', 'test-webhook-secret')
+            ->postJson('/api/webhook/ceisa', ['message' => str_repeat('x', 100)])
+            ->assertStatus(413);
+
+        $this->assertDatabaseCount('webhook_logs', 0);
     }
 
     public function test_submit_bc20_document_sends_to_ceisa_and_persists(): void

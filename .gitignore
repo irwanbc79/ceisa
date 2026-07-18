@@ -3,6 +3,7 @@
 .env
 .env.backup
 .env.production
+memory/test_credentials.md
 .phpactor.json
 .phpunit.result.cache
 /.fleet

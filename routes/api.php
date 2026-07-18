@@ -8,4 +8,5 @@ use Illuminate\Support\Facades\Route;
 | Tidak pakai auth session; diverifikasi via shared secret (CEISA_WEBHOOK_SECRET).
 */
 Route::post('/webhook/ceisa', [WebhookController::class, 'ceisa'])
+    ->middleware('throttle:300,1')
     ->name('webhook.ceisa');
