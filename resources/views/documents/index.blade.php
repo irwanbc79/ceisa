@@ -12,7 +12,7 @@
                     Ekspor CSV
                 </a>
                 <a href="{{ route('documents.create') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-xs font-extrabold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-md shadow-black/25 hover:shadow-black/25 transition-all duration-200 hover:-translate-y-0.5">
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-xs font-extrabold rounded-xl hover:from-indigo-700 hover:to-indigo-800 shadow-md shadow-slate-900/10 hover:shadow-slate-900/10 transition-all duration-200 hover:-translate-y-0.5">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                     Buat Dokumen
                 </a>
@@ -27,22 +27,22 @@
             {{-- Rekap (mengikuti filter aktif) --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Total Terfilter -->
-                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-slate-600 shadow-sm shadow-black/25 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-slate-600 shadow-sm shadow-slate-900/10 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total (Terfilter)</div>
                     <div class="text-2xl font-extrabold text-slate-800 mt-1 tracking-tight">{{ $rekap['total'] }}</div>
                 </div>
                 <!-- Diterima -->
-                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-emerald-500 shadow-sm shadow-black/25 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-emerald-500 shadow-sm shadow-slate-900/10 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Diterima</div>
                     <div class="text-2xl font-extrabold text-emerald-300 mt-1 tracking-tight">{{ $rekap['accepted'] }}</div>
                 </div>
                 <!-- Ditolak/Error -->
-                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-rose-500 shadow-sm shadow-black/25 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-rose-500 shadow-sm shadow-slate-900/10 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ditolak / Error</div>
                     <div class="text-2xl font-extrabold text-rose-300 mt-1 tracking-tight">{{ $rekap['rejected'] }}</div>
                 </div>
                 <!-- Jalur Merah -->
-                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-red-600 shadow-sm shadow-black/25 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+                <div class="bg-panel border border-slate-200/60 border-l-4 border-l-red-600 shadow-sm shadow-slate-900/10 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Jalur Merah</div>
                     <div class="text-2xl font-extrabold text-red-300 mt-1 tracking-tight">{{ $rekap['merah'] }}</div>
                 </div>

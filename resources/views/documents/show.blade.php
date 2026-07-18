@@ -135,7 +135,7 @@
                     <div class="relative z-10 flex flex-col items-center group cursor-default">
                         <div @class([
                             'h-12 w-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-350 font-bold text-sm shadow-sm transform group-hover:scale-110',
-                            'bg-gradient-to-tr from-indigo-550 to-indigo-650 border-indigo-600 text-white shadow-md shadow-black/25 ring-4 ring-indigo-50' => $step >= 1,
+                            'bg-gradient-to-tr from-indigo-550 to-indigo-650 border-indigo-600 text-white shadow-md shadow-slate-900/10 ring-4 ring-indigo-50' => $step >= 1,
                             'bg-panel border-slate-200 text-slate-400' => $step < 1
                         ])>
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -165,7 +165,7 @@
                     <div class="relative z-10 flex flex-col items-center group cursor-default">
                         <div @class([
                             'h-12 w-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-350 font-bold text-sm shadow-sm transform group-hover:scale-110',
-                            'bg-gradient-to-tr from-blue-550 to-blue-655 border-blue-600 text-white shadow-md shadow-black/25 ring-4 ring-blue-55' => $step >= 3,
+                            'bg-gradient-to-tr from-blue-550 to-blue-655 border-blue-600 text-white shadow-md shadow-slate-900/10 ring-4 ring-blue-55' => $step >= 3,
                             'bg-panel border-slate-200 text-slate-400' => $step < 3
                         ])>
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -180,8 +180,8 @@
                     <div class="relative z-10 flex flex-col items-center group cursor-default">
                         <div @class([
                             'h-12 w-12 rounded-2xl flex items-center justify-center border-2 transition-all duration-350 font-bold text-sm shadow-sm transform group-hover:scale-110',
-                            'bg-gradient-to-tr from-emerald-500 to-emerald-600 border-emerald-600 text-white shadow-md shadow-black/25 ring-4 ring-emerald-50' => $isAccepted,
-                            'bg-gradient-to-tr from-rose-550 to-rose-650 border-rose-600 text-white shadow-md shadow-black/25 ring-4 ring-rose-50' => $isRejected,
+                            'bg-gradient-to-tr from-emerald-500 to-emerald-600 border-emerald-600 text-white shadow-md shadow-slate-900/10 ring-4 ring-emerald-50' => $isAccepted,
+                            'bg-gradient-to-tr from-rose-550 to-rose-650 border-rose-600 text-white shadow-md shadow-slate-900/10 ring-4 ring-rose-50' => $isRejected,
                             'bg-panel border-slate-200 text-slate-400' => !$isAccepted && !$isRejected
                         ])>
                             @if($isAccepted)
@@ -322,7 +322,7 @@
                             @if (in_array($document->status, ['draft', 'error']))
                                 <form method="POST" action="{{ route('documents.submit', $document) }}">
                                     @csrf
-                                    <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-black rounded-xl shadow-md shadow-black/25 hover:shadow-lg transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
+                                    <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white text-xs font-black rounded-xl shadow-md shadow-slate-900/10 hover:shadow-lg transition-all duration-250 transform hover:-translate-y-0.5 active:translate-y-0">
                                         {{ $document->status === 'draft' ? 'Submit ke CEISA H2H' : 'Kirim Ulang ke CEISA' }}
                                     </button>
                                 </form>
@@ -606,7 +606,7 @@
                                     </div>
                                     
                                     <div>
-                                        <div class="bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-3xl p-6 shadow-md shadow-black/25 space-y-4 relative overflow-hidden">
+                                        <div class="bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-3xl p-6 shadow-md shadow-slate-900/10 space-y-4 relative overflow-hidden">
                                             <div class="absolute -right-8 -bottom-8 h-28 w-28 rounded-full bg-indigo-800/20 blur-xl"></div>
                                             <div class="flex items-center justify-between">
                                                 <span class="text-indigo-200 text-[10px] font-black uppercase tracking-wider">Mata Uang &amp; Nilai</span>
@@ -1003,7 +1003,7 @@
 
                     {{-- Local Webhook Simulator Widget --}}
                     @if(config('app.env') === 'local')
-                        <div class="bg-ink-950 text-white rounded-3xl p-6 shadow-lg border border-white/10 space-y-4 shadow-black/25 relative overflow-hidden">
+                        <div class="bg-ink-950 text-white rounded-3xl p-6 shadow-lg border border-white/10 space-y-4 shadow-slate-900/10 relative overflow-hidden">
                             <div class="absolute -right-8 -bottom-8 h-24 w-24 rounded-full bg-indigo-500/10 blur-xl"></div>
                             <div class="flex items-center justify-between pb-2 border-b border-white/10">
                                 <div class="flex items-center gap-2">

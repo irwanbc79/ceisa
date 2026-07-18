@@ -33,7 +33,7 @@
     </div>
 
     {{-- Quick Portal Info Cards --}}
-    <div class="bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-4 text-xs text-slate-500">
+    <div class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-4 text-xs text-slate-500">
         <h4 class="font-bold text-slate-700 uppercase tracking-wider mb-2">Informasi Validasi Bea Cukai</h4>
         <ul class="space-y-1.5 list-disc pl-4">
             <li>Struktur JSON ini didesain sesuai schema API di <code class="text-slate-800 font-bold font-mono">openapi.beacukai.go.id</code>.</li>

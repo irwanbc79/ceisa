@@ -8,45 +8,42 @@
 }
 
 /* ────────────────────────────────────────────────────────────
-   M2B Customs · "Pelabuhan Senja" (Harbor at Dusk)
-   Tema gelap-lembut resmi: navy senja · emas segel · krem arsip
-   Skala slate DIBALIK di tailwind.config — kelas terang lama
-   otomatis menjadi padanan gelapnya.
+   M2B Customs · "Customs Daylight"
+   Ruang kerja terang: biru-abu dokumen · navy DJBC · teal operasi
+   · emas segel. Dibuat untuk layar ERP yang dipakai sepanjang hari.
    ──────────────────────────────────────────────────────────── */
 
 @layer base {
     html {
-        color-scheme: dark;
+        color-scheme: light;
     }
 
     body {
-        background-color: #0A1128;
+        background-color: #F4F7FB;
         background-image:
-            /* cahaya dermaga: emas rendah di ufuk atas, teal laut di bawah */
-            radial-gradient(ellipse 70% 42% at 50% -10%, rgba(201, 165, 92, 0.07), transparent 62%),
-            radial-gradient(ellipse 55% 40% at 88% 108%, rgba(14, 134, 126, 0.06), transparent 60%),
-            /* peta navigasi: dot-grid samar */
-            radial-gradient(rgba(237, 242, 255, 0.035) 1px, transparent 1px);
+            radial-gradient(ellipse 70% 44% at 8% -12%, rgba(36, 95, 146, 0.11), transparent 64%),
+            radial-gradient(ellipse 56% 42% at 95% 106%, rgba(15, 127, 119, 0.09), transparent 62%),
+            radial-gradient(rgba(13, 32, 52, 0.045) 1px, transparent 1px);
         background-size: 100% 100%, 100% 100%, 26px 26px;
         background-attachment: fixed;
         color: theme('colors.slate.700');
     }
 
-    /* Signature: "Garis Khatulistiwa" — pita emas resmi di puncak halaman */
+    /* Signature: jalur manifes — navy ke teal dengan segel emas di tengah. */
     body::before {
         content: '';
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
-        height: 2px;
+        height: 3px;
         z-index: 60;
         background: linear-gradient(90deg,
-            transparent 0%,
-            rgba(201, 165, 92, 0.25) 12%,
+            theme('colors.indigo.700') 0%,
+            theme('colors.indigo.500') 34%,
             theme('colors.gold.400') 50%,
-            rgba(201, 165, 92, 0.25) 88%,
-            transparent 100%);
+            theme('colors.sea.500') 70%,
+            theme('colors.sea.700') 100%);
         pointer-events: none;
     }
 
@@ -59,34 +56,33 @@
 
     ::selection {
         background: rgba(201, 165, 92, 0.30);
-        color: #F4F6FC;
+        color: theme('colors.slate.900');
     }
 
-    /* Plugin @tailwindcss/forms memberi input latar PUTIH — di tema gelap
-       semua kontrol form di-reset di sini; utilitas per-elemen tetap menang. */
+    /* Kontrol form tetap terang dan kontras pada semua layar ERP. */
     input:not([type='checkbox']):not([type='radio']):not([type='range']),
     select,
     textarea {
-        background-color: rgba(10, 17, 40, 0.55);
-        border-color: rgba(237, 242, 255, 0.12);
+        background-color: rgba(255, 255, 255, 0.92);
+        border-color: theme('colors.slate.300');
         color: theme('colors.slate.800');
     }
     input::placeholder,
     textarea::placeholder {
-        color: rgba(133, 145, 180, 0.75);
+        color: theme('colors.slate.400');
     }
     select option {
-        background-color: #111B38;
+        background-color: white;
         color: theme('colors.slate.800');
     }
     input[type='checkbox'],
     input[type='radio'] {
-        background-color: rgba(10, 17, 40, 0.55);
-        border-color: rgba(237, 242, 255, 0.25);
+        background-color: white;
+        border-color: theme('colors.slate.300');
         color: theme('colors.gold.500');
     }
     input[type='date']::-webkit-calendar-picker-indicator {
-        filter: invert(0.8);
+        opacity: 0.65;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -113,8 +109,8 @@
 
     .topo-bg {
         background-image:
-            theme('backgroundImage.grid-light'),
-            linear-gradient(to bottom, #0C1430, #0A1128);
+            theme('backgroundImage.grid-ink'),
+            linear-gradient(to bottom, #F8FAFD, #EEF4F9);
         background-size: theme('backgroundSize.grid'), 100% 100%;
     }
 
@@ -161,8 +157,8 @@
         display: block;
         width: 100%;
         padding: 0.625rem 0.875rem;
-        background-color: rgba(10, 17, 40, 0.55);
-        border: 1px solid rgba(237, 242, 255, 0.12);
+        background-color: rgba(255, 255, 255, 0.96);
+        border: 1px solid theme('colors.slate.300');
         border-radius: 0.625rem;
         font-size: 0.9375rem;
         color: theme('colors.slate.800');
@@ -173,8 +169,8 @@
     }
     .field:focus {
         border-color: theme('colors.gold.500');
-        background-color: rgba(10, 17, 40, 0.85);
-        box-shadow: 0 0 0 4px rgba(201, 165, 92, 0.14);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(36, 95, 146, 0.11);
         outline: none;
     }
     .field:focus-visible {
@@ -252,9 +248,9 @@
         justify-content: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        background: rgba(237, 242, 255, 0.03);
+        background: rgba(255, 255, 255, 0.76);
         color: theme('colors.slate.600');
-        border: 1px solid rgba(237, 242, 255, 0.14);
+        border: 1px solid theme('colors.slate.300');
         border-radius: 0.625rem;
         font-size: 0.875rem;
         font-weight: 600;
@@ -262,8 +258,8 @@
         cursor: pointer;
     }
     .btn-ghost:hover {
-        background: rgba(237, 242, 255, 0.07);
-        border-color: rgba(212, 176, 97, 0.45);
+        background: theme('colors.slate.50');
+        border-color: theme('colors.indigo.300');
         color: theme('colors.slate.800');
     }
 
@@ -340,14 +336,37 @@
         align-items: center;
         gap: 0.375rem;
         padding: 0.25rem 0.625rem;
-        background-color: rgba(14, 134, 126, 0.12);
-        color: theme('colors.sea.200');
-        border: 1px solid rgba(14, 134, 126, 0.35);
+        background-color: theme('colors.sea.50');
+        color: theme('colors.sea.300');
+        border: 1px solid theme('colors.sea.200');
         border-radius: 9999px;
         font-size: 0.6875rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
+    }
+
+    .pill-amber,
+    .pill-crimson {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.25rem 0.625rem;
+        border-radius: 9999px;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .pill-amber {
+        background-color: theme('colors.amber.50');
+        color: theme('colors.amber.300');
+        border: 1px solid theme('colors.amber.200');
+    }
+    .pill-crimson {
+        background-color: theme('colors.crimson.50');
+        color: theme('colors.crimson.300');
+        border: 1px solid theme('colors.crimson.200');
     }
 
     .dot {
@@ -361,9 +380,27 @@
 
     .card {
         background-color: theme('colors.panel.DEFAULT');
-        border: 1px solid rgba(237, 242, 255, 0.09);
+        border: 1px solid theme('colors.slate.200');
         border-radius: 1rem;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 10px 30px -12px rgba(0, 0, 0, .55);
+        box-shadow: 0 1px 2px rgba(13,32,52,.04), 0 14px 34px -22px rgba(13,32,52,.28);
+    }
+
+    /* Jalur manifes pada page header: dekorasi yang juga mengisyaratkan
+       alur sistem internal → gateway → DJBC. */
+    .customs-page-header::after {
+        content: '';
+        position: absolute;
+        right: clamp(1.5rem, 7vw, 7rem);
+        bottom: -4px;
+        width: clamp(7rem, 18vw, 13rem);
+        height: 8px;
+        background:
+            radial-gradient(circle at 2% 50%, theme('colors.indigo.600') 0 3px, transparent 3.5px),
+            radial-gradient(circle at 50% 50%, theme('colors.gold.400') 0 3px, transparent 3.5px),
+            radial-gradient(circle at 98% 50%, theme('colors.sea.500') 0 3px, transparent 3.5px),
+            linear-gradient(90deg, theme('colors.indigo.300'), theme('colors.slate.300') 50%, theme('colors.sea.300')) center / calc(100% - 10px) 1px no-repeat;
+        pointer-events: none;
+        opacity: .72;
     }
 
     /* ── Ticker (marquee) ────────────────────────────────────── */
@@ -422,7 +459,7 @@
 @layer utilities {
     .scrollbar-thin {
         scrollbar-width: thin;
-        scrollbar-color: rgba(154, 165, 198, .35) transparent;
+        scrollbar-color: rgba(93, 112, 133, .34) transparent;
     }
     .scrollbar-thin::-webkit-scrollbar {
         width: 6px;
@@ -432,7 +469,7 @@
         background: transparent;
     }
     .scrollbar-thin::-webkit-scrollbar-thumb {
-        background-color: rgba(154, 165, 198, .35);
+        background-color: rgba(93, 112, 133, .34);
         border-radius: 9999px;
     }
 }
