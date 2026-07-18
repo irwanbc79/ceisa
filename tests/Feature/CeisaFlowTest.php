@@ -381,8 +381,10 @@ class CeisaFlowTest extends TestCase
         $response = $this->actingAs($user)->get('/dokumen/buat')->assertOk();
 
         $response
-            ->assertSee('x-show="showDraftModal" x-cloak', false)
-            ->assertSee('x-show="showJson" x-cloak', false);
+            ->assertSee('x-show="showDraftModal" x-cloak style="display: none;"', false)
+            ->assertSee('x-show="showJson" x-cloak', false)
+            ->assertSee('x-modelable="selectedVal"', false)
+            ->assertSee('x-model="formData.kantor_muat"', false);
 
         foreach (range(2, 9) as $step) {
             $response->assertSee("x-show=\"step === {$step}\" x-cloak", false);
