@@ -96,5 +96,5 @@ Penting:
 - REST/HTTP: standar RFC2616. ~~401 belum auto re-login+retry~~ ✅ FIXED (94ea14e): `authorizedRequest()` re-login + retry sekali; `httpStatusMessage()` pesan Indonesia per kode.
 
 ## Status operasional (2026-07-02)
-- Webhook `https://ceisa.m2b.co.id/api/webhook/ceisa` terdaftar di portal DJBC. Mulai hardening Juli 2026, callback wajib memakai shared secret/HMAC dan retry identik diproses secara idempoten.
+- Webhook `https://ceisa.m2b.co.id/api/webhook/ceisa` terdaftar di portal DJBC. Callback terverifikasi memakai shared secret/HMAC dan retry identik diproses secara idempoten. Callback unsigned hanya diakui HTTP 202 tanpa disimpan atau memutasi dokumen; polling/sinkronisasi menjadi jalur rekonsiliasi resmi.
 - Detail dokumen produksi tidak dicatat di repository. Verifikasi status dilakukan langsung melalui Sinkronisasi (`documents.sync`) dan audit log aplikasi.

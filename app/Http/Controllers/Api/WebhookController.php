@@ -36,12 +36,14 @@ class WebhookController extends Controller
             return response()->json(['message' => 'Payload too large'], 413);
         }
 
-        // Fail closed: callback tanpa secret tidak pernah boleh memutasi dokumen.
+        // Rollout-safe: kontrak resmi CEISA belum menjamin dukungan signature.
+        // Callback unsigned diakui agar CEISA tidak retry, tetapi dibuang dan
+        // tidak pernah boleh menyentuh audit log maupun status dokumen.
         $secret = trim((string) config('ceisa.webhook_secret'));
         if ($secret === '') {
-            Log::critical('Webhook CEISA dinonaktifkan: CEISA_WEBHOOK_SECRET belum dikonfigurasi.');
+            Log::warning('Webhook CEISA unsigned diabaikan; status wajib direkonsiliasi melalui polling.');
 
-            return response()->json(['message' => 'Webhook unavailable'], 503);
+            return response()->json(['message' => 'accepted for reconciliation'], 202);
         }
 
         if (! $this->hasValidSignature($request, $secret)) {

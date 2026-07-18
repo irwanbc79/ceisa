@@ -877,14 +877,14 @@ class CeisaFlowTest extends TestCase
         $this->assertDatabaseHas('webhook_logs', ['document_id' => null, 'processed' => false]);
     }
 
-    public function test_webhook_fails_closed_when_secret_is_missing(): void
+    public function test_unsigned_webhook_is_acknowledged_without_mutating_or_logging(): void
     {
         config(['ceisa.webhook_secret' => null]);
 
         $this->postJson('/api/webhook/ceisa', [
             'nomor_aju' => '000001-PEB',
             'status' => 'DITERIMA / SPPB',
-        ])->assertStatus(503);
+        ])->assertStatus(202)->assertJson(['message' => 'accepted for reconciliation']);
 
         $this->assertDatabaseCount('webhook_logs', 0);
     }
