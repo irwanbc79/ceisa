@@ -35,7 +35,7 @@
 
         <div class="flex items-center justify-between">
             <label for="remember_me" class="inline-flex items-center cursor-pointer">
-                <input id="remember_me" type="checkbox" class="rounded border-white/10 text-slate-800 focus:ring-ink-700/20" name="remember">
+                <input id="remember_me" type="checkbox" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20" name="remember">
                 <span class="ms-2 text-sm text-slate-600">Ingat saya 30 hari</span>
             </label>
 
@@ -53,7 +53,7 @@
     </form>
 
     {{-- ── Access info ──────────────────────────────────── --}}
-    <div class="mt-8 pt-6 border-t border-white/10/80">
+    <div class="mt-8 pt-6 border-t border-slate-200">
         <p class="text-[11px] font-mono text-slate-500 leading-relaxed">
             <span class="inline-flex items-center gap-1.5">
                 <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"/></svg>

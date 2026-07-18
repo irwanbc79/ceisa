@@ -119,14 +119,14 @@
                             ['Tanggal Daftar', data_get($result, 'tanggal_daftar', data_get($result, 'data.tanggal_daftar', '—'))],
                             ['Nilai Pabean', data_get($result, 'nilai_pabean', data_get($result, 'data.nilai_pabean', '—'))],
                         ] as [$label, $value])
-                            <div class="bg-panel-2 rounded-xl p-3 border border-white/10">
+                            <div class="bg-panel-2 rounded-xl p-3 border border-slate-200">
                                 <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">{{ $label }}</dt>
                                 <dd class="font-bold text-slate-800 text-sm mt-1 font-mono">{{ $value ?? '—' }}</dd>
                             </div>
                         @endforeach
                     </div>
 
-                    <div x-data="{ open: false }" class="border border-white/10 rounded-xl overflow-hidden">
+                    <div x-data="{ open: false }" class="border border-slate-200 rounded-xl overflow-hidden">
                         <button type="button" @click="open = !open" class="w-full flex items-center justify-between px-4 py-3 bg-panel-2 hover:bg-white/[0.05] transition-colors text-xs font-bold text-slate-600 uppercase tracking-widest">
                             <span>Raw Response JSON · Developer</span>
                             <svg class="h-4 w-4 transition-transform" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -137,7 +137,7 @@
                     </div>
 
                     @if (!$localDoc)
-                        <div class="mt-6 border-t border-white/10 pt-6">
+                        <div class="mt-6 border-t border-slate-200 pt-6">
                             <div class="bg-sea-50/50 border border-sea-100 rounded-xl p-4">
                                 <h4 class="eyebrow text-sea-300 mb-3">Impor ke arsip lokal</h4>
                                 <p class="text-xs text-slate-500 mb-4">Simpan dokumen historis dari portal CEISA ini ke database lokal M2B agar tampil di dashboard.</p>

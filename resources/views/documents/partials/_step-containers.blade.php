@@ -4,14 +4,14 @@
  */
 @endphp
 
-<div x-show="step === 6" class="bg-ink-800/50 backdrop-blur-xl border border-white/[0.08] shadow-xl shadow-black/25 rounded-2xl p-6 transition-all duration-300">
+<div x-show="step === 6" class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6 transition-all duration-300">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Kemasan &amp; Peti Kemas</h3>
             <p class="text-xs text-slate-500 mt-0.5">Input nomor kontainer, ukuran, tipe, dan status isi jika menggunakan kontainer</p>
         </div>
         <button type="button" @click="addContainer()"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-black/25">
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-slate-900/10">
             + Tambah Kontainer
         </button>
     </div>
