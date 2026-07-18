@@ -371,6 +371,24 @@ class CeisaFlowTest extends TestCase
         $response->assertSee('Pungutan (Pratinjau)');
     }
 
+    public function test_create_wizard_cloaks_conditional_content_before_alpine_starts(): void
+    {
+        $user = $this->authedUser();
+        $user->ceisaCredential()->create([
+            'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'secret-key',
+        ]);
+
+        $response = $this->actingAs($user)->get('/dokumen/buat')->assertOk();
+
+        $response
+            ->assertSee('x-show="showDraftModal" x-cloak', false)
+            ->assertSee('x-show="showJson" x-cloak', false);
+
+        foreach (range(2, 9) as $step) {
+            $response->assertSee("x-show=\"step === {$step}\" x-cloak", false);
+        }
+    }
+
     public function test_submit_document_sends_to_ceisa_and_persists(): void
     {
         Http::fake([

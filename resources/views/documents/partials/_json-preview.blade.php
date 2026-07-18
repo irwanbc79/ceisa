@@ -25,7 +25,7 @@
             </div>
         </button>
 
-        <div class="p-4" x-show="showJson" x-transition>
+        <div class="p-4" x-show="showJson" x-cloak x-transition>
             <p class="text-[10px] text-slate-500 mb-3">Payload di bawah disusun secara dinamis sesuai struktur Bea Cukai (DJBC):</p>
             <pre class="text-[11px] font-mono leading-relaxed overflow-x-auto text-emerald-400 max-h-[480px] scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent select-all font-semibold"
                  x-text="JSON.stringify(generateLivePayload(), null, 2)"></pre>
