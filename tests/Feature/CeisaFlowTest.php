@@ -338,8 +338,20 @@ class CeisaFlowTest extends TestCase
             ->get('/dokumen/buat')
             ->assertOk()
             ->assertSee('IN - India')
+            ->assertSee('KPPBC Tipe Madya Pabean Belawan')
             ->assertSee('011200 - KPPBC TMP C Kuala Tanjung')
             ->assertSee('IDKTJ - Kuala Tanjung, Sumut');
+
+        $this->assertDatabaseHas('ceisa_references', [
+            'type' => 'kantor_pabean',
+            'code' => '010700',
+            'label' => 'KPPBC Tipe Madya Pabean Belawan',
+        ]);
+        $this->assertDatabaseMissing('ceisa_references', [
+            'type' => 'kantor_pabean',
+            'code' => '010300',
+            'label' => '010300 - KPPBC TMP B Belawan',
+        ]);
     }
 
     public function test_create_wizard_steps_match_official_portal_order(): void
