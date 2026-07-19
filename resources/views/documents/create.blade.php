@@ -446,21 +446,36 @@
                     // Reset or adapt validation states as needed
                 },
 
+                scrollToWizardStart() {
+                    this.$nextTick(() => {
+                        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        window.scrollTo({
+                            top: 0,
+                            left: 0,
+                            behavior: reduceMotion ? 'auto' : 'smooth',
+                        });
+                    });
+                },
+
                 goToStep(s) {
                     if (s < this.step || this.isStepValid(this.step)) {
+                        const stepChanged = s !== this.step;
                         this.step = s;
+                        if (stepChanged) this.scrollToWizardStart();
                     }
                 },
 
                 nextStep() {
                     if (this.isStepValid(this.step)) {
                         this.step++;
+                        this.scrollToWizardStart();
                     }
                 },
 
                 prevStep() {
                     if (this.step > 1) {
                         this.step--;
+                        this.scrollToWizardStart();
                     }
                 },
 
