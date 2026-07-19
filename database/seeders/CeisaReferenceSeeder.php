@@ -222,7 +222,7 @@ class CeisaReferenceSeeder extends Seeder
             // --- Sumatera ---
             '010100' => '010100 - KPPBC TMP B Banda Aceh',
             '010200' => '010200 - KPPBC TMP C Lhokseumawe',
-            '010300' => '010300 - KPPBC TMP B Belawan',
+            '010700' => 'KPPBC Tipe Madya Pabean Belawan',
             '011200' => '011200 - KPPBC TMP C Kuala Tanjung',
             '010600' => '010600 - KPPBC TMP C Sibolga',
             '050200' => '050200 - KPPBC TMP B Tanjung Balai Asahan',
