@@ -59,8 +59,8 @@
                     <x-searchable-select id="negara_tujuan" name="negara_tujuan" model="formData.negara_tujuan" options="references.countries" placeholder="-- Pilih Negara Tujuan --" required />
                 </div>
                 <div class="sm:col-span-2">
-                    <x-input-label for="alamat_penerima" value="Alamat Penerima (Opsional)" />
-                    <textarea id="alamat_penerima" name="alamat_penerima" x-model="formData.alamat_penerima" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm"></textarea>
+                    <x-input-label for="alamat_penerima" value="Alamat Penerima Lengkap" />
+                    <textarea id="alamat_penerima" name="alamat_penerima" x-model="formData.alamat_penerima" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required></textarea>
                 </div>
             </div>
         </div>
@@ -95,6 +95,10 @@
                 <div>
                     <x-input-label for="negara_pemasok" value="Negara Asal Pemasok (Kode Referensi)" />
                     <x-searchable-select id="negara_pemasok" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'negara_pemasok' : ''" model="formData.negara_pemasok" options="references.countries" placeholder="-- Pilih Negara Asal --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
+                </div>
+                <div class="sm:col-span-2">
+                    <x-input-label for="alamat_pemasok" value="Alamat Pemasok Lengkap" />
+                    <textarea id="alamat_pemasok" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'alamat_pemasok' : ''" x-model="formData.alamat_pemasok" rows="2" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'"></textarea>
                 </div>
             </div>
         </div>

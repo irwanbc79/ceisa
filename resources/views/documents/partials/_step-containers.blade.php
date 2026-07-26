@@ -16,6 +16,25 @@
         </button>
     </div>
 
+    {{-- BC 2.0: kemasan agregat wajib menurut schema resmi. --}}
+    <div x-show="doc_type === 'BC20' || doc_type === 'BC24'" class="mb-6 pb-4 border-b border-slate-100">
+        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Informasi Kemasan Impor</h4>
+        <div class="grid sm:grid-cols-3 gap-4">
+            <div>
+                <x-input-label for="jumlah_kemasan_impor" value="Jumlah Kemasan" />
+                <input type="number" min="1" id="jumlah_kemasan_impor" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'jumlah_kemasan_impor' : ''" x-model="formData.jumlah_kemasan_impor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
+            </div>
+            <div>
+                <x-input-label for="kode_kemasan_impor" value="Jenis Kemasan" />
+                <x-searchable-select id="kode_kemasan_impor" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_kemasan_impor' : ''" model="formData.kode_kemasan_impor" options="references.packages" placeholder="-- Pilih Jenis Kemasan --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
+            </div>
+            <div>
+                <x-input-label for="merk_kemasan_impor" value="Merek Kemasan" />
+                <input type="text" id="merk_kemasan_impor" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'merk_kemasan_impor' : ''" x-model="formData.merk_kemasan_impor" placeholder="mis. UNMARKED" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
+            </div>
+        </div>
+    </div>
+
     {{-- RUSH: Informasi Kemasan (selaras tahap Kemasan portal resmi) --}}
     <div x-show="doc_type === 'RUSH'" class="mb-6 pb-4 border-b border-slate-100">
         <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Informasi Kemasan</h4>

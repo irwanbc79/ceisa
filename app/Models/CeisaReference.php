@@ -68,6 +68,9 @@ class CeisaReference extends Model
             'caraBayar' => 'cara_bayar',
             'incoterms' => 'incoterm',
             'caraAngkut' => 'cara_angkut',
+            'jenisPengangkutan' => 'jenis_pengangkutan',
+            'jenisImpor' => 'jenis_impor',
+            'tutupPu' => 'tutup_pu',
         ];
 
         $out = [];

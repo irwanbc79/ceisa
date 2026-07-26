@@ -49,11 +49,16 @@ class CeisaFlowTest extends TestCase
         return array_merge([
             'doc_type' => 'BC30',
             // Header
-            'kantor_muat' => 'IDJKT',
-            'jenis_ekspor' => 'Biasa',
-            'kategori_ekspor' => 'Umum',
-            'cara_dagang' => 'Biasa',
-            'cara_bayar' => 'Biasa/Tunai',
+            'kantor_muat' => '010700',
+            'kantor_pendaftaran' => '010700',
+            'kantor_ekspor' => '010700',
+            'jenis_ekspor' => '1',
+            'kategori_ekspor' => '10',
+            'cara_dagang' => '1',
+            'cara_bayar' => '1',
+            'jenis_pengangkutan' => '1',
+            'kode_lokasi' => '2',
+            'tanggal_periksa' => '2026-07-21',
             'komoditi' => 'NON_MIGAS',
             'curah' => 'NON_CURAH',
             // Entitas
@@ -61,19 +66,37 @@ class CeisaFlowTest extends TestCase
             'npwp_eksportir' => '012345678901000',
             'alamat_eksportir' => 'Jakarta',
             'nama_penerima' => 'ACME Pte Ltd',
+            'alamat_penerima' => 'Singapore',
             'negara_tujuan' => 'SG',
             // Pengangkut
+            'cara_angkut' => '1',
+            'kode_bendera' => 'ID',
+            'nama_sarana' => 'MV TEST',
+            'voy_flight' => 'V001',
             'pelabuhan_muat' => 'IDJKT',
+            'pelabuhan_ekspor' => 'IDJKT',
             'pelabuhan_tujuan' => 'SGSIN',
+            'tanggal_ekspor' => '2026-07-22',
             // Transaksi
             'kode_valuta' => 'USD',
             'ndpbm' => 15800,
             'incoterm' => 'FOB',
             'nilai_fob' => 1500.50,
+            'asuransi_jenis' => 'DN',
+            'nilai_asuransi' => 0,
+            'freight' => 0,
             'bruto' => 130.0,
             // Pernyataan
             'pernyataan_nama' => 'Irwan',
             'pernyataan_jabatan' => 'Direktur',
+            'pernyataan_kota' => 'Medan',
+            'dokumen' => [
+                [
+                    'kode_dokumen' => '380',
+                    'nomor_dokumen' => 'INV-001',
+                    'tanggal_dokumen' => '2026-07-20',
+                ],
+            ],
             // Barang
             'barang' => [
                 [
@@ -83,6 +106,82 @@ class CeisaFlowTest extends TestCase
                     'kode_satuan' => 'PCE',
                     'netto' => 25.5,
                     'nilai_fob' => 1500.50,
+                    'jumlah_kemasan' => 1,
+                    'kode_kemasan' => 'CT',
+                    'merk_kemasan' => 'M2B',
+                ],
+            ],
+        ], $overrides);
+    }
+
+    protected function createBc30Draft(User $user, array $overrides = []): Document
+    {
+        $this->actingAs($user)
+            ->post('/dokumen/submit', $this->bc30Payload(array_merge([
+                'submit_action' => 'draft',
+            ], $overrides)))
+            ->assertRedirect();
+
+        return Document::query()->latest('id')->firstOrFail();
+    }
+
+    protected function bc20Payload(array $overrides = []): array
+    {
+        return array_merge([
+            'doc_type' => 'BC20',
+            'nama_importir' => 'PT Mora Multi Berkah',
+            'npwp_importir' => '012345678901000',
+            'alamat_importir' => 'Medan',
+            'nib_importir' => 'NIB-001',
+            'jenis_api' => '02',
+            'status_importir' => '3',
+            'nama_pemasok' => 'Tokyo Machinery',
+            'negara_pemasok' => 'JP',
+            'alamat_pemasok' => 'Tokyo, Japan',
+            'kode_kantor' => '010700',
+            'jenis_impor' => '1',
+            'cara_bayar' => '1',
+            'kode_tutup_pu' => '11',
+            'pelabuhan_muat' => 'JPTYO',
+            'pelabuhan_bongkar' => 'IDBLW',
+            'cara_angkut' => '1',
+            'nama_sarana' => 'MV TEST',
+            'voy_flight' => 'V001',
+            'kode_bendera' => 'ID',
+            'kode_tps' => 'TPS-001',
+            'tanggal_tiba' => '2026-07-22',
+            'kode_valuta' => 'JPY',
+            'ndpbm' => 105,
+            'incoterm' => 'CIF',
+            'nilai_fob_impor' => 178000,
+            'nilai_cif' => 180000,
+            'freight' => 1800,
+            'nilai_asuransi' => 200,
+            'bruto' => 30,
+            'jumlah_kemasan_impor' => 1,
+            'kode_kemasan_impor' => 'CT',
+            'merk_kemasan_impor' => 'M2B',
+            'pernyataan_nama' => 'Irwan',
+            'pernyataan_jabatan' => 'Direktur',
+            'pernyataan_kota' => 'Medan',
+            'dokumen' => [
+                [
+                    'kode_dokumen' => '380',
+                    'nomor_dokumen' => 'INV-IMP-001',
+                    'tanggal_dokumen' => '2026-07-20',
+                ],
+            ],
+            'barang' => [
+                [
+                    'hs_code' => '8471302000',
+                    'uraian' => 'Laptop Office',
+                    'jumlah_satuan' => 10,
+                    'kode_satuan' => 'UNT',
+                    'netto' => 25,
+                    'nilai_cif' => 180000,
+                    'tarif_bm' => 0,
+                    'tarif_ppn' => 0,
+                    'tarif_pph' => 0,
                 ],
             ],
         ], $overrides);
@@ -127,7 +226,7 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('PLAT-001', $credential->id_platform);
     }
 
-    public function test_login_sends_id_platform_header(): void
+    public function test_login_sends_only_official_api_key_header(): void
     {
         Http::fake([
             '*user/login*' => Http::response(['access_token' => 'TOK', 'expires_in' => 3600], 200),
@@ -145,8 +244,8 @@ class CeisaFlowTest extends TestCase
 
         Http::assertSent(function (Request $request) {
             return str_contains($request->url(), '/v1/openapi-auth/user/login')
-                && $request->hasHeader('Beacukai-Api-Key', 'KEY-123')
-                && $request->hasHeader('id_platform', 'PLAT-XYZ');
+                && $request->hasHeader('beacukai-api-key', 'KEY-123')
+                && ! $request->hasHeader('id_platform');
         });
     }
 
@@ -214,7 +313,7 @@ class CeisaFlowTest extends TestCase
                 && $request->method() === 'POST'
                 && $request['username'] === 'm2b_user'
                 && $request['password'] === 'm2b_pass'
-                && $request->hasHeader('Beacukai-Api-Key', 'KEY-123');
+                && $request->hasHeader('beacukai-api-key', 'KEY-123');
         });
     }
 
@@ -439,7 +538,7 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('TOKEN-XYZ', $user->ceisaCredential->fresh()->token);
 
         // Struktur payload CEISA 4.0 tersimpan lengkap.
-        $this->assertSame('Biasa', data_get($doc->payload, 'header.jenis_ekspor'));
+        $this->assertSame('1', data_get($doc->payload, 'header.jenis_ekspor'));
         $this->assertSame('FOB', data_get($doc->payload, 'header.incoterm'));
         $this->assertEquals(15800, data_get($doc->payload, 'header.ndpbm'));
         $this->assertSame('Irwan', data_get($doc->payload, 'header.pernyataan.nama'));
@@ -505,6 +604,34 @@ class CeisaFlowTest extends TestCase
         $this->assertNotSame(Document::STATUS_SUBMITTING, $document->fresh()->status);
     }
 
+    public function test_incomplete_bc30_is_blocked_by_local_contract_before_http(): void
+    {
+        Http::fake();
+
+        $user = $this->authedUser();
+        $credential = $user->ceisaCredential()->create([
+            'username' => 'm2b_user',
+            'password' => 'm2b_pass',
+            'api_key' => 'secret-key',
+        ]);
+
+        $document = $this->createBc30Draft($user);
+        $payload = $document->payload;
+        data_forget($payload, 'header.pengangkutan.tanggal_ekspor');
+        $document->update(['payload' => $payload]);
+
+        try {
+            CeisaService::forCredential($credential)->submit($document);
+            $this->fail('Payload tidak lengkap seharusnya diblokir sebelum HTTP call.');
+        } catch (CeisaException $e) {
+            $this->assertSame('local_contract', data_get($e->context, 'validation'));
+            $this->assertContains('tanggalEkspor', data_get($e->context, 'missing_fields', []));
+        }
+
+        Http::assertNothingSent();
+        $this->assertSame(Document::STATUS_ERROR, $document->fresh()->status);
+    }
+
     public function test_connection_failure_keeps_submission_locked_until_status_check(): void
     {
         Http::fake([
@@ -522,12 +649,11 @@ class CeisaFlowTest extends TestCase
             'api_key' => 'secret-key',
         ]);
 
-        $document = $user->documents()->create([
-            'doc_type' => 'BC30',
-            'nomor_aju' => '040130ABCDEF20260718000004',
-            'payload' => $this->bc30Payload(),
-            'status' => Document::STATUS_DRAFT,
-        ]);
+        $this->actingAs($user)
+            ->post('/dokumen/submit', $this->bc30Payload(['submit_action' => 'draft']))
+            ->assertRedirect();
+
+        $document = Document::firstOrFail();
 
         try {
             CeisaService::forCredential($credential)->submit($document);
@@ -686,11 +812,9 @@ class CeisaFlowTest extends TestCase
             'api_key' => 'KEY-123',
         ]);
 
-        $doc = $user->documents()->create([
-            'doc_type' => 'BC30',
+        $doc = $this->createBc30Draft($user);
+        $doc->update([
             'nomor_aju' => '04010020260617012345678912',
-            'source' => Document::SOURCE_H2H,
-            'payload' => $this->bc30Payload(),
             'status' => Document::STATUS_ACCEPTED,
         ]);
 
@@ -725,11 +849,9 @@ class CeisaFlowTest extends TestCase
         ]);
 
         $submittedAt = now()->subDay();
-        $document = $user->documents()->create([
-            'doc_type' => 'BC30',
+        $document = $this->createBc30Draft($user);
+        $document->update([
             'nomor_aju' => '040130ABCDEF20260718000003',
-            'source' => Document::SOURCE_H2H,
-            'payload' => $this->bc30Payload(),
             'status' => Document::STATUS_ACCEPTED,
             'submitted_at' => $submittedAt,
             'ceisa_response' => ['status' => 'NPE'],
@@ -786,9 +908,9 @@ class CeisaFlowTest extends TestCase
 
             return str_contains($request->url(), 'isFinal=true')
                 && str_contains($request->url(), 'isRevision=false')
-                && $request->hasHeader('Beacukai-Api-Key', 'KEY-123')
-                && $request->hasHeader('nle-api-key', 'KEY-123')
-                && $request->hasHeader('Origin');
+                && $request->hasHeader('beacukai-api-key', 'KEY-123')
+                && ! $request->hasHeader('nle-api-key')
+                && ! $request->hasHeader('id_platform');
         });
     }
 
@@ -1022,28 +1144,7 @@ class CeisaFlowTest extends TestCase
             'api_key' => 'secret-key',
         ]);
 
-        $payload = [
-            'doc_type' => 'BC20',
-            'nama_importir' => 'PT Mora Multi Berkah',
-            'npwp_importir' => '01.234.567.8-901.000',
-            'alamat_importir' => 'Jakarta',
-            'nama_pemasok' => 'Tokyo Machinery',
-            'negara_pemasok' => 'JP',
-            'pelabuhan_muat' => 'JPTYO',
-            'pelabuhan_bongkar' => 'IDTPP',
-            'kode_valuta' => 'JPY',
-            'nilai_cif' => 180000.00,
-            'barang' => [
-                [
-                    'hs_code' => '8471302000',
-                    'uraian' => 'Laptop Office',
-                    'jumlah_satuan' => 10,
-                    'kode_satuan' => 'UNT',
-                    'netto' => 25.0,
-                    'nilai_cif' => 180000.00,
-                ],
-            ],
-        ];
+        $payload = $this->bc20Payload();
 
         $this->actingAs($user)
             ->post('/dokumen/submit', $payload)
@@ -1698,22 +1799,23 @@ class CeisaFlowTest extends TestCase
             'username' => 'm2b_user', 'password' => 'm2b_pass', 'api_key' => 'KEY-123', 'npwp' => '012345678901000',
         ]);
 
-        $this->actingAs($user)->post('/dokumen/submit', [
-            'doc_type' => 'BC20',
+        $this->actingAs($user)->post('/dokumen/submit', $this->bc20Payload([
             'nama_importir' => 'PT Importir Jaya', 'npwp_importir' => '0123456789012000', 'alamat_importir' => 'Jakarta',
             'nib_importir' => 'NIB-99', 'jenis_api' => '02',
-            'nama_pemasok' => 'Acme Inc', 'negara_pemasok' => 'SG',
+            'nama_pemasok' => 'Acme Inc', 'negara_pemasok' => 'SG', 'alamat_pemasok' => 'Singapore',
             'pelabuhan_muat' => 'SGSIN', 'pelabuhan_bongkar' => 'IDTPP',
-            'cara_angkut' => 'Udara', 'nama_sarana' => 'GA-880', 'voy_flight' => 'GA880', 'kode_bendera' => 'id',
+            'cara_angkut' => '4', 'nama_sarana' => 'GA-880', 'voy_flight' => 'GA880', 'kode_bendera' => 'id',
             'kode_tps' => 'TPS-XYZ', 'tanggal_tiba' => '2026-07-01',
-            'kode_valuta' => 'USD', 'ndpbm' => 16250, 'incoterm' => 'cif', 'nilai_cif' => 2000,
+            'kode_valuta' => 'USD', 'ndpbm' => 16250, 'incoterm' => 'cif',
+            'nilai_fob_impor' => 1830, 'nilai_cif' => 2000,
             'freight' => 150, 'nilai_asuransi' => 20, 'bruto' => 88,
-            'pernyataan_nama' => 'Budi', 'pernyataan_jabatan' => 'Manajer Impor',
+            'pernyataan_nama' => 'Budi', 'pernyataan_jabatan' => 'Manajer Impor', 'pernyataan_kota' => 'Jakarta',
             'barang' => [[
                 'hs_code' => '8471.30.20', 'uraian' => 'Laptop', 'jumlah_satuan' => 5,
                 'kode_satuan' => 'UNT', 'netto' => 10, 'nilai_cif' => 2000,
+                'tarif_bm' => 0, 'tarif_ppn' => 0, 'tarif_pph' => 0,
             ]],
-        ])->assertRedirect();
+        ]))->assertRedirect();
 
         $doc = Document::first();
         $this->assertEquals(16250, data_get($doc->payload, 'header.ndpbm'));
@@ -1762,6 +1864,7 @@ class CeisaFlowTest extends TestCase
         ])->assertRedirect();
 
         $docTpb = Document::where('doc_type', 'TPB')->first();
+        $this->assertSame(Document::STATUS_DRAFT, $docTpb->status);
         $this->assertSame('040300', data_get($docTpb->payload, 'header.kode_kantor'));
         $this->assertSame('MV BINTANG', data_get($docTpb->payload, 'header.pengangkutan.sarana_angkut'));
 
@@ -1786,6 +1889,7 @@ class CeisaFlowTest extends TestCase
         ])->assertRedirect();
 
         $docRush = Document::where('doc_type', 'RUSH')->first();
+        $this->assertSame(Document::STATUS_DRAFT, $docRush->status);
         $this->assertSame('050100', data_get($docRush->payload, 'header.kode_kantor'));
         $this->assertSame('Singapore Airlines', data_get($docRush->payload, 'header.pengangkutan.sarana'));
         $this->assertSame('SG', data_get($docRush->payload, 'header.pengangkutan.bendera'));
@@ -1795,6 +1899,8 @@ class CeisaFlowTest extends TestCase
         $this->assertSame('Singapore Airlines', $flatRush['pengangkut'][0]['namaPengangkut']);
         $this->assertSame('SG', $flatRush['pengangkut'][0]['kodeBendera']);
         $this->assertSame('4', $flatRush['pengangkut'][0]['kodeCaraAngkut']);
+
+        Http::assertNothingSent();
     }
 
     public function test_settings_page_shows_token_countdown(): void

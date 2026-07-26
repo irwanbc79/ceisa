@@ -42,24 +42,11 @@ trait HandlesCeisaHttp
     {
         $headers = [];
 
-        // API key dikirim pada semua nama header yang dikonfigurasi
-        // (Beacukai-Api-Key & nle-api-key) demi kompatibilitas antar-versi gateway.
+        // Nama header resmi: beacukai-api-key. Alias hanya melalui konfigurasi.
         $apiKey = (string) $this->credential()->api_key;
-        $apiKeyHeaders = (array) config('ceisa.api_key_headers', ['Beacukai-Api-Key']);
+        $apiKeyHeaders = (array) config('ceisa.api_key_headers', ['beacukai-api-key']);
         foreach ($apiKeyHeaders as $headerName) {
             $headers[$headerName] = $apiKey;
-        }
-
-        // id_platform: dari credential user atau fallback config.
-        $idPlatform = $this->credential()->id_platform ?: config('ceisa.id_platform');
-        if (! empty($idPlatform)) {
-            $headers['id_platform'] = (string) $idPlatform;
-        }
-
-        // Origin: domain asal sistem klien.
-        $origin = config('ceisa.origin');
-        if (! empty($origin)) {
-            $headers['Origin'] = (string) $origin;
         }
 
         return $headers;

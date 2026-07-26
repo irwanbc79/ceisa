@@ -99,6 +99,29 @@
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase">Jenis Kemasan</label>
                                 <x-searchable-select ::name="'barang[' + index + '][kode_kemasan]'" model="item.kode_kemasan" options="references.packages" placeholder="-- Pilih Kemasan --" />
                             </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Merek Kemasan</label>
+                                <input type="text" :name="`barang[${index}][merk_kemasan]`" x-model="item.merk_kemasan" placeholder="mis. M2B / Tanpa Merek" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Tarif impor harus berasal dari hasil klasifikasi/operator, bukan default aplikasi. --}}
+                    <template x-if="doc_type === 'BC20' || doc_type === 'BC24'">
+                        <div class="sm:col-span-3 grid sm:grid-cols-3 gap-3 border-t border-dashed border-slate-200 pt-3 mt-1">
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Tarif BM (%)</label>
+                                <input type="number" step="0.01" min="0" max="100" :name="`barang[${index}][tarif_bm]`" x-model="item.tarif_bm" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Tarif PPN (%)</label>
+                                <input type="number" step="0.01" min="0" max="100" :name="`barang[${index}][tarif_ppn]`" x-model="item.tarif_ppn" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Tarif PPh (%)</label>
+                                <input type="number" step="0.01" min="0" max="100" :name="`barang[${index}][tarif_pph]`" x-model="item.tarif_pph" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" required />
+                            </div>
+                            <p class="sm:col-span-3 text-[10px] text-amber-700">Gunakan tarif hasil klasifikasi HS dan fasilitas importir yang telah diverifikasi. Sistem tidak lagi mengisi tarif pajak asumsi.</p>
                         </div>
                     </template>
 

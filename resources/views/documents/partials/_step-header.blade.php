@@ -46,6 +46,14 @@
                 <x-searchable-select id="kantor_muat" name="kantor_muat" model="formData.kantor_muat" options="references.kantorMuat" placeholder="-- Pilih Kantor Muat --" />
             </div>
             <div>
+                <x-input-label for="kantor_pendaftaran" value="Kantor Pendaftaran" />
+                <x-searchable-select id="kantor_pendaftaran" name="kantor_pendaftaran" model="formData.kantor_pendaftaran" options="references.kantorMuat" placeholder="-- Pilih Kantor Pendaftaran --" required />
+            </div>
+            <div>
+                <x-input-label for="kantor_ekspor" value="Kantor Ekspor" />
+                <x-searchable-select id="kantor_ekspor" name="kantor_ekspor" model="formData.kantor_ekspor" options="references.kantorMuat" placeholder="-- Pilih Kantor Ekspor --" required />
+            </div>
+            <div>
                 <x-input-label for="jenis_ekspor" value="Jenis Ekspor" />
                 <x-searchable-select id="jenis_ekspor" name="jenis_ekspor" model="formData.jenis_ekspor" options="references.jenisEkspor" placeholder="-- Pilih Jenis Ekspor --" />
             </div>
@@ -59,7 +67,22 @@
             </div>
             <div>
                 <x-input-label for="cara_bayar" value="Cara Bayar" />
-                <x-searchable-select id="cara_bayar" name="cara_bayar" model="formData.cara_bayar" options="references.caraBayar" placeholder="-- Pilih Cara Bayar --" />
+                <x-searchable-select id="cara_bayar" ::name="doc_type === 'BC30' ? 'cara_bayar' : ''" model="formData.cara_bayar" options="references.caraBayar" placeholder="-- Pilih Cara Bayar --" />
+            </div>
+            <div>
+                <x-input-label for="jenis_pengangkutan" value="Jenis Pengangkutan" />
+                <x-searchable-select id="jenis_pengangkutan" name="jenis_pengangkutan" model="formData.jenis_pengangkutan" options="references.jenisPengangkutan" placeholder="-- Pilih Jenis Pengangkutan --" required />
+            </div>
+            <div>
+                <x-input-label for="kode_lokasi" value="Lokasi Pemeriksaan" />
+                <x-searchable-select id="kode_lokasi" name="kode_lokasi" model="formData.kode_lokasi" :options="[
+                    '1' => 'KP Tempat Pemuatan', '2' => 'Gudang Eksportir', '3' => 'Tempat Lain yang Diizinkan', '4' => 'TPS',
+                    '5' => 'TPP', '6' => 'TPB', '7' => 'Tempat Penimbunan Lainnya', '8' => 'Gudang Konsolidator'
+                ]" placeholder="-- Pilih Lokasi Pemeriksaan --" required />
+            </div>
+            <div>
+                <x-input-label for="tanggal_periksa" value="Tanggal Siap Diperiksa" />
+                <input type="date" id="tanggal_periksa" name="tanggal_periksa" x-model="formData.tanggal_periksa" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" required />
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -81,16 +104,18 @@
             <div>
                 <x-input-label for="kode_kantor_imp" value="Kantor Pabean" />
                 <x-searchable-select id="kode_kantor_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_kantor' : ''" model="formData.kode_kantor" options="references.kantorMuat" placeholder="-- Pilih Kantor Pabean --" />
-                <p class="text-[10px] text-slate-400 mt-1">Kosongkan = diambil dari kode pelabuhan bongkar.</p>
             </div>
             <div>
-                <x-input-label for="jenis_impor_imp" value="Jenis Impor (kode CEISA)" />
-                <input type="text" maxlength="5" id="jenis_impor_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'jenis_impor' : ''" x-model="formData.jenis_impor" placeholder="1 = Untuk Dipakai" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <x-input-label for="jenis_impor_imp" value="Jenis Impor" />
+                <x-searchable-select id="jenis_impor_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'jenis_impor' : ''" model="formData.jenis_impor" options="references.jenisImpor" placeholder="-- Pilih Jenis Impor --" />
             </div>
             <div>
-                <x-input-label for="cara_bayar_imp" value="Cara Bayar (kode CEISA)" />
-                {{-- Tanpa name: nilai di-post oleh select cara_bayar BC30 (model sama) --}}
-                <input type="text" maxlength="5" id="cara_bayar_imp" x-model="formData.cara_bayar" placeholder="1 = Biasa/Tunai" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <x-input-label for="cara_bayar_imp" value="Cara Bayar" />
+                <x-searchable-select id="cara_bayar_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_bayar' : ''" model="formData.cara_bayar" options="references.caraBayar" placeholder="-- Pilih Cara Bayar --" />
+            </div>
+            <div>
+                <x-input-label for="kode_tutup_pu" value="Jenis Pemberitahuan Pengangkut" />
+                <x-searchable-select id="kode_tutup_pu" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_tutup_pu' : ''" model="formData.kode_tutup_pu" options="references.tutupPu" placeholder="-- Pilih BC 1.1 / 1.2 / 1.4 --" />
             </div>
         </div>
     </div>

@@ -10,7 +10,8 @@ namespace App\Services;
  * Pungutan, Dokumen) lalu digabung — sesuai saran integrasi DJBC agar
  * troubleshooting validation error per-blok lebih mudah dilacak.
  *
- * Output dijaga identik dengan transformasi sebelumnya (lihat CeisaFlowTest).
+ * Nilai fakta operasional tidak dibuat-buat oleh aplikasi. Draft lama yang
+ * belum lengkap ditahan sebelum request HTTP dikirim ke CEISA.
  */
 class CeisaPayloadBuilder
 {
@@ -37,18 +38,45 @@ class CeisaPayloadBuilder
     }
 
     /**
-     * Kode cara angkut CEISA dari label (1=Laut..5=Pos).
+     * Kode cara angkut CEISA dari kode resmi atau label draft lama.
      */
     public function caraAngkutCode(?string $label): string
     {
-        return match ($label ?? 'Laut') {
-            'Laut' => '1',
-            'Kereta Api' => '2',
-            'Darat' => '3',
-            'Udara' => '4',
-            'Pos' => '5',
+        $value = trim((string) ($label ?? ''));
+        if (preg_match('/^(?:[1-9]|1[0-2])$/', $value)) {
+            return $value;
+        }
+
+        return match (mb_strtolower($value)) {
+            'laut' => '1',
+            'kereta api' => '2',
+            'darat' => '3',
+            'udara' => '4',
+            'pos' => '5',
+            'multimoda' => '6',
+            'instalasi / pipa', 'instalasi/pipa' => '7',
+            'perairan' => '8',
+            'lainnya' => '9',
+            'instalasi' => '10',
+            'pipa' => '11',
+            'transmisi' => '12',
             default => '1',
         };
+    }
+
+    /**
+     * Normalisasi kode referensi sambil menjaga draft lama yang masih menyimpan label.
+     *
+     * @param  array<string, string>  $legacyMap
+     */
+    private function referenceCode(?string $value, array $legacyMap): string
+    {
+        $value = trim((string) $value);
+        if ($value === '' || ctype_digit($value)) {
+            return $value;
+        }
+
+        return $legacyMap[mb_strtolower($value)] ?? $value;
     }
 
     /**
@@ -77,6 +105,21 @@ class CeisaPayloadBuilder
     {
         $header = $payload['header'] ?? [];
         $barang = $payload['barang'] ?? [];
+        $jenisEkspor = $this->referenceCode($header['jenis_ekspor'] ?? null, [
+            'biasa' => '1', 'akan diimpor kembali' => '4', 'reekspor' => '5',
+            're-ekspor' => '5', 'reekspor ex impor sementara' => '6',
+        ]);
+        $kategoriEkspor = $this->referenceCode($header['kategori_ekspor'] ?? null, [
+            'umum' => '10', 'kite' => '23', 'barang perwakilan negara asing' => '31',
+            'barang kiriman' => '33', 'plb' => '51', 'pusat logistik berikat (plb)' => '51',
+        ]);
+        $caraBayar = $this->referenceCode($header['cara_bayar'] ?? null, [
+            'biasa/tunai' => '1', 'biasa / tunai' => '1', 'berkala' => '2',
+            'dengan jaminan' => '3', 'gabungan' => '9', 'gabungan/lainnya' => '9',
+        ]);
+        $caraDagang = $this->referenceCode($header['cara_dagang'] ?? null, [
+            'biasa' => '1', 'imb' => '2', 'imb (imbal beli)' => '2', 'lainnya' => '15',
+        ]);
 
         $flat = [
             'asalData' => 'S',
@@ -85,13 +128,13 @@ class CeisaPayloadBuilder
             'nomorAju' => $nomorAju,
             'tanggalAju' => date('Y-m-d'),
 
-            'kodeKantor' => $header['kantor_muat'] ?? '',
+            'kodeKantor' => $header['kantor_pendaftaran'] ?? $header['kantor_muat'] ?? '',
             'kodeKantorMuat' => $header['kantor_muat'] ?? '',
-            'kodeKantorEkspor' => $header['kantor_muat'] ?? '',
-            'kodeJenisEkspor' => $header['jenis_ekspor'] ?? '',
-            'kodeKategoriEkspor' => $header['kategori_ekspor'] ?? '',
-            'kodeCaraDagang' => $header['cara_dagang'] ?? '',
-            'kodeCaraBayar' => $header['cara_bayar'] ?? '',
+            'kodeKantorEkspor' => $header['kantor_ekspor'] ?? $header['kantor_muat'] ?? '',
+            'kodeJenisEkspor' => $jenisEkspor,
+            'kodeKategoriEkspor' => $kategoriEkspor,
+            'kodeCaraDagang' => $caraDagang,
+            'kodeCaraBayar' => $caraBayar,
             'flagMigas' => ($header['komoditi'] ?? '') === 'MIGAS' ? '1' : '2',
             'flagCurah' => ($header['curah'] ?? '') === 'CURAH' ? '1' : '2',
 
@@ -102,8 +145,7 @@ class CeisaPayloadBuilder
             'freight' => isset($header['freight']) ? (float) $header['freight'] : 0.0,
 
             'asuransi' => isset($header['asuransi']['nilai']) ? (float) $header['asuransi']['nilai'] : 0.0,
-            // Required + enum [LN,DN] di JSON Schema BC 3.0 → kosong akan kena error 1008.
-            'kodeAsuransi' => ($header['asuransi']['jenis'] ?? '') ?: 'DN',
+            'kodeAsuransi' => $header['asuransi']['jenis'] ?? '',
 
             'bruto' => isset($header['bruto']) ? (float) $header['bruto'] : 0.0,
             'netto' => array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0),
@@ -113,13 +155,14 @@ class CeisaPayloadBuilder
             'kotaTtd' => $header['pernyataan']['kota'] ?? '',
             'tanggalTtd' => $header['pernyataan']['tanggal'] ?? date('Y-m-d'),
 
-            'flagBarkir' => 'T',
+            'flagBarkir' => $kategoriEkspor === '33' ? 'Y' : 'T',
             'jumlahKontainer' => 0,
-            'kodeLokasi' => '2',
-            'tanggalPeriksa' => date('Y-m-d', strtotime('+1 day')),
+            'kodeLokasi' => $header['kode_lokasi'] ?? '',
+            'tanggalPeriksa' => $header['tanggal_periksa'] ?? '',
+            'tanggalEkspor' => $header['pengangkutan']['tanggal_ekspor'] ?? '',
 
-            'kodeJenisPengangkutan' => $this->caraAngkutCode($header['pengangkutan']['cara_angkut'] ?? 'Laut'),
-            'kodePelEkspor' => $header['pengangkutan']['pelabuhan_muat'] ?? '',
+            'kodeJenisPengangkutan' => $header['jenis_pengangkutan'] ?? '',
+            'kodePelEkspor' => $header['pengangkutan']['pelabuhan_ekspor'] ?? $header['pengangkutan']['pelabuhan_muat'] ?? '',
             'kodePelMuat' => $header['pengangkutan']['pelabuhan_muat'] ?? '',
             'kodePelTujuan' => $header['pengangkutan']['pelabuhan_tujuan'] ?? '',
 
@@ -137,20 +180,13 @@ class CeisaPayloadBuilder
         $flat['barang'] = $this->barangBc30($barang, $flat['kodeJenisEkspor']);
         $flat['kemasan'] = $this->kemasanFromBarang($flat['barang']);
         $flat['pengangkut'] = $this->pengangkutBc30($header);
-        $flat['bankDevisa'] = [[
+        $flat['bankDevisa'] = ! empty($header['bank_devisa']) ? [[
             'seriBank' => 1,
-            'kodeBank' => '008',
-            'namaBank' => $header['bank_devisa'] ?? 'Bank Mandiri',
-        ]];
-        $flat['kesiapanBarang'] = [[
-            'kodeJenisGudang' => '4',
-            'namaPic' => $flat['namaTtd'],
-            'alamat' => $header['eksportir']['alamat'] ?? 'Jakarta',
-            'nomorTelpPic' => '08123456789',
-            'lokasiSiapPeriksa' => 'Gudang Eksportir',
-            'tanggalPkb' => date('Y-m-d'),
-            'waktuSiapPeriksa' => date('Y-m-d\TH:i:s.000\Z'),
-        ]];
+            'namaBank' => $header['bank_devisa'],
+        ]] : [];
+        // Properti wajib pada schema, tetapi array boleh kosong. Jangan mengirim PIC,
+        // nomor telepon, atau lokasi rekaan bila pengguna belum mengisinya.
+        $flat['kesiapanBarang'] = [];
         if (isset($payload['dokumen']) && is_array($payload['dokumen']) && ! empty($payload['dokumen'])) {
             $flat['dokumen'] = array_map(fn ($d, $idx) => [
                 'seriDokumen' => $idx + 1,
@@ -158,11 +194,6 @@ class CeisaPayloadBuilder
                 'nomorDokumen' => $d['nomor_dokumen'] ?? '',
                 'tanggalDokumen' => $d['tanggal_dokumen'] ?? '',
             ], $payload['dokumen'], array_keys($payload['dokumen']));
-        } else {
-            $flat['dokumen'] = [
-                ['seriDokumen' => 1, 'kodeDokumen' => '380', 'nomorDokumen' => 'INV-'.$nomorAju, 'tanggalDokumen' => date('Y-m-d')],
-                ['seriDokumen' => 2, 'kodeDokumen' => '217', 'nomorDokumen' => 'PL-'.$nomorAju, 'tanggalDokumen' => date('Y-m-d')],
-            ];
         }
 
         if (isset($payload['kontainer']) && is_array($payload['kontainer']) && ! empty($payload['kontainer'])) {
@@ -239,12 +270,13 @@ class CeisaPayloadBuilder
                 'merk' => $item['merk'] ?? '',
                 'tipe' => $item['tipe'] ?? '',
                 'ukuran' => $item['ukuran'] ?? '',
-                'kodeNegaraAsal' => strtoupper($item['negara_asal'] ?? 'ID'),
+                'kodeNegaraAsal' => strtoupper($item['negara_asal'] ?? ''),
                 'kodeDaerahAsal' => $item['daerah_asal'] ?? '',
                 'jumlahSatuan' => $qty,
                 'kodeSatuanBarang' => $item['kode_satuan'] ?? '',
-                'jumlahKemasan' => isset($item['jumlah_kemasan']) ? (float) $item['jumlah_kemasan'] : 1.0,
-                'kodeJenisKemasan' => $item['kode_kemasan'] ?? 'CT',
+                'jumlahKemasan' => isset($item['jumlah_kemasan']) ? (float) $item['jumlah_kemasan'] : 0.0,
+                'kodeJenisKemasan' => $item['kode_kemasan'] ?? '',
+                'merkKemasan' => $item['merk_kemasan'] ?? '',
                 'netto' => isset($item['netto']) ? (float) $item['netto'] : 0.0,
                 'volume' => isset($item['volume']) ? (float) $item['volume'] : 0.0,
                 'fob' => $fob,
@@ -270,19 +302,17 @@ class CeisaPayloadBuilder
         $seriKemasan = 1;
         foreach ($barangFlat as $b) {
             $kCode = $b['kodeJenisKemasan'];
-            if (! isset($kemasanCodes[$kCode])) {
-                $kemasanCodes[$kCode] = [
+            $merkKemasan = $b['merkKemasan'] ?? '';
+            $key = $kCode.'|'.$merkKemasan;
+            if (! isset($kemasanCodes[$key])) {
+                $kemasanCodes[$key] = [
                     'seriKemasan' => $seriKemasan++,
                     'jumlahKemasan' => 0.0,
                     'kodeJenisKemasan' => $kCode,
-                    'merkKemasan' => 'M2B PKG',
+                    'merkKemasan' => $merkKemasan,
                 ];
             }
-            $kemasanCodes[$kCode]['jumlahKemasan'] += $b['jumlahKemasan'];
-        }
-
-        if (empty($kemasanCodes)) {
-            return [$this->kemasanDefault()];
+            $kemasanCodes[$key]['jumlahKemasan'] += $b['jumlahKemasan'];
         }
 
         return array_values($kemasanCodes);
@@ -310,18 +340,18 @@ class CeisaPayloadBuilder
         if (isset($header['pengangkutan'])) {
             return [[
                 'seriPengangkut' => 1,
-                'namaPengangkut' => $header['pengangkutan']['sarana_angkut'] ?? 'MV Sinar Bintang',
-                'nomorPengangkut' => $header['pengangkutan']['voy_flight'] ?? 'V-1024',
-                'kodeBendera' => 'ID',
-                'kodeCaraAngkut' => $this->caraAngkutCode($header['pengangkutan']['cara_angkut'] ?? 'Laut'),
+                'namaPengangkut' => $header['pengangkutan']['sarana_angkut'] ?? '',
+                'nomorPengangkut' => $header['pengangkutan']['voy_flight'] ?? '',
+                'kodeBendera' => strtoupper($header['pengangkutan']['bendera'] ?? ''),
+                'kodeCaraAngkut' => $this->caraAngkutCode($header['pengangkutan']['cara_angkut'] ?? ''),
             ]];
         }
 
         return [[
             'seriPengangkut' => 1,
-            'namaPengangkut' => 'MV STAR',
-            'nomorPengangkut' => 'V-100',
-            'kodeBendera' => 'ID',
+            'namaPengangkut' => '',
+            'nomorPengangkut' => '',
+            'kodeBendera' => '',
             'kodeCaraAngkut' => '1',
         ]];
     }
@@ -336,6 +366,11 @@ class CeisaPayloadBuilder
     {
         $header = $payload['header'] ?? [];
         $barang = $payload['barang'] ?? [];
+        $jenisImpor = $this->referenceCode($header['jenis_impor'] ?? '1', ['untuk dipakai' => '1']);
+        $caraBayar = $this->referenceCode($header['cara_bayar'] ?? '1', [
+            'biasa/tunai' => '1', 'biasa / tunai' => '1', 'berkala' => '2',
+            'dengan jaminan' => '3', 'gabungan' => '9', 'gabungan/lainnya' => '9',
+        ]);
 
         $flat = [
             'asalData' => 'S',
@@ -344,34 +379,31 @@ class CeisaPayloadBuilder
             'nomorAju' => $nomorAju,
             'tanggalAju' => date('Y-m-d'),
 
-            'kodeKantor' => $header['kode_kantor'] ?? $header['pengangkutan']['pelabuhan_bongkar'] ?? '040100',
-            'kodeJenisImpor' => $header['jenis_impor'] ?? '1',
-            'kodeCaraBayar' => $header['cara_bayar'] ?? '1',
-            'kodeValuta' => $header['valuta'] ?? 'USD',
+            'kodeKantor' => $header['kode_kantor'] ?? '',
+            'kodeJenisImpor' => $jenisImpor,
+            'kodeCaraBayar' => $caraBayar,
+            'kodeValuta' => $header['valuta'] ?? '',
             'ndpbm' => isset($header['ndpbm']) ? (float) $header['ndpbm'] : 0.0,
-            'kodeIncoterm' => $header['incoterm'] ?? 'FOB',
+            'kodeIncoterm' => $header['incoterm'] ?? '',
             'kodePelMuat' => $header['pengangkutan']['pelabuhan_muat'] ?? '',
             'kodePelTujuan' => $header['pengangkutan']['pelabuhan_bongkar'] ?? '',
             'kodeTps' => $header['pengangkutan']['tps'] ?? '',
-            'kodeTutupPu' => $header['kode_tutup_pu'] ?? '11',
+            'kodeTutupPu' => $header['kode_tutup_pu'] ?? '',
 
-            'tanggalTiba' => $header['pengangkutan']['tanggal_tiba'] ?? date('Y-m-d', strtotime('+3 days')),
+            'tanggalTiba' => $header['pengangkutan']['tanggal_tiba'] ?? '',
             'jumlahKontainer' => 0,
 
-            // Nilai CIF dipecah: pakai nilai eksplisit bila ada, jika tidak baru estimasi proporsional.
-            'fob' => $this->cifComponent($header, 'fob', 0.9),
-            'asuransi' => $this->cifComponent($header, 'asuransi', 0.01),
-            'freight' => $this->cifComponent($header, 'freight', 0.09),
+            'fob' => isset($header['fob']) ? (float) $header['fob'] : 0.0,
+            'asuransi' => isset($header['asuransi']) ? (float) $header['asuransi'] : 0.0,
+            'freight' => isset($header['freight']) ? (float) $header['freight'] : 0.0,
             'cif' => isset($header['nilai_cif']) ? (float) $header['nilai_cif'] : 0.0,
 
-            'bruto' => isset($header['bruto'])
-                ? (float) $header['bruto']
-                : array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0) * 1.1,
+            'bruto' => isset($header['bruto']) ? (float) $header['bruto'] : 0.0,
             'netto' => array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0),
 
-            'namaTtd' => $header['pernyataan']['nama'] ?? $header['importir']['nama'] ?? 'M2B Staff',
-            'jabatanTtd' => $header['pernyataan']['jabatan'] ?? 'Manager',
-            'kotaTtd' => $header['pernyataan']['kota'] ?? 'Jakarta',
+            'namaTtd' => $header['pernyataan']['nama'] ?? '',
+            'jabatanTtd' => $header['pernyataan']['jabatan'] ?? '',
+            'kotaTtd' => $header['pernyataan']['kota'] ?? '',
             'tanggalTtd' => date('Y-m-d'),
 
             'biayaTambahan' => isset($header['biaya_tambahan']) ? (float) $header['biaya_tambahan'] : 0.0,
@@ -387,7 +419,12 @@ class CeisaPayloadBuilder
 
         $flat['entitas'] = $this->entitasBc20($header);
         $flat['barang'] = $this->barangBc20($barang, $header);
-        $flat['kemasan'] = [$this->kemasanDefault()];
+        $flat['kemasan'] = [[
+            'seriKemasan' => 1,
+            'jumlahKemasan' => (int) ($header['kemasan']['jumlah'] ?? 0),
+            'kodeJenisKemasan' => $header['kemasan']['kode'] ?? '',
+            'merkKemasan' => $header['kemasan']['merk'] ?? '',
+        ]];
         $flat['pengangkut'] = [$this->pengangkutImpor($header)];
         if (isset($payload['dokumen']) && is_array($payload['dokumen']) && ! empty($payload['dokumen'])) {
             $flat['dokumen'] = array_map(fn ($d, $idx) => [
@@ -396,8 +433,6 @@ class CeisaPayloadBuilder
                 'nomorDokumen' => $d['nomor_dokumen'] ?? '',
                 'tanggalDokumen' => $d['tanggal_dokumen'] ?? '',
             ], $payload['dokumen'], array_keys($payload['dokumen']));
-        } else {
-            $flat['dokumen'] = $this->dokumenImpor($header, $nomorAju);
         }
 
         if (isset($payload['kontainer']) && is_array($payload['kontainer']) && ! empty($payload['kontainer'])) {
@@ -416,10 +451,7 @@ class CeisaPayloadBuilder
     }
 
     /**
-     * Sub-blok pungutan per barang impor: BM (wajib JSON Schema) + PPN + PPH (lazim impor).
-     * Tarif bisa dioverride dari data barang; default mengikuti tarif umum
-     * (PPN 11%, PPH 2.5%). ⚠ VERIFIKASI tarif per komoditas/HS sebelum submit final
-     * (isFinal=true) — nilaiBayar dihitung CEISA dari tarif × nilai pabean.
+     * Sub-blok pungutan per barang impor: tarif selalu berasal dari input operator.
      *
      * @param  array<string, mixed>  $item
      * @return array<int, array<string, mixed>>
@@ -430,8 +462,8 @@ class CeisaPayloadBuilder
 
         $pungutan = [
             ['kode' => 'BM', 'tarif' => (float) ($item['tarif_bm'] ?? 0)],
-            ['kode' => 'PPN', 'tarif' => (float) ($item['tarif_ppn'] ?? 11)],
-            ['kode' => 'PPH', 'tarif' => (float) ($item['tarif_pph'] ?? 2.5)],
+            ['kode' => 'PPN', 'tarif' => (float) ($item['tarif_ppn'] ?? 0)],
+            ['kode' => 'PPH', 'tarif' => (float) ($item['tarif_pph'] ?? 0)],
         ];
 
         return array_map(fn (array $p): array => [
@@ -444,46 +476,6 @@ class CeisaPayloadBuilder
             'nilaiBayar' => 0.0,
             'nilaiFasilitas' => 0.0,
         ], $pungutan);
-    }
-
-    /**
-     * Blok dokumen pelengkap impor: Invoice (380) wajib + House-BL/AWB bila tersedia
-     * (705 untuk laut, 740 untuk udara) — sesuai JSON Schema dokumen tuple BC 2.0.
-     *
-     * @param  array<string, mixed>  $header
-     * @return array<int, array<string, mixed>>
-     */
-    private function dokumenImpor(array $header, string $nomorAju): array
-    {
-        $dokumen = [$this->dokumenInvoice($nomorAju)];
-
-        $blAwb = $header['dokumen_pengangkutan']['awb_bl'] ?? null;
-        if (! empty($blAwb)) {
-            $isUdara = ($header['pengangkutan']['cara_angkut'] ?? 'Laut') === 'Udara';
-            $dokumen[] = [
-                'seriDokumen' => 2,
-                'kodeDokumen' => $isUdara ? '740' : '705',
-                'nomorDokumen' => $blAwb,
-                'tanggalDokumen' => $header['dokumen_pengangkutan']['tanggal'] ?? date('Y-m-d'),
-            ];
-        }
-
-        return $dokumen;
-    }
-
-    /**
-     * Komponen nilai (fob/asuransi/freight): pakai nilai eksplisit dari form
-     * bila diisi, jika tidak estimasi proporsional dari CIF.
-     *
-     * @param  array<string, mixed>  $header
-     */
-    private function cifComponent(array $header, string $key, float $ratio): float
-    {
-        if (isset($header[$key]) && $header[$key] !== '' && $header[$key] !== null) {
-            return (float) $header[$key];
-        }
-
-        return isset($header['nilai_cif']) ? (float) $header['nilai_cif'] * $ratio : 0.0;
     }
 
     /**
@@ -504,8 +496,8 @@ class CeisaPayloadBuilder
                 'nomorIdentitas' => $this->digits($npwp),
                 'kodeJenisIdentitas' => $this->jenisIdentitas($npwp),
                 'nibEntitas' => $header['importir']['nib'] ?? '',
-                'kodeJenisApi' => $header['importir']['jenis_api'] ?? '01',
-                'kodeStatus' => $header['importir']['status'] ?? '1',
+                'kodeJenisApi' => $header['importir']['jenis_api'] ?? '',
+                'kodeStatus' => $header['importir']['status'] ?? '',
             ];
             $entitas[] = [
                 'seriEntitas' => 2,
@@ -514,7 +506,7 @@ class CeisaPayloadBuilder
                 'alamatEntitas' => $header['importir']['alamat'] ?? '',
                 'nomorIdentitas' => $this->digits($npwp),
                 'kodeJenisIdentitas' => $this->jenisIdentitas($npwp),
-                'kodeAfiliasi' => 'TAH',
+                'kodeAfiliasi' => $header['importir']['afiliasi'] ?? '',
             ];
         }
 
@@ -523,8 +515,8 @@ class CeisaPayloadBuilder
                 'seriEntitas' => 3,
                 'kodeEntitas' => '9',
                 'namaEntitas' => $header['pemasok']['nama'] ?? '',
-                'alamatEntitas' => 'Overseas Address',
-                'kodeNegara' => strtoupper($header['pemasok']['negara'] ?? 'US'),
+                'alamatEntitas' => $header['pemasok']['alamat'] ?? '',
+                'kodeNegara' => strtoupper($header['pemasok']['negara'] ?? ''),
             ];
         }
 
@@ -555,33 +547,39 @@ class CeisaPayloadBuilder
     protected function barangBc20(array $barang, array $header): array
     {
         $out = [];
+        $totalCifBarang = array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['nilai_cif'] ?? 0.0), 0.0);
+        $totalNettoBarang = array_reduce($barang, fn ($carry, $item) => $carry + (float) ($item['netto'] ?? 0.0), 0.0);
+
         foreach ($barang as $i => $item) {
             $itemCif = isset($item['nilai_cif']) ? (float) $item['nilai_cif'] : 0.0;
             $qty = isset($item['jumlah_satuan']) ? (float) $item['jumlah_satuan'] : 1.0;
+            $valueRatio = $totalCifBarang > 0 ? $itemCif / $totalCifBarang : 0.0;
+            $itemNetto = isset($item['netto']) ? (float) $item['netto'] : 0.0;
+            $weightRatio = $totalNettoBarang > 0 ? $itemNetto / $totalNettoBarang : 0.0;
 
             $out[] = [
                 'seriBarang' => $i + 1,
                 'posTarif' => $this->digits($item['hs_code'] ?? ''),
                 'uraian' => $item['uraian'] ?? '',
-                'merk' => $item['merk'] ?? 'UNBRANDED',
-                'tipe' => $item['tipe'] ?? 'STANDARD',
-                'kodeJenisKemasan' => $item['kode_kemasan'] ?? 'CT',
-                'kodeSatuanBarang' => $item['kode_satuan'] ?? 'UNT',
-                'jumlahKemasan' => 1.0,
+                'merk' => $item['merk'] ?? '',
+                'tipe' => $item['tipe'] ?? '',
+                'kodeJenisKemasan' => $item['kode_kemasan'] ?? $header['kemasan']['kode'] ?? '',
+                'kodeSatuanBarang' => $item['kode_satuan'] ?? '',
+                'jumlahKemasan' => (float) ($item['jumlah_kemasan'] ?? $header['kemasan']['jumlah'] ?? 0),
                 'jumlahSatuan' => $qty,
                 'hargaSatuan' => $qty > 0 ? round($itemCif / $qty, 4) : 0.0,
-                'fob' => $itemCif * 0.9,
-                'asuransi' => $itemCif * 0.01,
-                'freight' => $itemCif * 0.09,
+                'fob' => round((float) ($header['fob'] ?? 0.0) * $valueRatio, 2),
+                'asuransi' => round((float) ($header['asuransi'] ?? 0.0) * $valueRatio, 2),
+                'freight' => round((float) ($header['freight'] ?? 0.0) * $valueRatio, 2),
                 'cif' => $itemCif,
                 'saldoAwal' => 0.0,
                 'saldoAkhir' => 0.0,
-                'metodePenentuanNilai' => 'Metode 1',
+                'metodePenentuanNilai' => $item['metode_penentuan_nilai'] ?? '',
                 'alasanMetodePenentuanNilai' => null,
                 'statementPerbedaanHarga' => 'T',
-                'bruto' => isset($item['netto']) ? (float) $item['netto'] * 1.1 : 1.1,
-                'netto' => isset($item['netto']) ? (float) $item['netto'] : 1.0,
-                'kodeNegaraAsal' => strtoupper($header['pemasok']['negara'] ?? 'US'),
+                'bruto' => round((float) ($header['bruto'] ?? 0.0) * $weightRatio, 4),
+                'netto' => $itemNetto,
+                'kodeNegaraAsal' => strtoupper($header['pemasok']['negara'] ?? ''),
                 'barangTarif' => $this->barangTarif($i + 1, $item),
                 // Wajib hadir per JSON Schema BC 2.0 (barang.required memuat "barangVd").
                 // Kosong = tanpa voluntary declaration (kasus normal); diisi bila flagVd=Y.
@@ -639,10 +637,10 @@ class CeisaPayloadBuilder
         $p = $header['pengangkutan'] ?? [];
         $flat['pengangkut'] = [[
             'seriPengangkut' => 1,
-            'namaPengangkut' => $p['sarana_angkut'] ?? 'MV CONTAINER',
-            'nomorPengangkut' => $p['voy_flight'] ?? 'V-100',
-            'kodeBendera' => $p['bendera'] ?? 'US',
-            'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? 'Laut'),
+            'namaPengangkut' => $p['sarana_angkut'] ?? '',
+            'nomorPengangkut' => $p['voy_flight'] ?? '',
+            'kodeBendera' => strtoupper($p['bendera'] ?? ''),
+            'kodeCaraAngkut' => $this->caraAngkutCode($p['cara_angkut'] ?? ''),
         ]];
 
         if (isset($payload['dokumen']) && is_array($payload['dokumen']) && ! empty($payload['dokumen'])) {
