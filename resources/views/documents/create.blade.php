@@ -122,6 +122,10 @@
                                                 <span x-text="item.label"></span>
                                                 <span class="text-[10px] uppercase px-1.5 py-0.5 font-extrabold rounded-md tracking-wider transition-colors"
                                                       :class="item.badgeClass" x-text="item.code"></span>
+                                                <span x-show="!submittableDocTypes.includes(item.code)"
+                                                      class="text-[10px] uppercase px-1.5 py-0.5 font-extrabold rounded-md tracking-wider bg-amber-100 text-amber-700">
+                                                    Draft only
+                                                </span>
                                             </div>
                                             <p class="text-xs text-slate-500 mt-1" x-text="item.description"></p>
                                         </div>
@@ -174,6 +178,7 @@
                 showJson: false,
                 showDraftModal: false,
                 formError: '',
+                submittableDocTypes: @json(config('ceisa.submittable_doc_types', [])),
                 // Urutan tahap selaras Portal CEISA 4.0 resmi (usermanualceisa40.gitbook.io):
                 // Header -> Entitas -> Dokumen -> Pengangkut -> Kemasan -> Transaksi -> Barang -> (Pungutan+Pernyataan di Review).
                 steps: [
@@ -268,10 +273,15 @@
                 formData: {
                     // BC30 — Header klasifikasi ekspor (CEISA 4.0)
                     kantor_muat: '',
-                    jenis_ekspor: 'Biasa',
-                    kategori_ekspor: 'Umum',
-                    cara_dagang: 'Biasa',
-                    cara_bayar: 'Biasa/Tunai',
+                    kantor_pendaftaran: '',
+                    kantor_ekspor: '',
+                    jenis_ekspor: '1',
+                    kategori_ekspor: '10',
+                    cara_dagang: '1',
+                    cara_bayar: '1',
+                    jenis_pengangkutan: '1',
+                    kode_lokasi: '',
+                    tanggal_periksa: '',
                     komoditi: 'NON_MIGAS',
                     curah: 'NON_CURAH',
                     // BC30 — Entitas
@@ -282,16 +292,18 @@
                     negara_tujuan: '',
                     alamat_penerima: '',
                     // BC30 — Pengangkut
-                    cara_angkut: 'Laut',
+                    cara_angkut: '1',
+                    kode_bendera: '',
                     nama_sarana: '',
                     voy_flight: '',
+                    pelabuhan_ekspor: '',
                     pelabuhan_tujuan: '',
                     tanggal_ekspor: '',
                     // BC30 — Transaksi tambahan
                     ndpbm: '',
                     incoterm: 'FOB',
                     freight: '',
-                    asuransi_jenis: 'DN',
+                    asuransi_jenis: '',
                     nilai_asuransi: '',
                     bruto: '',
                     bank_devisa: '',
@@ -306,13 +318,18 @@
                     alamat_importir: '',
                     nama_pemasok: '',
                     negara_pemasok: '',
+                    alamat_pemasok: '',
                     nib_importir: '',
                     jenis_api: '',
-                    jenis_impor: '',
-                    cara_bayar: '',
-                    kode_bendera: '',
+                    status_importir: '',
+                    jenis_impor: '1',
+                    kode_tutup_pu: '11',
                     kode_tps: '',
                     tanggal_tiba: '',
+                    jumlah_kemasan_impor: '',
+                    kode_kemasan_impor: '',
+                    merk_kemasan_impor: '',
+                    nilai_fob_impor: '',
 
                     // TPB
                     nama_tpb: '',
@@ -347,7 +364,7 @@
                     
                     // Pos Barang
                     barang: [
-                        { hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: '' }
+                        { hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', merk_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: '', tarif_bm: '', tarif_ppn: '', tarif_pph: '' }
                     ],
                     // Dokumen Pelengkap
                     dokumen: [
@@ -392,14 +409,15 @@
                         @if ($errors->any())
                             const errorKeys = @json($errors->keys());
                             const stepMap = {
-                                'kantor_muat': 2, 'jenis_ekspor': 2, 'kategori_ekspor': 2, 'cara_dagang': 2, 'cara_bayar': 2, 'komoditi': 2, 'curah': 2,
+                                'kantor_muat': 2, 'kantor_pendaftaran': 2, 'kantor_ekspor': 2, 'jenis_ekspor': 2, 'kategori_ekspor': 2, 'cara_dagang': 2, 'cara_bayar': 2, 'jenis_pengangkutan': 2, 'kode_lokasi': 2, 'tanggal_periksa': 2, 'komoditi': 2, 'curah': 2,
                                 'nama_eksportir': 2, 'npwp_eksportir': 2, 'alamat_eksportir': 2, 'nama_penerima': 2, 'negara_tujuan': 2, 'alamat_penerima': 2,
-                                'nama_importir': 2, 'npwp_importir': 2, 'alamat_importir': 2, 'nama_pemasok': 2, 'negara_pemasok': 2,
+                                'nama_importir': 3, 'npwp_importir': 3, 'alamat_importir': 3, 'nama_pemasok': 3, 'negara_pemasok': 3, 'alamat_pemasok': 3,
                                 'nama_tpb': 2, 'npwp_tpb': 2, 'alamat_tpb': 2, 'jenis_tpb': 2, 'tujuan_tpb': 2, 'dokumen_referensi': 2,
                                 'nama_pemohon': 2, 'npwp_pemohon': 2, 'alamat_pemohon': 2, 'alasan_segera': 2,
                                 
-                                'cara_angkut': 4, 'nama_sarana': 4, 'voy_flight': 4, 'pelabuhan_muat': 4, 'pelabuhan_bongkar': 4, 'pelabuhan_tujuan': 4, 'tanggal_ekspor': 4,
-                                'kode_valuta': 4, 'ndpbm': 4, 'incoterm': 4, 'nilai_fob': 4, 'freight': 4, 'asuransi_jenis': 4, 'nilai_asuransi': 4, 'bruto': 4, 'bank_devisa': 4,
+                                'cara_angkut': 5, 'kode_bendera': 5, 'nama_sarana': 5, 'voy_flight': 5, 'pelabuhan_muat': 5, 'pelabuhan_ekspor': 5, 'pelabuhan_bongkar': 5, 'pelabuhan_tujuan': 5, 'tanggal_ekspor': 5, 'kode_tps': 5, 'tanggal_tiba': 5,
+                                'kode_valuta': 7, 'ndpbm': 7, 'incoterm': 7, 'nilai_fob': 7, 'nilai_fob_impor': 7, 'freight': 7, 'asuransi_jenis': 7, 'nilai_asuransi': 7, 'bruto': 7, 'bank_devisa': 7, 'nib_importir': 7, 'jenis_api': 7, 'status_importir': 7,
+                                'jumlah_kemasan_impor': 6, 'kode_kemasan_impor': 6, 'merk_kemasan_impor': 6,
                                 'nilai_cif': 4, 'nilai_barang': 4, 'cara_pembayaran': 4,
                                 'nama_sarana_pengangkut': 4, 'nomor_flight': 4, 'nomor_awb_bl': 4, 'tanggal_awb_bl': 4, 'jumlah_kemasan': 4, 'jenis_kemasan': 4,
                                 
@@ -483,7 +501,12 @@
                     // Tahap 2 — Data Header
                     if (s === 2) {
                         if (this.doc_type === 'BC30') {
-                            return this.formData.kantor_muat && this.formData.jenis_ekspor && this.formData.kategori_ekspor && this.formData.cara_bayar;
+                            return this.formData.kantor_muat && this.formData.kantor_pendaftaran && this.formData.kantor_ekspor
+                                && this.formData.jenis_ekspor && this.formData.kategori_ekspor && this.formData.cara_bayar
+                                && this.formData.jenis_pengangkutan && this.formData.kode_lokasi && this.formData.tanggal_periksa;
+                        }
+                        if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
+                            return this.formData.kode_kantor && this.formData.jenis_impor && this.formData.cara_bayar && this.formData.kode_tutup_pu;
                         }
                         if (this.doc_type === 'TPB') {
                             return this.formData.kode_kantor && this.formData.jenis_tpb;
@@ -500,7 +523,8 @@
                                 && this.formData.nama_penerima && this.formData.negara_tujuan;
                         }
                         if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
-                            return this.formData.nama_importir && this.formData.npwp_importir && this.formData.nama_pemasok && this.formData.negara_pemasok;
+                            return this.formData.nama_importir && this.formData.npwp_importir && this.formData.alamat_importir
+                                && this.formData.nama_pemasok && this.formData.negara_pemasok && this.formData.alamat_pemasok;
                         }
                         if (this.doc_type === 'TPB') {
                             return this.formData.nama_tpb && this.formData.npwp_tpb;
@@ -516,10 +540,14 @@
                     // Tahap 5 — Data Pengangkut
                     if (s === 5) {
                         if (this.doc_type === 'BC30') {
-                            return this.formData.pelabuhan_muat && this.formData.pelabuhan_tujuan;
+                            return this.formData.cara_angkut && this.formData.kode_bendera && this.formData.nama_sarana
+                                && this.formData.voy_flight && this.formData.pelabuhan_muat && this.formData.pelabuhan_ekspor
+                                && this.formData.pelabuhan_tujuan && this.formData.tanggal_ekspor;
                         }
                         if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
-                            return this.formData.pelabuhan_muat && this.formData.pelabuhan_bongkar;
+                            return this.formData.cara_angkut && this.formData.kode_bendera && this.formData.nama_sarana
+                                && this.formData.voy_flight && this.formData.pelabuhan_muat && this.formData.pelabuhan_bongkar
+                                && this.formData.kode_tps && this.formData.tanggal_tiba;
                         }
                         if (this.doc_type === 'RUSH') {
                             return this.formData.nama_sarana_pengangkut && this.formData.nomor_awb_bl;
@@ -532,15 +560,23 @@
                         if (this.doc_type === 'RUSH') {
                             return kontainerOk && this.formData.jumlah_kemasan && this.formData.jenis_kemasan;
                         }
+                        if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
+                            return kontainerOk && this.formData.jumlah_kemasan_impor && this.formData.kode_kemasan_impor && this.formData.merk_kemasan_impor;
+                        }
                         return kontainerOk;
                     }
                     // Tahap 7 — Data Transaksi
                     if (s === 7) {
                         if (this.doc_type === 'BC30') {
-                            return this.formData.kode_valuta && this.formData.ndpbm && this.formData.incoterm && this.formData.nilai_fob && this.formData.bruto;
+                            return this.formData.kode_valuta && this.formData.ndpbm && this.formData.incoterm
+                                && this.formData.nilai_fob && this.formData.bruto
+                                && this.formData.asuransi_jenis && this.formData.nilai_asuransi !== '';
                         }
                         if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
-                            return this.formData.kode_valuta && this.formData.nilai_cif;
+                            return this.formData.kode_valuta && this.formData.ndpbm && this.formData.incoterm
+                                && this.formData.nilai_fob_impor !== '' && this.formData.nilai_cif !== ''
+                                && this.formData.freight !== '' && this.formData.nilai_asuransi !== '' && this.formData.bruto !== ''
+                                && this.formData.nib_importir && this.formData.jenis_api && this.formData.status_importir !== '';
                         }
                         if (this.doc_type === 'TPB') {
                             return this.formData.kode_valuta && this.formData.nilai_barang;
@@ -549,14 +585,23 @@
                     }
                     // Tahap 8 — Data Barang
                     if (s === 8) {
-                        return this.formData.barang.length > 0 && this.formData.barang.every(b => b.hs_code && b.uraian && b.jumlah_satuan && b.kode_satuan && b.netto);
+                        return this.formData.barang.length > 0 && this.formData.barang.every(b => {
+                            const baseOk = b.hs_code && b.uraian && b.jumlah_satuan && b.kode_satuan && b.netto;
+                            if (this.doc_type === 'BC30') {
+                                return baseOk && b.jumlah_kemasan && b.kode_kemasan && b.merk_kemasan && b.nilai_fob !== '';
+                            }
+                            if (this.doc_type === 'BC20' || this.doc_type === 'BC24') {
+                                return baseOk && b.nilai_cif !== '' && b.tarif_bm !== '' && b.tarif_ppn !== '' && b.tarif_pph !== '';
+                            }
+                            return baseOk;
+                        });
                     }
                     return true;
                 },
 
                 addItem() {
                     this.formData.barang.push({
-                        hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: ''
+                        hs_code: '', uraian: '', merk: '', tipe: '', ukuran: '', negara_asal: '', daerah_asal: '', jumlah_satuan: '', kode_satuan: '', jumlah_kemasan: '', kode_kemasan: '', merk_kemasan: '', netto: '', volume: '', nilai_fob: '', nilai_cif: '', nilai_barang: '', tarif_bm: '', tarif_ppn: '', tarif_pph: ''
                     });
                 },
 
@@ -615,19 +660,26 @@
                         out = {
                             header: {
                                 kantor_muat: f.kantor_muat,
+                                kantor_pendaftaran: f.kantor_pendaftaran,
+                                kantor_ekspor: f.kantor_ekspor,
                                 jenis_ekspor: f.jenis_ekspor,
                                 kategori_ekspor: f.kategori_ekspor,
                                 cara_dagang: f.cara_dagang || null,
                                 cara_bayar: f.cara_bayar,
+                                jenis_pengangkutan: f.jenis_pengangkutan,
+                                kode_lokasi: f.kode_lokasi,
+                                tanggal_periksa: f.tanggal_periksa,
                                 komoditi: f.komoditi,
                                 curah: f.curah,
                                 eksportir: { nama: f.nama_eksportir, npwp: f.npwp_eksportir, alamat: f.alamat_eksportir },
                                 penerima: { nama: f.nama_penerima, negara: (f.negara_tujuan || '').toUpperCase(), alamat: f.alamat_penerima || null },
                                 pengangkutan: {
                                     cara_angkut: f.cara_angkut || null,
+                                    bendera: (f.kode_bendera || '').toUpperCase(),
                                     sarana_angkut: f.nama_sarana || null,
                                     voy_flight: f.voy_flight || null,
                                     pelabuhan_muat: f.pelabuhan_muat,
+                                    pelabuhan_ekspor: f.pelabuhan_ekspor,
                                     pelabuhan_bongkar: f.pelabuhan_bongkar || null,
                                     pelabuhan_tujuan: f.pelabuhan_tujuan,
                                     tanggal_ekspor: f.tanggal_ekspor || null
@@ -669,11 +721,32 @@
                     } else if (docType === 'BC20' || docType === 'BC24') {
                         out = {
                             header: {
-                                importir: { nama: f.nama_importir, npwp: f.npwp_importir, alamat: f.alamat_importir },
-                                pemasok: { nama: f.nama_pemasok, negara: (f.negara_pemasok || '').toUpperCase() },
-                                pengangkutan: { pelabuhan_muat: f.pelabuhan_muat, pelabuhan_bongkar: f.pelabuhan_bongkar },
+                                importir: { nama: f.nama_importir, npwp: f.npwp_importir, alamat: f.alamat_importir, nib: f.nib_importir, jenis_api: f.jenis_api, status: f.status_importir },
+                                pemasok: { nama: f.nama_pemasok, negara: (f.negara_pemasok || '').toUpperCase(), alamat: f.alamat_pemasok },
+                                kode_kantor: f.kode_kantor,
+                                jenis_impor: f.jenis_impor,
+                                cara_bayar: f.cara_bayar,
+                                kode_tutup_pu: f.kode_tutup_pu,
+                                pengangkutan: {
+                                    pelabuhan_muat: f.pelabuhan_muat,
+                                    pelabuhan_bongkar: f.pelabuhan_bongkar,
+                                    cara_angkut: f.cara_angkut,
+                                    sarana_angkut: f.nama_sarana,
+                                    voy_flight: f.voy_flight,
+                                    bendera: (f.kode_bendera || '').toUpperCase(),
+                                    tps: f.kode_tps,
+                                    tanggal_tiba: f.tanggal_tiba
+                                },
                                 valuta: (f.kode_valuta || '').toUpperCase(),
+                                ndpbm: parseFloat(f.ndpbm) || 0.0,
+                                incoterm: (f.incoterm || '').toUpperCase(),
+                                fob: parseFloat(f.nilai_fob_impor) || 0.0,
+                                freight: parseFloat(f.freight) || 0.0,
+                                asuransi: parseFloat(f.nilai_asuransi) || 0.0,
                                 nilai_cif: parseFloat(f.nilai_cif) || 0.0,
+                                bruto: parseFloat(f.bruto) || 0.0,
+                                kemasan: { jumlah: parseInt(f.jumlah_kemasan_impor) || 0, kode: f.kode_kemasan_impor, merk: f.merk_kemasan_impor },
+                                pernyataan: { nama: f.pernyataan_nama, jabatan: f.pernyataan_jabatan, kota: f.pernyataan_kota },
                                 cara_pembayaran: f.cara_pembayaran || null
                             },
                             barang: f.barang.map((b, i) => ({
@@ -683,7 +756,10 @@
                                 jumlah_satuan: parseFloat(b.jumlah_satuan) || 0.0,
                                 kode_satuan: b.kode_satuan,
                                 netto: parseFloat(b.netto) || 0.0,
-                                nilai_cif: parseFloat(b.nilai_cif) || 0.0
+                                nilai_cif: parseFloat(b.nilai_cif) || 0.0,
+                                tarif_bm: parseFloat(b.tarif_bm) || 0.0,
+                                tarif_ppn: parseFloat(b.tarif_ppn) || 0.0,
+                                tarif_pph: parseFloat(b.tarif_pph) || 0.0
                             }))
                         };
                     } else if (docType === 'TPB') {
@@ -742,10 +818,15 @@
                     
                     if (docType === 'BC30') {
                         this.formData.kantor_muat = '050100';
-                        this.formData.jenis_ekspor = 'Biasa';
-                        this.formData.kategori_ekspor = 'Umum';
-                        this.formData.cara_dagang = 'Biasa';
-                        this.formData.cara_bayar = 'Biasa/Tunai';
+                        this.formData.kantor_pendaftaran = '050100';
+                        this.formData.kantor_ekspor = '050100';
+                        this.formData.jenis_ekspor = '1';
+                        this.formData.kategori_ekspor = '10';
+                        this.formData.cara_dagang = '1';
+                        this.formData.cara_bayar = '1';
+                        this.formData.jenis_pengangkutan = '1';
+                        this.formData.kode_lokasi = '2';
+                        this.formData.tanggal_periksa = '2026-07-21';
                         this.formData.komoditi = 'NON_MIGAS';
                         this.formData.curah = 'NON_CURAH';
                         this.formData.nama_eksportir = 'PT Mora Multi Berkah';
@@ -754,10 +835,12 @@
                         this.formData.nama_penerima = 'Global Trade Logistics Pte Ltd';
                         this.formData.negara_tujuan = 'SG';
                         this.formData.alamat_penerima = '8 Marina Boulevard, Singapore 018981';
-                        this.formData.cara_angkut = 'Laut';
+                        this.formData.cara_angkut = '1';
+                        this.formData.kode_bendera = 'ID';
                         this.formData.nama_sarana = 'MV Sinar Bintang';
                         this.formData.voy_flight = 'V-1024E';
                         this.formData.pelabuhan_muat = 'IDJKT';
+                        this.formData.pelabuhan_ekspor = 'IDJKT';
                         this.formData.pelabuhan_bongkar = 'SGSIN';
                         this.formData.pelabuhan_tujuan = 'SGSIN';
                         this.formData.tanggal_ekspor = '2026-06-20';
@@ -775,35 +858,87 @@
                         this.formData.pernyataan_jabatan = 'Direktur';
                         this.formData.pernyataan_kota = 'Jakarta';
                         this.formData.barang = [
-                            { hs_code: '6109100000', uraian: 'Kaos Katun Premium Polos M2B', merk: 'M2B', tipe: 'Round Neck', ukuran: 'All Size', negara_asal: 'ID', daerah_asal: 'Jawa Barat', jumlah_satuan: 500, kode_satuan: 'PCE', jumlah_kemasan: 20, kode_kemasan: 'CT', netto: 120, volume: 2.5, nilai_fob: 12500.00 }
+                            { hs_code: '6109100000', uraian: 'Kaos Katun Premium Polos M2B', merk: 'M2B', tipe: 'Round Neck', ukuran: 'All Size', negara_asal: 'ID', daerah_asal: 'Jawa Barat', jumlah_satuan: 500, kode_satuan: 'PCE', jumlah_kemasan: 20, kode_kemasan: 'CT', merk_kemasan: 'M2B', netto: 120, volume: 2.5, nilai_fob: 12500.00 }
                         ];
                     } else if (docType === 'BC20') {
+                        this.formData.kode_kantor = '040300';
+                        this.formData.jenis_impor = '1';
+                        this.formData.cara_bayar = '1';
+                        this.formData.kode_tutup_pu = '11';
                         this.formData.nama_importir = 'PT Mora Multi Berkah';
                         this.formData.npwp_importir = '012345678901000';
                         this.formData.alamat_importir = 'Jl. Kemang Timur No. 45, Mampang Prapatan, Jakarta Selatan';
                         this.formData.nama_pemasok = 'Tokyo Machinery Industrial Corp';
                         this.formData.negara_pemasok = 'JP';
+                        this.formData.alamat_pemasok = 'Tokyo, Japan';
+                        this.formData.nib_importir = '1234567890123';
+                        this.formData.jenis_api = '01';
+                        this.formData.status_importir = '3';
                         this.formData.pelabuhan_muat = 'JPTYO';
                         this.formData.pelabuhan_bongkar = 'IDTPP';
+                        this.formData.cara_angkut = '1';
+                        this.formData.kode_bendera = 'JP';
+                        this.formData.nama_sarana = 'MV Ocean Star';
+                        this.formData.voy_flight = 'OS-102';
+                        this.formData.kode_tps = 'TPS01';
+                        this.formData.tanggal_tiba = '2026-07-25';
                         this.formData.kode_valuta = 'JPY';
+                        this.formData.ndpbm = 110;
+                        this.formData.incoterm = 'CIF';
+                        this.formData.nilai_fob_impor = 1600000.00;
+                        this.formData.freight = 180000.00;
+                        this.formData.nilai_asuransi = 20000.00;
+                        this.formData.bruto = 40;
                         this.formData.nilai_cif = 1800000.00;
+                        this.formData.jumlah_kemasan_impor = 2;
+                        this.formData.kode_kemasan_impor = 'CT';
+                        this.formData.merk_kemasan_impor = 'UNMARKED';
                         this.formData.cara_pembayaran = 'Telegraphic Transfer (TT)';
+                        this.formData.pernyataan_nama = 'Irwan';
+                        this.formData.pernyataan_jabatan = 'Direktur';
+                        this.formData.pernyataan_kota = 'Medan';
                         this.formData.barang = [
-                            { hs_code: '8471302000', uraian: 'Unit Laptop Kantor Core i7 16GB RAM', jumlah_satuan: 15, kode_satuan: 'UNT', netto: 35, nilai_cif: 1800000.00 }
+                            { hs_code: '8471302000', uraian: 'Unit Laptop Kantor Core i7 16GB RAM', jumlah_satuan: 15, kode_satuan: 'UNT', netto: 35, nilai_cif: 1800000.00, tarif_bm: 0, tarif_ppn: 0, tarif_pph: 0 }
                         ];
                     } else if (docType === 'BC24') {
+                        this.formData.kode_kantor = '040300';
+                        this.formData.jenis_impor = '4';
+                        this.formData.cara_bayar = '1';
+                        this.formData.kode_tutup_pu = '11';
                         this.formData.nama_importir = 'PT Mora Multi Berkah';
                         this.formData.npwp_importir = '012345678901000';
                         this.formData.alamat_importir = 'Jl. Kemang Timur No. 45, Mampang Prapatan, Jakarta Selatan';
                         this.formData.nama_pemasok = 'Shenzhen Electronic Components Ltd';
                         this.formData.negara_pemasok = 'CN';
+                        this.formData.alamat_pemasok = 'Shenzhen, China';
+                        this.formData.nib_importir = '1234567890123';
+                        this.formData.jenis_api = '01';
+                        this.formData.status_importir = '3';
                         this.formData.pelabuhan_muat = 'CNSZN';
                         this.formData.pelabuhan_bongkar = 'IDTPP';
+                        this.formData.cara_angkut = '1';
+                        this.formData.kode_bendera = 'CN';
+                        this.formData.nama_sarana = 'MV Shenzhen Star';
+                        this.formData.voy_flight = 'SZ-240';
+                        this.formData.kode_tps = 'TPS01';
+                        this.formData.tanggal_tiba = '2026-07-25';
                         this.formData.kode_valuta = 'USD';
+                        this.formData.ndpbm = 15800;
+                        this.formData.incoterm = 'CIF';
+                        this.formData.nilai_fob_impor = 40000.00;
+                        this.formData.freight = 2300.00;
+                        this.formData.nilai_asuransi = 200.00;
+                        this.formData.bruto = 200;
                         this.formData.nilai_cif = 42500.00;
+                        this.formData.jumlah_kemasan_impor = 12;
+                        this.formData.kode_kemasan_impor = 'CT';
+                        this.formData.merk_kemasan_impor = 'UNMARKED';
                         this.formData.cara_pembayaran = 'Open Account';
+                        this.formData.pernyataan_nama = 'Irwan';
+                        this.formData.pernyataan_jabatan = 'Direktur';
+                        this.formData.pernyataan_kota = 'Medan';
                         this.formData.barang = [
-                            { hs_code: '8541410000', uraian: 'Modul LED Display P3.9 Outdoor', jumlah_satuan: 1200, kode_satuan: 'PCE', netto: 180, nilai_cif: 42500.00 }
+                            { hs_code: '8541410000', uraian: 'Modul LED Display P3.9 Outdoor', jumlah_satuan: 1200, kode_satuan: 'PCE', netto: 180, nilai_cif: 42500.00, tarif_bm: 0, tarif_ppn: 0, tarif_pph: 0 }
                         ];
                     } else if (docType === 'TPB') {
                         this.formData.nama_tpb = 'PT Mora Multi Berkah (Kawasan Berikat)';
@@ -864,12 +999,15 @@
                     const vf = this.valueField();
                     for (let i = 0; i < this.formData.barang.length; i++) {
                         const b = this.formData.barang[i];
-                        if (!b.hs_code || !b.uraian || !b.jumlah_satuan || !b.kode_satuan || !b.netto || !b[vf]) {
+                        const tariffMissing = (this.doc_type === 'BC20' || this.doc_type === 'BC24')
+                            && (b.tarif_bm === '' || b.tarif_ppn === '' || b.tarif_pph === '');
+                        if (!b.hs_code || !b.uraian || !b.jumlah_satuan || !b.kode_satuan || !b.netto || !b[vf] || tariffMissing) {
                             return { step: 8, message: `Lengkapi seluruh isian pada Pos Barang #${i + 1} (Tahap 8).` };
                         }
                     }
-                    if (this.doc_type === 'BC30' && (!this.formData.pernyataan_nama || !this.formData.pernyataan_jabatan)) {
-                        return { step: 9, message: 'Lengkapi Pernyataan Penanggung Jawab (nama & jabatan) di Tahap 9.' };
+                    if (['BC30', 'BC20', 'BC24'].includes(this.doc_type)
+                        && (!this.formData.pernyataan_nama || !this.formData.pernyataan_jabatan || !this.formData.pernyataan_kota)) {
+                        return { step: 9, message: 'Lengkapi Pernyataan Penanggung Jawab (nama, jabatan, dan kota) di Tahap 9.' };
                     }
                     return null;
                 },
@@ -887,6 +1025,12 @@
 
                 // Submit form: validasi relevan dulu, lalu kirim ke server.
                 submitForm(action = 'submit') {
+                    if (action === 'submit' && !this.submittableDocTypes.includes(this.doc_type)) {
+                        this.showDraftModal = false;
+                        this.formError = `${this.doc_type} belum dapat dikirim final karena kontrak payload resminya belum diaudit. Simpan sebagai draft.`;
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        return;
+                    }
                     const invalid = this.firstInvalidStep();
                     if (invalid) {
                         this.showDraftModal = false;

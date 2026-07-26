@@ -22,16 +22,13 @@ return [
 
     /*
     | Header API Key wajib pada SEMUA request (auth maupun layanan).
-    | Dokumentasi resmi tidak konsisten antar-versi soal nama header:
-    |   - PIA-CEISA40 gitbook menyebut "Beacukai-Api-Key"
-    |   - Beacukai Developer Portal (gateway NLE) menyebut "nle-api-key"
-    | Untuk memaksimalkan kompatibilitas onboarding, key dikirim pada SEMUA nama
-    | header di daftar ini (gateway mengabaikan header yang tak dikenal).
+    | Developer Portal dan Swagger openapi v2 resmi menetapkan nama header
+    | `beacukai-api-key`. Header tambahan hanya dikirim bila dioverride via env.
     | Nilai key disimpan per-user terenkripsi di kolom api_key tabel ceisa_credentials.
     */
     'api_key_headers' => array_values(array_filter(array_map(
         'trim',
-        explode(',', env('CEISA_API_KEY_HEADERS', 'Beacukai-Api-Key,nle-api-key'))
+        explode(',', env('CEISA_API_KEY_HEADERS', 'beacukai-api-key'))
     ))),
 
     /*
@@ -123,6 +120,12 @@ return [
     | submit() dipanggil berarti pengiriman sungguhan -> default is_final true.
     */
     'submit_is_final_default' => env('CEISA_SUBMIT_IS_FINAL', true),
+
+    /*
+    | Hanya tipe yang payload builder-nya telah diaudit terhadap JSON Schema
+    | resmi boleh dikirim final. Tipe lain tetap bisa direkam sebagai draft.
+    */
+    'submittable_doc_types' => ['BC20', 'BC30'],
 
     'timeout' => env('CEISA_HTTP_TIMEOUT', 30),
 

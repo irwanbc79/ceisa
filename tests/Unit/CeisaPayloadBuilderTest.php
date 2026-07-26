@@ -11,10 +11,15 @@ class CeisaPayloadBuilderTest extends TestCase
     {
         return [
             'header' => [
-                'kantor_muat' => 'IDJKT',
-                'jenis_ekspor' => 'Biasa',
-                'kategori_ekspor' => 'Umum',
-                'cara_bayar' => 'Biasa/Tunai',
+                'kantor_muat' => '010700',
+                'kantor_pendaftaran' => '010700',
+                'kantor_ekspor' => '010700',
+                'jenis_ekspor' => '1',
+                'kategori_ekspor' => '10',
+                'cara_bayar' => '1',
+                'jenis_pengangkutan' => '1',
+                'kode_lokasi' => '2',
+                'tanggal_periksa' => '2026-07-20',
                 'komoditi' => 'NON_MIGAS',
                 'curah' => 'NON_CURAH',
                 'valuta' => 'USD',
@@ -23,12 +28,26 @@ class CeisaPayloadBuilderTest extends TestCase
                 'nilai_fob' => 1500.50,
                 'bruto' => 130,
                 'eksportir' => ['nama' => 'PT M2B', 'npwp' => '0123456789012000', 'alamat' => 'Jakarta'],
-                'penerima' => ['nama' => 'ACME', 'negara' => 'sg'],
-                'pengangkutan' => ['cara_angkut' => 'Laut', 'pelabuhan_muat' => 'IDJKT', 'pelabuhan_tujuan' => 'SGSIN'],
-                'pernyataan' => ['nama' => 'Irwan', 'jabatan' => 'Direktur'],
+                'penerima' => ['nama' => 'ACME', 'negara' => 'sg', 'alamat' => 'Singapore'],
+                'pengangkutan' => [
+                    'cara_angkut' => '1',
+                    'sarana_angkut' => 'MV TEST',
+                    'voy_flight' => 'V001',
+                    'bendera' => 'ID',
+                    'pelabuhan_muat' => 'IDJKT',
+                    'pelabuhan_ekspor' => 'IDJKT',
+                    'pelabuhan_tujuan' => 'SGSIN',
+                    'tanggal_ekspor' => '2026-07-22',
+                ],
+                'asuransi' => ['jenis' => 'DN', 'nilai' => 0],
+                'pernyataan' => ['nama' => 'Irwan', 'jabatan' => 'Direktur', 'kota' => 'Medan'],
             ],
             'barang' => [
-                ['hs_code' => '6109.10.00', 'uraian' => 'Kaos', 'jumlah_satuan' => 100, 'kode_satuan' => 'PCE', 'netto' => 25.5, 'nilai_fob' => 1500.50, 'kode_kemasan' => 'CT'],
+                ['hs_code' => '6109.10.00', 'uraian' => 'Kaos', 'jumlah_satuan' => 100, 'kode_satuan' => 'PCE', 'netto' => 25.5, 'nilai_fob' => 1500.50, 'jumlah_kemasan' => 1, 'kode_kemasan' => 'CT', 'merk_kemasan' => 'M2B'],
+            ],
+            'dokumen' => [
+                ['kode_dokumen' => '380', 'nomor_dokumen' => 'INV-001', 'tanggal_dokumen' => '2026-07-20'],
+                ['kode_dokumen' => '217', 'nomor_dokumen' => 'PL-001', 'tanggal_dokumen' => '2026-07-20'],
             ],
         ];
     }
@@ -72,7 +91,7 @@ class CeisaPayloadBuilderTest extends TestCase
                 'nilai_cif' => 1000,
             ],
             'barang' => [
-                ['hs_code' => '8517.12.00', 'uraian' => 'Ponsel', 'jumlah_satuan' => 10, 'kode_satuan' => 'UNT', 'netto' => 5, 'nilai_cif' => 1000],
+                ['hs_code' => '8517.12.00', 'uraian' => 'Ponsel', 'jumlah_satuan' => 10, 'kode_satuan' => 'UNT', 'netto' => 5, 'nilai_cif' => 1000, 'tarif_bm' => 0, 'tarif_ppn' => 11, 'tarif_pph' => 2.5],
             ],
         ];
 
@@ -87,7 +106,7 @@ class CeisaPayloadBuilderTest extends TestCase
         // NPWP 15 digit -> kodeJenisIdentitas 5.
         $this->assertSame('5', $flat['entitas'][0]['kodeJenisIdentitas']);
 
-        // Pungutan lengkap: BM + PPN + PPH (default tarif PPN 11, PPH 2.5).
+        // Pungutan lengkap: BM + PPN + PPH, seluruh tarif berasal dari operator.
         $this->assertSame(
             ['BM', 'PPN', 'PPH'],
             array_column($flat['barang'][0]['barangTarif'], 'kodeJenisPungutan'),
@@ -108,7 +127,11 @@ class CeisaPayloadBuilderTest extends TestCase
                 'nilai_cif' => 1000,
             ],
             'barang' => [
-                ['hs_code' => '8517.12.00', 'uraian' => 'Ponsel', 'jumlah_satuan' => 10, 'kode_satuan' => 'UNT', 'netto' => 5, 'nilai_cif' => 1000],
+                ['hs_code' => '8517.12.00', 'uraian' => 'Ponsel', 'jumlah_satuan' => 10, 'kode_satuan' => 'UNT', 'netto' => 5, 'nilai_cif' => 1000, 'tarif_bm' => 0, 'tarif_ppn' => 11, 'tarif_pph' => 2.5],
+            ],
+            'dokumen' => [
+                ['kode_dokumen' => '380', 'nomor_dokumen' => 'INV-002', 'tanggal_dokumen' => '2026-06-20'],
+                ['kode_dokumen' => '705', 'nomor_dokumen' => 'BL-998877', 'tanggal_dokumen' => '2026-06-20'],
             ],
         ];
 
@@ -117,7 +140,7 @@ class CeisaPayloadBuilderTest extends TestCase
         // Entitas PPJK (kode 4) ikut tergenerate setelah importir(1), pemilik(7), pengirim(9).
         $this->assertContains('4', array_column($flat['entitas'], 'kodeEntitas'));
 
-        // Dokumen House-BL (705 untuk laut) menyusul invoice (380).
+        // Dokumen House-BL (705 untuk laut) berasal dari input operator.
         $this->assertSame(['380', '705'], array_column($flat['dokumen'], 'kodeDokumen'));
         $this->assertSame('BL-998877', $flat['dokumen'][1]['nomorDokumen']);
     }
@@ -144,10 +167,10 @@ class CeisaPayloadBuilderTest extends TestCase
         // Field wizard baru (step Data Header): kantor pabean eksplisit menang.
         $this->assertSame('040300', $flat['kodeKantor']);
 
-        // Tanpa kode_kantor: fallback lama dari pelabuhan bongkar tetap jalan.
+        // Tanpa kode_kantor: builder tidak menebak kode kantor dari kode pelabuhan.
         unset($payload['header']['kode_kantor']);
         $flat = CeisaPayloadBuilder::make()->build('BC20', $payload, str_repeat('0', 26));
-        $this->assertSame('IDTPP', $flat['kodeKantor']);
+        $this->assertSame('', $flat['kodeKantor']);
     }
 
     public function test_cara_angkut_code_mapping(): void

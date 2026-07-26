@@ -23,27 +23,35 @@
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
                 <x-input-label for="cara_angkut" value="Cara Pengangkutan" />
-                <x-searchable-select id="cara_angkut" name="cara_angkut" model="formData.cara_angkut" options="references.caraAngkut" placeholder="-- Pilih Cara Pengangkutan --" />
+                <x-searchable-select id="cara_angkut" ::name="doc_type === 'BC30' ? 'cara_angkut' : ''" model="formData.cara_angkut" options="references.caraAngkut" placeholder="-- Pilih Cara Pengangkutan --" ::required="doc_type === 'BC30'" />
+            </div>
+            <div>
+                <x-input-label for="kode_bendera_bc30" value="Bendera Sarana (ISO 2 huruf)" />
+                <input type="text" maxlength="2" id="kode_bendera_bc30" :name="doc_type === 'BC30' ? 'kode_bendera' : ''" x-model="formData.kode_bendera" placeholder="mis. ID" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm uppercase" :required="doc_type === 'BC30'" />
             </div>
             <div>
                 <x-input-label for="nama_sarana" value="Nama Sarana Pengangkut" />
-                <input type="text" id="nama_sarana" name="nama_sarana" x-model="formData.nama_sarana" placeholder="mis. MV Sinar Jaya" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <input type="text" id="nama_sarana" :name="doc_type === 'BC30' ? 'nama_sarana' : ''" x-model="formData.nama_sarana" placeholder="mis. MV Sinar Jaya" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
             </div>
             <div>
                 <x-input-label for="voy_flight" value="No. Voyage / Flight" />
-                <input type="text" id="voy_flight" name="voy_flight" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <input type="text" id="voy_flight" :name="doc_type === 'BC30' ? 'voy_flight' : ''" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
             </div>
             <div>
                 <x-input-label for="pelabuhan_muat_bc30" value="Pelabuhan Muat Ekspor" />
                 <x-searchable-select id="pelabuhan_muat_bc30" ::name="doc_type === 'BC30' ? 'pelabuhan_muat' : ''" model="formData.pelabuhan_muat" options="references.ports" placeholder="-- Pilih Pelabuhan Muat --" ::required="doc_type === 'BC30'" />
             </div>
             <div>
+                <x-input-label for="pelabuhan_ekspor_bc30" value="Pelabuhan Ekspor" />
+                <x-searchable-select id="pelabuhan_ekspor_bc30" ::name="doc_type === 'BC30' ? 'pelabuhan_ekspor' : ''" model="formData.pelabuhan_ekspor" options="references.ports" placeholder="-- Pilih Pelabuhan Ekspor --" ::required="doc_type === 'BC30'" />
+            </div>
+            <div>
                 <x-input-label for="pelabuhan_tujuan" value="Pelabuhan Tujuan" />
-                <x-searchable-select id="pelabuhan_tujuan" name="pelabuhan_tujuan" model="formData.pelabuhan_tujuan" options="references.ports" placeholder="-- Pilih Pelabuhan Tujuan --" ::required="doc_type === 'BC30'" />
+                <x-searchable-select id="pelabuhan_tujuan" ::name="doc_type === 'BC30' ? 'pelabuhan_tujuan' : ''" model="formData.pelabuhan_tujuan" options="references.ports" placeholder="-- Pilih Pelabuhan Tujuan --" ::required="doc_type === 'BC30'" />
             </div>
             <div>
                 <x-input-label for="tanggal_ekspor" value="Tanggal Perkiraan Ekspor" />
-                <input type="date" id="tanggal_ekspor" name="tanggal_ekspor" x-model="formData.tanggal_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <input type="date" id="tanggal_ekspor" :name="doc_type === 'BC30' ? 'tanggal_ekspor' : ''" x-model="formData.tanggal_ekspor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
             </div>
         </div>
     </div>
@@ -56,31 +64,31 @@
         </div>
         <div>
             <x-input-label for="pelabuhan_bongkar" value="Pelabuhan Bongkar (Kode Referensi)" />
-            <x-searchable-select id="pelabuhan_bongkar" name="pelabuhan_bongkar" model="formData.pelabuhan_bongkar" options="references.ports" placeholder="-- Pilih Pelabuhan Bongkar --" ::required="doc_type !== 'BC30'" />
+            <x-searchable-select id="pelabuhan_bongkar" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'pelabuhan_bongkar' : ''" model="formData.pelabuhan_bongkar" options="references.ports" placeholder="-- Pilih Pelabuhan Bongkar --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="cara_angkut_imp" value="Cara Pengangkutan" />
-            <x-searchable-select id="cara_angkut_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_angkut' : ''" model="formData.cara_angkut" :options="['Laut' => 'Laut', 'Udara' => 'Udara', 'Darat' => 'Darat', 'Kereta Api' => 'Kereta Api', 'Pos' => 'Pos']" placeholder="-- Pilih Cara Pengangkutan --" />
+            <x-searchable-select id="cara_angkut_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'cara_angkut' : ''" model="formData.cara_angkut" options="references.caraAngkut" placeholder="-- Pilih Cara Pengangkutan --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="kode_bendera_imp" value="Bendera Sarana (ISO 2 huruf)" />
-            <input type="text" maxlength="2" id="kode_bendera_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_bendera' : ''" x-model="formData.kode_bendera" placeholder="mis. SG" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm uppercase" />
+            <input type="text" maxlength="2" id="kode_bendera_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_bendera' : ''" x-model="formData.kode_bendera" placeholder="mis. SG" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm uppercase" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="nama_sarana_imp" value="Nama Sarana Pengangkut" />
-            <input type="text" id="nama_sarana_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nama_sarana' : ''" x-model="formData.nama_sarana" placeholder="mis. MV Ocean Star" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <input type="text" id="nama_sarana_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nama_sarana' : ''" x-model="formData.nama_sarana" placeholder="mis. MV Ocean Star" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="voy_flight_imp" value="No. Voyage / Flight" />
-            <input type="text" id="voy_flight_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'voy_flight' : ''" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <input type="text" id="voy_flight_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'voy_flight' : ''" x-model="formData.voy_flight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="kode_tps_imp" value="Kode TPS (Tempat Penimbunan Sementara)" />
-            <input type="text" id="kode_tps_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_tps' : ''" x-model="formData.kode_tps" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <input type="text" id="kode_tps_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'kode_tps' : ''" x-model="formData.kode_tps" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="tanggal_tiba_imp" value="Perkiraan Tanggal Tiba" />
-            <input type="date" id="tanggal_tiba_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'tanggal_tiba' : ''" x-model="formData.tanggal_tiba" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <input type="date" id="tanggal_tiba_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'tanggal_tiba' : ''" x-model="formData.tanggal_tiba" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
     </div>
 

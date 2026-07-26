@@ -17,13 +17,12 @@ use Throwable;
  * Klien integrasi CEISA H2H (Host-to-Host) Bea Cukai (CEISA 4.0 / PIA).
  *
  * Auth resmi (ceisa40.gitbook.io/pia-ceisa40, openapi.beacukai.go.id):
- *   - SEMUA request membawa header `Beacukai-Api-Key: {api_key}` dan `id_platform: {id_platform}`.
- *   - Login : POST {host}/nle-oauth/v1/user/login (body username+password)
+ *   - Semua request membawa header `beacukai-api-key: {api_key}`.
+ *   - Login : POST {host}/v1/openapi-auth/user/login (body username+password)
  *     -> mengembalikan access_token (Bearer) + refresh_token.
- *   - Refresh: POST {host}/nle-oauth/v1/user/update-token
+ *   - Refresh: POST {host}/v1/openapi-auth/user/update-token
  *     dengan header Authorization: {refresh_token} -> access_token baru.
- *   - Layanan Pabean (kirim dokumen, status) di {host}/openapi memakai
- *     Authorization: Bearer {access_token} + header Beacukai-Api-Key + id_platform.
+ *   - Layanan Pabean berada di {host}/v2/openapi dan memakai Bearer token.
  *
  * Trait pemisahan:
  *   - HandlesCeisaAuth  → token lifecycle (login, refresh, store, extract).
@@ -123,6 +122,12 @@ class CeisaService
     {
         $document->refresh();
 
+        if (! in_array($document->doc_type, config('ceisa.submittable_doc_types', []), true)) {
+            throw new CeisaException(
+                "Submit final {$document->doc_type} belum diaktifkan karena payload-nya belum diaudit terhadap JSON Schema resmi DJBC. Dokumen tetap aman sebagai draft."
+            );
+        }
+
         $previousStatus = $document->status;
         $previousSubmittedAt = $document->submitted_at;
         $previousCeisaResponse = $document->ceisa_response;
@@ -185,6 +190,7 @@ class CeisaService
 
         try {
             $formattedPayload = $this->transformPayloadForCeisa($document->doc_type, $document->payload, $nomorAju);
+            $this->assertFinalPayloadReady($document->doc_type, $formattedPayload);
             $requestStarted = true;
             $data = $this->submitDocument($document->doc_type, $formattedPayload, [
                 'is_final' => true,
@@ -265,6 +271,56 @@ class CeisaService
     public function transformPayloadForCeisa(string $type, array $payload, string $nomorAju): array
     {
         return CeisaPayloadBuilder::make()->build($type, $payload, $nomorAju);
+    }
+
+    /**
+     * Tahan payload lama/tidak lengkap sebelum request final meninggalkan M2B.
+     *
+     * @param  array<string, mixed>  $payload
+     *
+     * @throws CeisaException
+     */
+    private function assertFinalPayloadReady(string $type, array $payload): void
+    {
+        $required = match ($type) {
+            'BC30' => [
+                'nomorAju', 'kodeKantor', 'kodeKantorMuat', 'kodeKantorEkspor',
+                'kodeJenisEkspor', 'kodeKategoriEkspor', 'kodeCaraBayar',
+                'kodeJenisPengangkutan', 'kodeLokasi', 'tanggalPeriksa',
+                'tanggalEkspor', 'kodePelEkspor', 'kodePelMuat', 'kodePelTujuan',
+                'kodeValuta', 'kodeAsuransi', 'namaTtd', 'jabatanTtd', 'kotaTtd',
+                'barang.0.posTarif', 'barang.0.kodeJenisKemasan',
+                'entitas.0.namaEntitas', 'kemasan.0.merkKemasan',
+                'dokumen.0.nomorDokumen', 'pengangkut.0.namaPengangkut',
+            ],
+            'BC20' => [
+                'nomorAju', 'kodeKantor', 'kodeJenisImpor', 'kodeCaraBayar',
+                'kodeValuta', 'kodeIncoterm', 'kodePelMuat', 'kodePelTujuan',
+                'kodeTps', 'kodeTutupPu', 'tanggalTiba',
+                'namaTtd', 'jabatanTtd', 'kotaTtd',
+                'barang.0.posTarif', 'entitas.0.nibEntitas',
+                'entitas.0.kodeJenisApi', 'entitas.0.kodeStatus',
+                'kemasan.0.kodeJenisKemasan', 'dokumen.0.nomorDokumen',
+                'pengangkut.0.namaPengangkut',
+            ],
+            default => [],
+        };
+
+        $missing = array_values(array_filter(
+            $required,
+            static function (string $path) use ($payload): bool {
+                $value = data_get($payload, $path);
+
+                return $value === null || $value === '' || $value === [];
+            },
+        ));
+
+        if ($missing !== []) {
+            throw new CeisaException(
+                'Payload belum memenuhi kontrak final CEISA. Lengkapi draft: '.implode(', ', $missing).'.',
+                context: ['validation' => 'local_contract', 'missing_fields' => $missing],
+            );
+        }
     }
 
     /**

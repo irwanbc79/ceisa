@@ -27,36 +27,36 @@
             </div>
             <div>
                 <x-input-label for="ndpbm" value="NDPBM / Kurs (ke IDR)" />
-                <input type="number" step="0.0001" min="0" id="ndpbm" name="ndpbm" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                <input type="number" step="0.0001" min="0" id="ndpbm" :name="doc_type === 'BC30' ? 'ndpbm' : ''" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
             </div>
             <div>
                 <x-input-label for="incoterm" value="Cara Penyerahan (Incoterm)" />
-                <x-searchable-select id="incoterm" name="incoterm" model="formData.incoterm" options="references.incoterms" placeholder="-- Pilih Incoterm --" ::required="doc_type === 'BC30'" />
+                <x-searchable-select id="incoterm" ::name="doc_type === 'BC30' ? 'incoterm' : ''" model="formData.incoterm" options="references.incoterms" placeholder="-- Pilih Incoterm --" ::required="doc_type === 'BC30'" />
             </div>
             <div>
                 <x-input-label for="nilai_fob" value="Nilai FOB Total" />
-                <input type="number" step="0.01" min="0" id="nilai_fob" name="nilai_fob" x-model="formData.nilai_fob" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                <input type="number" step="0.01" min="0" id="nilai_fob" :name="doc_type === 'BC30' ? 'nilai_fob' : ''" x-model="formData.nilai_fob" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
                 <p class="text-[10px] text-slate-400 mt-1">Auto-terisi dari total Pos Barang bila dikosongkan.</p>
             </div>
             <div>
                 <x-input-label for="freight" value="Freight (Opsional)" />
-                <input type="number" step="0.01" min="0" id="freight" name="freight" x-model="formData.freight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <input type="number" step="0.01" min="0" id="freight" :name="doc_type === 'BC30' ? 'freight' : ''" x-model="formData.freight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
             </div>
             <div>
                 <x-input-label for="bruto" value="Berat Kotor / Bruto (KGM)" />
-                <input type="number" step="0.01" min="0" id="bruto" name="bruto" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
+                <input type="number" step="0.01" min="0" id="bruto" :name="doc_type === 'BC30' ? 'bruto' : ''" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
             </div>
             <div>
-                <x-input-label for="asuransi_jenis" value="Asuransi" />
-                <x-searchable-select id="asuransi_jenis" name="asuransi_jenis" model="formData.asuransi_jenis" :options="['DN' => 'Dalam Negeri', 'LN' => 'Luar Negeri']" placeholder="-- Pilih Asuransi --" />
+                <x-input-label for="asuransi_jenis" value="Lokasi Pembayaran Asuransi" />
+                <x-searchable-select id="asuransi_jenis" ::name="doc_type === 'BC30' ? 'asuransi_jenis' : ''" model="formData.asuransi_jenis" :options="['DN' => 'Dalam Negeri', 'LN' => 'Luar Negeri']" placeholder="-- Pilih Lokasi Pembayaran --" ::required="doc_type === 'BC30'" />
             </div>
             <div>
-                <x-input-label for="nilai_asuransi" value="Nilai Asuransi (Opsional)" />
-                <input type="number" step="0.01" min="0" id="nilai_asuransi" name="nilai_asuransi" x-model="formData.nilai_asuransi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <x-input-label for="nilai_asuransi" value="Nilai Asuransi" />
+                <input type="number" step="0.01" min="0" id="nilai_asuransi" :name="doc_type === 'BC30' ? 'nilai_asuransi' : ''" x-model="formData.nilai_asuransi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC30'" />
             </div>
             <div>
                 <x-input-label for="bank_devisa" value="Bank Devisa (Opsional)" />
-                <input type="text" id="bank_devisa" name="bank_devisa" x-model="formData.bank_devisa" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <input type="text" id="bank_devisa" :name="doc_type === 'BC30' ? 'bank_devisa' : ''" x-model="formData.bank_devisa" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
             </div>
             <div class="sm:col-span-2 lg:col-span-3">
                 <x-input-label for="cara_pembayaran_bc30" value="Cara Pembayaran (Opsional)" />
@@ -73,35 +73,48 @@
         </div>
         <div>
             <x-input-label for="nilai_cif" value="Nilai CIF Total (Cost, Insurance, Freight)" />
-            <input type="number" step="0.01" min="0" id="nilai_cif" name="nilai_cif" x-model="formData.nilai_cif" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
+            <input type="number" step="0.01" min="0" id="nilai_cif" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nilai_cif' : ''" x-model="formData.nilai_cif" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
+        </div>
+        <div>
+            <x-input-label for="nilai_fob_impor" value="Nilai FOB Total" />
+            <input type="number" step="0.01" min="0" id="nilai_fob_impor" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nilai_fob_impor' : ''" x-model="formData.nilai_fob_impor" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="ndpbm_imp" value="NDPBM / Kurs Pajak" />
-            <input type="number" step="0.0001" min="0" id="ndpbm_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'ndpbm' : ''" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <input type="number" step="0.0001" min="0" id="ndpbm_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'ndpbm' : ''" x-model="formData.ndpbm" placeholder="mis. 15800" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="incoterm_imp" value="Cara Penyerahan (Incoterm)" />
-            <x-searchable-select id="incoterm_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'incoterm' : ''" model="formData.incoterm" options="references.incoterms" placeholder="-- Pilih Incoterm --" />
+            <x-searchable-select id="incoterm_imp" ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'incoterm' : ''" model="formData.incoterm" options="references.incoterms" placeholder="-- Pilih Incoterm --" ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
-            <x-input-label for="freight_imp" value="Freight (opsional)" />
-            <input type="number" step="0.01" min="0" id="freight_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'freight' : ''" x-model="formData.freight" placeholder="kosongkan = estimasi dari CIF" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <x-input-label for="freight_imp" value="Freight" />
+            <input type="number" step="0.01" min="0" id="freight_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'freight' : ''" x-model="formData.freight" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
-            <x-input-label for="nilai_asuransi_imp" value="Nilai Asuransi (opsional)" />
-            <input type="number" step="0.01" min="0" id="nilai_asuransi_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nilai_asuransi' : ''" x-model="formData.nilai_asuransi" placeholder="kosongkan = estimasi dari CIF" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <x-input-label for="nilai_asuransi_imp" value="Nilai Asuransi" />
+            <input type="number" step="0.01" min="0" id="nilai_asuransi_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nilai_asuransi' : ''" x-model="formData.nilai_asuransi" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
-            <x-input-label for="bruto_imp" value="Berat Kotor / Bruto (Kg, opsional)" />
-            <input type="number" step="0.0001" min="0" id="bruto_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'bruto' : ''" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <x-input-label for="bruto_imp" value="Berat Kotor / Bruto (Kg)" />
+            <input type="number" step="0.0001" min="0" id="bruto_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'bruto' : ''" x-model="formData.bruto" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
-            <x-input-label for="nib_importir_imp" value="NIB Importir (opsional)" />
-            <input type="text" id="nib_importir_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nib_importir' : ''" x-model="formData.nib_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <x-input-label for="nib_importir_imp" value="NIB Importir" />
+            <input type="text" id="nib_importir_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'nib_importir' : ''" x-model="formData.nib_importir" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div>
             <x-input-label for="jenis_api_imp" value="Jenis API (mis. 01)" />
-            <input type="text" maxlength="5" id="jenis_api_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'jenis_api' : ''" x-model="formData.jenis_api" placeholder="01" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+            <input type="text" maxlength="5" id="jenis_api_imp" :name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'jenis_api' : ''" x-model="formData.jenis_api" placeholder="01" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" :required="doc_type === 'BC20' || doc_type === 'BC24'" />
+        </div>
+        <div>
+            <x-input-label for="status_importir_imp" value="Status Pengusaha Importir" />
+            <x-searchable-select id="status_importir_imp"
+                ::name="(doc_type === 'BC20' || doc_type === 'BC24') ? 'status_importir' : ''"
+                model="formData.status_importir"
+                :options="['0' => '0 - Belum Ditentukan', '1' => '1 - Koperasi', '2' => '2 - PMDN (Migas)', '3' => '3 - PMDN (Non Migas)', '4' => '4 - PMA (Migas)', '5' => '5 - PMA (Non Migas)', '6' => '6 - BUMN', '7' => '7 - BUMD', '8' => '8 - Perorangan', '9' => '9 - UMKM', '10' => '10 - Lainnya']"
+                placeholder="-- Pilih Status Pengusaha --"
+                ::required="doc_type === 'BC20' || doc_type === 'BC24'" />
         </div>
         <div class="sm:col-span-2">
             <x-input-label for="cara_pembayaran" value="Cara Pembayaran (Referensi)" />
