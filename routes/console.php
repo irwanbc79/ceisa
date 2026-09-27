@@ -18,3 +18,9 @@ Schedule::command('ceisa:sync-references')
     ->dailyAt('03:00')
     ->withoutOverlapping()
     ->runInBackground();
+
+// Worker queue untuk memproses pengiriman dokumen CEISA asinkron di shared hosting
+Schedule::command('queue:work --stop-when-empty --max-time=50')
+    ->everyMinute()
+    ->withoutOverlapping();
+
