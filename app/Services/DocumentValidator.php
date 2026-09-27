@@ -123,7 +123,105 @@ class DocumentValidator
             $f[] = ['level' => 'warning', 'field' => 'NPWP', 'message' => 'NPWP pihak utama belum terisi.'];
         }
 
+        // Validasi Manifes Kedatangan (BC 1.1) untuk dokumen impor
+        if (in_array($document->doc_type, ['BC20', 'BC24', 'TPB'], true)) {
+            $f = array_merge($f, $this->checkManifestRequirements($document));
+        }
+
         return $f;
+    }
+
+    /**
+     * Validasi kelengkapan & rekonsiliasi manifes kedatangan sarana pengangkut (BC 1.1).
+     *
+     * @return array<int, array{level: string, field: ?string, message: string}>
+     */
+    protected function checkManifestRequirements(Document $document): array
+    {
+        $findings = [];
+        $payload = $document->payload ?? [];
+
+        $kodeTutupPu = (string) (data_get($payload, 'header.kode_tutup_pu') ?? data_get($payload, 'kode_tutup_pu') ?? '');
+        $dokumenList = (array) (data_get($payload, 'dokumen') ?? []);
+
+        // Kode 11 = Tutup Pos PU dengan BC 1.1
+        if ($kodeTutupPu === '11') {
+            $hasBc11 = collect($dokumenList)->contains(function ($dok) {
+                $code = (string) data_get($dok, 'kode_dokumen', '');
+                return in_array($code, ['217', 'BC11', '001', '0217'], true)
+                    || str_contains(strtoupper((string) data_get($dok, 'nomor_dokumen', '')), 'BC 1.1');
+            });
+
+            if (! $hasBc11) {
+                $findings[] = [
+                    'level' => 'warning',
+                    'field' => 'dokumen BC 1.1',
+                    'message' => 'Dokumen impor (Tutup PU 11) wajib menyertakan lampiran nomor dan tanggal BC 1.1 agar tidak ditolak CEISA.',
+                ];
+            }
+        }
+
+        // Cross-check dengan tabel Manifests (Inward) bila data sarana terisi
+        $namaSarana = trim((string) (data_get($payload, 'header.pengangkutan.nama_sarana') ?? data_get($payload, 'nama_sarana') ?? ''));
+        if ($namaSarana !== '') {
+            $manifestExists = \App\Models\Manifest::query()
+                ->where('jenis_manifes', \App\Models\Manifest::JENIS_INWARD)
+                ->where(function ($q) use ($namaSarana) {
+                    $q->where('nama_sarana', 'LIKE', "%{$namaSarana}%");
+                })
+                ->exists();
+
+            if (! $manifestExists) {
+                $findings[] = [
+                    'level' => 'info',
+                    'field' => 'manifes sarana pengangkut',
+                    'message' => "Manifes inward untuk sarana '{$namaSarana}' belum tercatat di modul Manifes M2B. Pastikan pos/subpos sesuai B/L resmi.",
+                ];
+            }
+        }
+
+        return $findings;
+    }
+
+    /**
+     * Sanitasi payload sebelum dikirim ke AI (DLP - Data Loss Prevention & Kerahasiaan Pabean).
+     * Sesuai Pasal 100 UU Kepabeanan: NPWP, nama perusahaan riil, dan detail perbankan
+     * dimasking untuk melindungi rahasia dagang.
+     *
+     * @return array<string, mixed>
+     */
+    protected function sanitizePayloadForAi(Document $document): array
+    {
+        $payload = $document->payload ?? [];
+        $barang = data_get($payload, 'barang', []);
+
+        $sanitizedBarang = array_map(function ($item, $idx) {
+            return [
+                'seri' => data_get($item, 'seri', $idx + 1),
+                'hs_code' => data_get($item, 'hs_code'),
+                'uraian' => data_get($item, 'uraian'),
+                'spesifikasi' => data_get($item, 'spesifikasi') ?? data_get($item, 'tipe') ?? data_get($item, 'merk'),
+                'jumlah_satuan' => data_get($item, 'jumlah_satuan'),
+                'kode_satuan' => data_get($item, 'kode_satuan'),
+                'netto' => data_get($item, 'netto'),
+                'nilai_estimasi' => data_get($item, 'nilai_fob') ?? data_get($item, 'nilai_cif') ?? data_get($item, 'nilai_barang'),
+            ];
+        }, $barang, array_keys($barang));
+
+        return [
+            'doc_type' => $document->doc_type,
+            'kantor_pabean' => data_get($payload, 'header.kode_kantor') ?? data_get($payload, 'kode_kantor'),
+            'cara_angkut' => data_get($payload, 'header.pengangkutan.cara_angkut') ?? data_get($payload, 'cara_angkut'),
+            'incoterm' => data_get($payload, 'header.incoterm') ?? data_get($payload, 'incoterm'),
+            'valuta' => data_get($payload, 'header.valuta') ?? data_get($payload, 'kode_valuta'),
+            'pelabuhan_muat' => data_get($payload, 'header.pengangkutan.pelabuhan_muat') ?? data_get($payload, 'pelabuhan_muat'),
+            'pelabuhan_bongkar' => data_get($payload, 'header.pengangkutan.pelabuhan_bongkar') ?? data_get($payload, 'pelabuhan_bongkar'),
+            'barang' => $sanitizedBarang,
+            'pihak_eksportir' => '[REDACTED_EXPORTER_NAME]',
+            'pihak_importir' => '[REDACTED_IMPORTER_NAME]',
+            'npwp_entitas' => '[REDACTED_NPWP]',
+            'alamat_entitas' => '[REDACTED_ADDRESS]',
+        ];
     }
 
     /**
@@ -144,8 +242,10 @@ WAJIB jawab HANYA dengan JSON valid (tanpa teks lain, tanpa markdown), berbentuk
 Jika tidak ada masalah, kembalikan {"findings":[]}. Maksimum 10 temuan paling penting.
 SYS;
 
-        $user = "Jenis dokumen: {$document->doc_type}\n\nData dokumen (JSON):\n"
-            .json_encode($document->payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $sanitizedData = $this->sanitizePayloadForAi($document);
+
+        $user = "Jenis dokumen: {$document->doc_type}\n\nData dokumen tervalidasi (DLP Masked JSON):\n"
+            .json_encode($sanitizedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $result = $this->ai->chat($system, $user);
 
