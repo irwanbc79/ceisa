@@ -234,7 +234,7 @@ class DocumentController extends Controller
         }
 
         try {
-            CeisaService::forCredential($credential)->submit($document);
+            \App\Jobs\SubmitCeisaDocumentJob::dispatch($document);
         } catch (CeisaException $e) {
             return redirect()
                 ->route('documents.show', $document)
@@ -410,7 +410,7 @@ class DocumentController extends Controller
         }
 
         try {
-            CeisaService::forCredential($credential)->submit($document);
+            \App\Jobs\SubmitCeisaDocumentJob::dispatch($document);
         } catch (CeisaException $e) {
             return back()->with('error', 'Submit gagal: '.$e->getMessage());
         }
@@ -433,7 +433,7 @@ class DocumentController extends Controller
         }
 
         try {
-            CeisaService::forCredential($credential)->submit($document, isRevision: true);
+            \App\Jobs\SubmitCeisaDocumentJob::dispatch($document, isRevision: true);
         } catch (CeisaException $e) {
             return back()->with('error', 'Kirim pembetulan gagal: '.$e->getMessage());
         }

@@ -51,6 +51,12 @@ return [
     'webhook_max_payload_bytes' => (int) env('CEISA_WEBHOOK_MAX_PAYLOAD_BYTES', 1_048_576),
 
     /*
+    | Zero-Trust Webhook: verifikasi ulang status ke gateway resmi DJBC
+    | setelah callback diterima, untuk mencegah status spoofing.
+    */
+    'zero_trust_verification' => (bool) env('CEISA_ZERO_TRUST_VERIFICATION', false),
+
+    /*
     | Endpoint relatif terhadap base_url (host gateway).
     | Diselaraskan dengan Beacukai Developer Portal (API Gallery + halaman Authentication)
     | dan DIVERIFIKASI LIVE via probe 2026-06-29 (akun H2H PT Mora Multi Berkah):

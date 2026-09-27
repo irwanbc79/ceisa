@@ -57,7 +57,7 @@ class CeisaStatusMapper
 
         $haystack = trim($raw.' '.$responText);
 
-        return match (true) {
+        $mapped = match (true) {
             str_contains($haystack, 'NPP'), str_contains($haystack, 'TOLAK'), str_contains($haystack, 'REJECT') => Document::STATUS_REJECTED,
             str_contains($haystack, 'TERIMA'), str_contains($haystack, 'ACCEPT'), str_contains($haystack, 'SPPB'), str_contains($haystack, 'NPE'), str_contains($haystack, 'SELESAI') => Document::STATUS_ACCEPTED,
             // Dokumen baru dari sinkronisasi (belum punya status lokal)
@@ -66,6 +66,13 @@ class CeisaStatusMapper
                 ? Document::STATUS_SUBMITTED
                 : ($document->status ?? Document::STATUS_SUBMITTED),
         };
+
+        // FSM guard: Cegah demosi status terminal (SPPB / ACCEPTED tidak boleh turun kembali ke SUBMITTED / SUBMITTING)
+        if ($document->status === Document::STATUS_ACCEPTED && in_array($mapped, [Document::STATUS_SUBMITTED, Document::STATUS_SUBMITTING, Document::STATUS_DRAFT], true)) {
+            return Document::STATUS_ACCEPTED;
+        }
+
+        return $mapped;
     }
 
     /**

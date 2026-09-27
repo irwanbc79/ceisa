@@ -77,6 +77,26 @@ class Document extends Model
     }
 
     /**
+     * Validasi Finite State Machine (FSM) untuk transisi status dokumen kepabeanan.
+     */
+    public function canTransitionTo(string $targetStatus): bool
+    {
+        if ($this->status === $targetStatus) {
+            return true;
+        }
+
+        return match ($this->status) {
+            self::STATUS_DRAFT => in_array($targetStatus, [self::STATUS_SUBMITTING, self::STATUS_DRAFT], true),
+            self::STATUS_SUBMITTING => in_array($targetStatus, [self::STATUS_SUBMITTED, self::STATUS_ACCEPTED, self::STATUS_REJECTED, self::STATUS_ERROR, self::STATUS_DRAFT], true),
+            self::STATUS_SUBMITTED => in_array($targetStatus, [self::STATUS_ACCEPTED, self::STATUS_REJECTED, self::STATUS_SUBMITTING], true),
+            self::STATUS_ACCEPTED => false, // Terminal status (SPPB / NPE)
+            self::STATUS_REJECTED => in_array($targetStatus, [self::STATUS_SUBMITTING, self::STATUS_DRAFT], true),
+            self::STATUS_ERROR => in_array($targetStatus, [self::STATUS_SUBMITTING, self::STATUS_DRAFT], true),
+            default => true,
+        };
+    }
+
+    /**
      * Nama pihak utama (eksportir/importir/pengusaha TPB/pemohon/arsip).
      */
     public function partyName(): ?string

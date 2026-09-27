@@ -130,4 +130,82 @@ class AiValidationTest extends TestCase
         $teammate = $this->authedUser();
         $this->actingAs($teammate)->post(route('documents.validate', $doc))->assertRedirect();
     }
+
+    public function test_ai_validation_sanitizes_pii_before_sending_to_model(): void
+    {
+        config([
+            'ai.enabled' => true,
+            'ai.order' => ['gemini'],
+            'ai.providers.gemini.api_key' => 'k-gemini',
+        ]);
+
+        $sentPrompt = null;
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => function ($request) use (&$sentPrompt) {
+                $sentPrompt = (string) $request->body();
+
+                return Http::response([
+                    'candidates' => [['content' => ['parts' => [['text' => '{"findings":[]}']]]]],
+                ], 200);
+            },
+        ]);
+
+        $user = $this->authedUser();
+        $doc = $this->makeDocument($user, [
+            'header' => [
+                'eksportir' => [
+                    'nama' => 'PT RAHASIA DAGANG UTAMA',
+                    'npwp' => '0123456789012345',
+                    'alamat' => 'Jalan Sangat Rahasia No 10',
+                ],
+            ],
+            'barang' => [[
+                'seri' => 1,
+                'hs_code' => '84713020',
+                'uraian' => 'Laptop Core i7',
+                'jumlah_satuan' => 1,
+                'kode_satuan' => 'UNT',
+                'netto' => 2,
+                'nilai_fob' => 1500,
+            ]],
+        ]);
+
+        (new DocumentValidator)->validate($doc);
+
+        $this->assertNotNull($sentPrompt);
+        $this->assertStringNotContainsString('PT RAHASIA DAGANG UTAMA', $sentPrompt);
+        $this->assertStringNotContainsString('0123456789012345', $sentPrompt);
+        $this->assertStringNotContainsString('Jalan Sangat Rahasia', $sentPrompt);
+        $this->assertStringContainsString('REDACTED', $sentPrompt);
+    }
+
+    public function test_manifest_validation_flags_missing_bc11_on_import_document(): void
+    {
+        config(['ai.enabled' => false]);
+        $user = $this->authedUser();
+        $doc = $user->documents()->create([
+            'doc_type' => 'BC20',
+            'source' => Document::SOURCE_H2H,
+            'status' => Document::STATUS_DRAFT,
+            'payload' => [
+                'header' => [
+                    'importir' => ['nama' => 'PT M2B', 'npwp' => '012345678901000'],
+                    'kode_tutup_pu' => '11',
+                    'pengangkutan' => ['nama_sarana' => 'EVERGREEN 001'],
+                ],
+                'barang' => [[
+                    'seri' => 1, 'hs_code' => '84713020', 'uraian' => 'Komputer',
+                    'jumlah_satuan' => 1, 'kode_satuan' => 'UNT', 'netto' => 10, 'nilai_cif' => 1000,
+                ]],
+                'dokumen' => [], // Tidak ada BC 1.1
+            ],
+        ]);
+
+        $result = (new DocumentValidator)->validate($doc);
+        $messages = collect($result['rule_findings'])->pluck('message')->implode(' | ');
+
+        $this->assertStringContainsString('Tutup PU 11', $messages);
+        $this->assertStringContainsString('BC 1.1', $messages);
+    }
 }
+

@@ -87,6 +87,10 @@ class WebhookController extends Controller
             if ($document && $type === self::TYPE_RESPON) {
                 $this->applyStatus($document, $payload);
                 $log->update(['document_id' => $document->id, 'processed' => true]);
+
+                if (! empty($document->nomor_aju) && config('ceisa.zero_trust_verification', false)) {
+                    \App\Jobs\VerifyCeisaStatusJob::dispatch($document, $payload, $log->id);
+                }
             } elseif ($document) {
                 $log->update(['document_id' => $document->id, 'processed' => true]);
             } else {
