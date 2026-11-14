@@ -141,7 +141,18 @@ class CeisaService
             throw new CeisaException('Dokumen tidak dapat dikirim karena statusnya sudah berubah. Muat ulang halaman sebelum mencoba lagi.');
         }
 
-        // Generate a unique 26-digit nomor_aju if missing
+        // Klaim status secara atomik sebelum mutasi apa pun. Dua request paralel hanya boleh
+        // menghasilkan satu pengiriman ke CEISA; request yang kalah berhenti sebelum HTTP call.
+        $claimed = $document->transitionTo(Document::STATUS_SUBMITTING, [
+            'submitted_at' => Carbon::now(),
+            'error_message' => null,
+        ], force: $isRevision);
+
+        if (! $claimed) {
+            throw new CeisaException('Dokumen sedang diproses atau statusnya sudah berubah. Pengiriman ganda dibatalkan.');
+        }
+
+        // Generate a unique 26-digit nomor_aju if missing (setelah atomic claim).
         $nomorAju = $document->nomor_aju;
         if (empty($nomorAju)) {
             $kantorCode = data_get($document->payload, 'header.kantor_muat')
@@ -161,29 +172,11 @@ class CeisaService
             $npwp = $this->credential->npwp ?: '012345678901000';
             $uuuuuu = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', md5($npwp)), 0, 6));
             $tttttttt = date('Ymd');
-            $ssssss = str_pad((string) $document->id, 6, '0', STR_PAD_LEFT);
+            $ssssss = str_pad(substr((string) $document->id, -6), 6, '0', STR_PAD_LEFT);
             $nomorAju = $kkkk.$dd.$uuuuuu.$tttttttt.$ssssss;
 
             $document->forceFill(['nomor_aju' => $nomorAju])->save();
         }
-
-        // Klaim status secara atomik. Dua request paralel hanya boleh menghasilkan
-        // satu pengiriman ke CEISA; request yang kalah berhenti sebelum HTTP call.
-        $claimed = Document::query()
-            ->whereKey($document->getKey())
-            ->where('status', $previousStatus)
-            ->update([
-                'status' => Document::STATUS_SUBMITTING,
-                'submitted_at' => Carbon::now(),
-                'error_message' => null,
-                'updated_at' => Carbon::now(),
-            ]);
-
-        if ($claimed !== 1) {
-            throw new CeisaException('Dokumen sedang diproses atau statusnya sudah berubah. Pengiriman ganda dibatalkan.');
-        }
-
-        $document->refresh();
 
         $requestStarted = false;
         $data = null;
@@ -199,8 +192,8 @@ class CeisaService
 
             $document->forceFill([
                 'status' => Document::STATUS_SUBMITTED,
-                'nomor_aju' => data_get($data, 'nomor_aju', $document->nomor_aju),
-                'nomor_daftar' => data_get($data, 'nomor_daftar', $document->nomor_daftar),
+                'nomor_aju' => data_get($data, 'nomor_aju') ?: $document->nomor_aju,
+                'nomor_daftar' => data_get($data, 'nomor_daftar') ?: $document->nomor_daftar,
                 'id_header' => $this->extractIdHeader($data) ?? $document->id_header,
                 'ceisa_response' => $data,
                 'response_at' => Carbon::now(),
@@ -741,11 +734,23 @@ class CeisaService
             $payload = [
                 'synced_from_ceisa' => true,
                 'raw_status' => $info['raw_status'],
-                'raw_respon' => $info['raw_respon'] ?? null,
             ];
+
+            if (! empty($info['raw_respon'])) {
+                $payload['raw_respon'] = $info['raw_respon'];
+            }
 
             if ($document) {
                 $payload = array_merge(is_array($document->payload) ? $document->payload : [], $payload);
+            }
+
+            $submittedAt = $document ? $document->submitted_at : now();
+            if (! empty($info['waktu_status'])) {
+                try {
+                    $submittedAt = Carbon::parse($info['waktu_status']);
+                } catch (Throwable) {
+                    // Abaikan format waktu yang tidak valid dari API eksternal
+                }
             }
 
             $updateData = [
@@ -758,7 +763,7 @@ class CeisaService
                     is_array($info['raw_respon'] ?? null) ? $info['raw_respon'] : []
                 ),
                 'payload' => $payload,
-                'submitted_at' => $info['waktu_status'] ? Carbon::parse($info['waktu_status']) : ($document ? $document->submitted_at : now()),
+                'submitted_at' => $submittedAt,
                 'response_at' => now(),
             ];
 

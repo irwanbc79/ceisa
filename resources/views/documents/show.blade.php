@@ -29,6 +29,61 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <x-flash />
 
+            {{-- Horizontal Lifecycle Stepper --}}
+            @php
+                $stepIndex = match ($document->status) {
+                    \App\Models\Document::STATUS_DRAFT => 1,
+                    \App\Models\Document::STATUS_SUBMITTING => 2,
+                    \App\Models\Document::STATUS_SUBMITTED => 3,
+                    \App\Models\Document::STATUS_ACCEPTED,
+                    \App\Models\Document::STATUS_REJECTED,
+                    \App\Models\Document::STATUS_ERROR => 4,
+                    default => 1,
+                };
+                $isNegativeFinal = in_array($document->status, [\App\Models\Document::STATUS_REJECTED, \App\Models\Document::STATUS_ERROR], true);
+                $steps = [
+                    1 => 'Draft',
+                    2 => 'Mengirim H2H',
+                    3 => 'Terkirim ke DJBC',
+                    4 => $isNegativeFinal ? ($document->status === \App\Models\Document::STATUS_REJECTED ? 'Ditolak (NPP)' : 'Error Submit') : 'Selesai (SPPB / NPE)',
+                ];
+            @endphp
+            <div class="bg-panel rounded-2xl border border-slate-200/80 shadow-soft px-5 py-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 flex-wrap flex-1">
+                        @foreach ($steps as $idx => $label)
+                            @php
+                                $done = $idx < $stepIndex || ($idx === $stepIndex && $document->status === \App\Models\Document::STATUS_ACCEPTED);
+                                $active = $idx === $stepIndex && $document->status !== \App\Models\Document::STATUS_ACCEPTED;
+                                $pillCls = match (true) {
+                                    $active && $isNegativeFinal => 'bg-rose-50 text-rose-300 border-rose-200 ring-2 ring-rose-500/20',
+                                    $done => 'bg-emerald-50 text-emerald-300 border-emerald-200',
+                                    $active => 'bg-indigo-50 text-indigo-300 border-indigo-200 ring-2 ring-indigo-500/20',
+                                    default => 'bg-slate-50 text-slate-400 border-slate-200',
+                                };
+                            @endphp
+                            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all {{ $pillCls }}">
+                                <span class="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-mono {{ $done ? 'bg-emerald-500 text-white' : ($active ? ($isNegativeFinal ? 'bg-rose-500 text-white' : 'bg-indigo-600 text-white') : 'bg-slate-200 text-slate-500') }}">
+                                    {{ $done ? '✓' : $idx }}
+                                </span>
+                                <span>{{ $label }}</span>
+                            </div>
+                            @if (! $loop->last)
+                                <svg class="h-4 w-4 text-slate-300 hidden sm:block shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
+                            @endif
+                        @endforeach
+                    </div>
+                    @if ($document->nomor_aju)
+                        <button type="button"
+                                onclick="window.copyCeisaText(@json($document->nomor_aju), 'Nomor Aju tersalin')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-xs font-mono font-semibold text-slate-600 hover:text-indigo-700 transition-colors shrink-0">
+                            <span>{{ $document->nomor_aju }}</span>
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg>
+                        </button>
+                    @endif
+                </div>
+            </div>
+
             {{-- AI Validation Result Box --}}
             @if (session('ai_validation'))
                 @php

@@ -120,7 +120,7 @@ class WebhookController extends Controller
             }
         }
 
-        foreach ([$request->header('X-Webhook-Secret'), $request->query('secret'), $request->input('secret')] as $provided) {
+        foreach ([$request->header('X-Webhook-Secret'), $request->post('secret')] as $provided) {
             if (is_string($provided) && hash_equals($secret, $provided)) {
                 return true;
             }

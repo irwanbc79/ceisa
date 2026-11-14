@@ -52,7 +52,7 @@ class DeepSeekProvider implements AiProvider
         }
 
         if (! $response->successful()) {
-            throw new AiException('DeepSeek HTTP '.$response->status().': '.$response->body());
+            throw new AiException('DeepSeek HTTP '.$response->status().' — permintaan ditolak penyedia AI.');
         }
 
         $text = data_get($response->json(), 'choices.0.message.content');

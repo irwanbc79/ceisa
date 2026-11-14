@@ -38,8 +38,33 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden xl:flex xl:items-center xl:ms-5">
+            <!-- Settings Dropdown + Quick Search + CEISA Env Pill -->
+            @php
+                $navCredential = \App\Models\CeisaCredential::shared();
+                $navEnv = match (true) {
+                    ! $navCredential => ['label' => 'CEISA BELUM DIATUR', 'cls' => 'bg-amber-50 text-amber-300 border-amber-200'],
+                    str_contains((string) $navCredential->base_url, 'apisdev-gw') => ['label' => 'SANDBOX', 'cls' => 'bg-amber-50 text-amber-300 border-amber-200'],
+                    str_contains((string) $navCredential->base_url, 'apis-gw') => ['label' => 'PROD', 'cls' => 'bg-emerald-50 text-emerald-300 border-emerald-200'],
+                    default => ['label' => 'CUSTOM', 'cls' => 'bg-indigo-50 text-indigo-300 border-indigo-200'],
+                };
+            @endphp
+            <div class="hidden xl:flex xl:items-center xl:gap-2.5 xl:ms-5">
+                <button type="button"
+                        @click="$dispatch('open-command-palette')"
+                        title="Cari cepat dokumen & menu (⌘K / Ctrl+K)"
+                        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200/80 bg-slate-50/80 hover:bg-slate-100 text-xs text-slate-500 hover:text-slate-800 transition-colors">
+                    <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803m10.607.197a7.5 7.5 0 0 1-10.607 0" /></svg>
+                    <span class="hidden 2xl:inline font-medium">Cari...</span>
+                    <kbd class="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-400 border border-slate-200">⌘K</kbd>
+                </button>
+
+                <a href="{{ route('settings.ceisa.edit') }}"
+                   title="Environment Gateway CEISA Aktif"
+                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold tracking-wider {{ $navEnv['cls'] }}">
+                    <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                    {{ $navEnv['label'] }}
+                </a>
+
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center gap-2 px-3 py-1.5 border border-slate-200/60 text-sm leading-4 font-semibold rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100/80 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition ease-in-out duration-150 shadow-sm">

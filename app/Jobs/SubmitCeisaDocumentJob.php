@@ -6,6 +6,7 @@ use App\Exceptions\CeisaException;
 use App\Models\CeisaCredential;
 use App\Models\Document;
 use App\Services\CeisaService;
+use App\Services\CeisaStatusMapper;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -50,8 +51,39 @@ class SubmitCeisaDocumentJob implements ShouldQueue
             return;
         }
 
+        $service = CeisaService::forCredential($credential);
+        $this->document->refresh();
+
+        // Pada retry setelah delivery_state=unknown, jangan submit ulang membabi buta;
+        // rekonsiliasi status ke CEISA terlebih dahulu agar tidak terjadi pengiriman ganda.
+        if ($this->document->status === Document::STATUS_SUBMITTING && ! empty($this->document->nomor_aju)) {
+            try {
+                $statusData = $service->queryDocumentStatus($this->document->nomor_aju, $this->document->id_header);
+                CeisaStatusMapper::apply($this->document, $statusData);
+                Log::info('SubmitCeisaDocumentJob: status berhasil direkonsiliasi dari CEISA', [
+                    'document_id' => $this->document->id,
+                    'nomor_aju' => $this->document->nomor_aju,
+                    'status' => $this->document->fresh()->status,
+                ]);
+
+                return;
+            } catch (CeisaException $reconcileError) {
+                Log::warning('SubmitCeisaDocumentJob: rekonsiliasi status gagal', [
+                    'document_id' => $this->document->id,
+                    'nomor_aju' => $this->document->nomor_aju,
+                    'message' => $reconcileError->getMessage(),
+                ]);
+
+                if ($this->attempts() < $this->tries) {
+                    throw $reconcileError;
+                }
+
+                return;
+            }
+        }
+
         try {
-            CeisaService::forCredential($credential)->submit($this->document, $this->isRevision);
+            $service->submit($this->document, $this->isRevision);
 
             Log::info('SubmitCeisaDocumentJob sukses dikirim ke CEISA', [
                 'document_id' => $this->document->id,

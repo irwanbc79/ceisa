@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Exceptions\CeisaException;
 use App\Http\Requests\StoreArchiveDocumentRequest;
 use App\Http\Requests\StoreDocumentRequest;
+use App\Jobs\SubmitCeisaDocumentJob;
 use App\Models\CeisaCredential;
 use App\Models\CeisaReference;
 use App\Models\Document;
+use App\Services\CeisaResponseExtractor;
 use App\Services\CeisaService;
 use App\Services\CeisaStatusMapper;
 use App\Services\DocumentValidator;
+use App\Support\SafeUrl;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,7 +48,7 @@ class DocumentController extends Controller
         ];
 
         $perPage = 20;
-        $page = (int) $request->input('page', 1);
+        $page = max(1, (int) $request->input('page', 1));
         $documents = $query->latest()->forPage($page, $perPage)->get();
         $documents = new LengthAwarePaginator(
             $documents,
@@ -81,14 +84,14 @@ class DocumentController extends Controller
             $query->latest()->chunk(200, function ($chunk) use ($out) {
                 foreach ($chunk as $doc) {
                     fputcsv($out, [
-                        $doc->nomor_aju,
-                        $doc->nomor_daftar,
-                        $doc->doc_type,
-                        $doc->status,
-                        $doc->jalurInfo()['label'] ?? '',
+                        SafeUrl::csvCell($doc->nomor_aju),
+                        SafeUrl::csvCell($doc->nomor_daftar),
+                        SafeUrl::csvCell($doc->doc_type),
+                        SafeUrl::csvCell($doc->status),
+                        SafeUrl::csvCell($doc->jalurInfo()['label'] ?? ''),
                         $doc->isArchived() ? 'Arsip' : 'H2H',
-                        $doc->partyName(),
-                        $doc->partyNpwp(),
+                        SafeUrl::csvCell($doc->partyName()),
+                        SafeUrl::csvCell($doc->partyNpwp()),
                         $doc->created_at?->format('Y-m-d H:i'),
                     ]);
                 }
@@ -309,7 +312,7 @@ class DocumentController extends Controller
         }
 
         try {
-            CeisaService::forCredential(CeisaCredential::shared())->submit($document);
+            SubmitCeisaDocumentJob::dispatch($document);
         } catch (CeisaException $e) {
             return redirect()
                 ->route('documents.show', $document)
@@ -646,20 +649,23 @@ class DocumentController extends Controller
         $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
-        // Cari path di ceisa_response atau webhookLogs
-        $path = data_get($document->ceisa_response, 'data.responPdf')
-            ?? data_get($document->ceisa_response, 'data.pathRespon')
-            ?? data_get($document->ceisa_response, 'responPdf')
-            ?? data_get($document->ceisa_response, 'pathRespon')
-            ?? $document->webhookLogs->map(fn ($log) => data_get($log->payload, 'data.responPdf') ?? data_get($log->payload, 'data.pathRespon') ?? data_get($log->payload, 'pathRespon'))->filter()->first();
+        $path = CeisaResponseExtractor::responPdfPath($document);
 
         if (! $path) {
-            $path = $request->query('path');
+            $queryPath = $request->query('path');
+            if ($queryPath !== null) {
+                if (! SafeUrl::isSafeCeisaParam($queryPath)) {
+                    return back()->with('error', 'Parameter path respon tidak valid.');
+                }
+                $path = trim((string) $queryPath);
+            }
         }
 
         if (! $path) {
             return back()->with('error', 'Path file respon tidak ditemukan di data dokumen. Pastikan webhook respon sudah masuk.');
         }
+
+        $filename = SafeUrl::sanitizeFilename("respon-ceisa-{$document->nomor_aju}.pdf");
 
         try {
             $service = CeisaService::forCredential($credential);
@@ -668,7 +674,7 @@ class DocumentController extends Controller
             if ($response->successful()) {
                 return response()->streamDownload(function () use ($response) {
                     echo $response->body();
-                }, "respon-ceisa-{$document->nomor_aju}.pdf", [
+                }, $filename, [
                     'Content-Type' => 'application/pdf',
                 ]);
             }
@@ -692,6 +698,8 @@ class DocumentController extends Controller
             return back()->with('error', 'Nomor aju dokumen kosong. Kirim dokumen terlebih dahulu.');
         }
 
+        $filename = SafeUrl::sanitizeFilename("formulir-ceisa-{$document->nomor_aju}.pdf");
+
         try {
             $service = CeisaService::forCredential($credential);
             $response = $service->cetakFormulir($document->nomor_aju);
@@ -699,7 +707,7 @@ class DocumentController extends Controller
             if ($response->successful()) {
                 return response()->streamDownload(function () use ($response) {
                     echo $response->body();
-                }, "formulir-ceisa-{$document->nomor_aju}.pdf", [
+                }, $filename, [
                     'Content-Type' => 'application/pdf',
                 ]);
             }
@@ -719,17 +727,23 @@ class DocumentController extends Controller
         $credential = CeisaCredential::shared();
         abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
 
-        $kodeBilling = data_get($document->ceisa_response, 'data.kodeBilling')
-            ?? data_get($document->ceisa_response, 'kodeBilling')
-            ?? $document->webhookLogs->map(fn ($log) => data_get($log->payload, 'data.kodeBilling') ?? data_get($log->payload, 'kodeBilling'))->filter()->first();
+        $kodeBilling = CeisaResponseExtractor::kodeBilling($document);
 
         if (! $kodeBilling) {
-            $kodeBilling = $request->query('kode_billing');
+            $queryBilling = $request->query('kode_billing');
+            if ($queryBilling !== null) {
+                if (! SafeUrl::isSafeCeisaParam($queryBilling)) {
+                    return back()->with('error', 'Parameter kode billing tidak valid.');
+                }
+                $kodeBilling = trim((string) $queryBilling);
+            }
         }
 
         if (! $kodeBilling) {
             return back()->with('error', 'Kode billing tidak ditemukan di data dokumen.');
         }
+
+        $filename = SafeUrl::sanitizeFilename("billing-ceisa-{$kodeBilling}.pdf");
 
         try {
             $service = CeisaService::forCredential($credential);
@@ -738,7 +752,7 @@ class DocumentController extends Controller
             if ($response->successful()) {
                 return response()->streamDownload(function () use ($response) {
                     echo $response->body();
-                }, "billing-ceisa-{$kodeBilling}.pdf", [
+                }, $filename, [
                     'Content-Type' => 'application/pdf',
                 ]);
             }

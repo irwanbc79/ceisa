@@ -39,7 +39,7 @@ class GeminiProvider implements AiProvider
             $response = Http::timeout($this->timeout)
                 ->acceptJson()
                 ->asJson()
-                ->withQueryParameters(['key' => (string) $this->config['api_key']])
+                ->withHeaders(['x-goog-api-key' => (string) $this->config['api_key']])
                 ->post($url, [
                     'systemInstruction' => [
                         'parts' => [['text' => $system]],
@@ -57,7 +57,7 @@ class GeminiProvider implements AiProvider
         }
 
         if (! $response->successful()) {
-            throw new AiException('Gemini HTTP '.$response->status().': '.$response->body());
+            throw new AiException('Gemini HTTP '.$response->status().' — permintaan ditolak penyedia AI.');
         }
 
         $parts = data_get($response->json(), 'candidates.0.content.parts', []);

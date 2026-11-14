@@ -97,6 +97,37 @@ class Document extends Model
     }
 
     /**
+     * Transisi status atomik dengan validasi Finite State Machine (FSM).
+     *
+     * @param  array<string, mixed>  $attributes
+     */
+    public function transitionTo(string $targetStatus, array $attributes = [], bool $force = false): bool
+    {
+        if (! $force && ! $this->canTransitionTo($targetStatus)) {
+            return false;
+        }
+
+        $currentStatus = $this->status;
+        $payload = array_merge($attributes, [
+            'status' => $targetStatus,
+            'updated_at' => Carbon::now(),
+        ]);
+
+        $updated = static::query()
+            ->whereKey($this->getKey())
+            ->where('status', $currentStatus)
+            ->update($payload);
+
+        if ($updated === 1) {
+            $this->refresh();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Nama pihak utama (eksportir/importir/pengusaha TPB/pemohon/arsip).
      */
     public function partyName(): ?string

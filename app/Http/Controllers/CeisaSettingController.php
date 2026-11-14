@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\CeisaException;
 use App\Models\CeisaCredential;
 use App\Services\CeisaService;
+use App\Support\SafeUrl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -35,8 +36,14 @@ class CeisaSettingController extends Controller
             'id_platform' => ['nullable', 'string', 'max:255'],
             'app_id' => ['nullable', 'string', 'max:255'],
             'environment' => ['required', 'string', 'in:production,sandbox,custom'],
-            'custom_base_url' => ['required_if:environment,custom', 'nullable', 'string', 'max:500'],
+            'custom_base_url' => ['required_if:environment,custom', 'nullable', 'url', 'max:500'],
         ]);
+
+        if ($data['environment'] === 'custom' && ! SafeUrl::isSafeExternalBaseUrl((string) ($data['custom_base_url'] ?? ''))) {
+            return back()
+                ->withInput()
+                ->withErrors(['custom_base_url' => 'URL kustom harus menggunakan HTTPS publik yang valid dan tidak boleh mengarah ke jaringan internal/lokal.']);
+        }
 
         $credential = CeisaCredential::shared();
 
