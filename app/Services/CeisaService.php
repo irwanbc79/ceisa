@@ -610,6 +610,25 @@ class CeisaService
     }
 
     /**
+     * Upload dokumen pelengkap respon NPD (Nota Permintaan Data/Dokumen) ke CEISA.
+     *
+     * @param  string  $filePath  Absolute path ke file PDF
+     * @param  array<string, mixed>  $params  {nomorAju, seriDokumen, npwp, keterangan?}
+     * @return array<string, mixed>
+     *
+     * @throws CeisaException
+     */
+    public function uploadDokapNpd(string $filePath, array $params): array
+    {
+        return $this->uploadFile(
+            config('ceisa.endpoints.upload_dokap_npd'),
+            $filePath,
+            $params,
+            'Gagal upload dokumen respon NPD ke CEISA',
+        );
+    }
+
+    /**
      * Upload gambar barang ke CEISA.
      *
      * @param  string  $filePath  Absolute path ke file gambar

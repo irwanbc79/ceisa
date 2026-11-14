@@ -9,6 +9,7 @@ use App\Jobs\SubmitCeisaDocumentJob;
 use App\Models\CeisaCredential;
 use App\Models\CeisaReference;
 use App\Models\Document;
+use App\Models\DocumentAuditLog;
 use App\Services\CeisaResponseExtractor;
 use App\Services\CeisaService;
 use App\Services\CeisaStatusMapper;
@@ -230,6 +231,11 @@ class DocumentController extends Controller
             'status' => Document::STATUS_DRAFT,
         ]);
 
+        DocumentAuditLog::record($document, 'created', 'Dokumen dibuat.', [
+            'doc_type' => $document->doc_type,
+            'submit_action' => $request->input('submit_action', 'submit'),
+        ], $user, $request);
+
         if ($request->input('submit_action') === 'draft') {
             return redirect()
                 ->route('documents.show', $document)
@@ -304,6 +310,11 @@ class DocumentController extends Controller
             'nomor_aju' => $request->validated('nomor_aju'),
             'payload' => $request->toCeisaPayload(),
         ]);
+
+        DocumentAuditLog::record($document, 'updated', 'Payload dokumen diperbarui.', [
+            'doc_type' => $document->doc_type,
+            'submit_action' => $request->input('submit_action', 'submit'),
+        ], $request->user(), $request);
 
         if ($request->input('submit_action') === 'draft') {
             return redirect()
@@ -381,6 +392,12 @@ class DocumentController extends Controller
 
         $result = $validator->validate($document);
 
+        DocumentAuditLog::record($document, 'validated', 'Validasi kepatuhan pra-kirim dijalankan.', [
+            'rule_count' => count($result['rule_findings'] ?? []),
+            'ai_count' => count($result['ai_findings'] ?? []),
+            'provider' => $result['provider'] ?? null,
+        ], $request->user(), $request);
+
         return redirect()
             ->route('documents.show', $document)
             ->with('ai_validation', $result);
@@ -393,7 +410,7 @@ class DocumentController extends Controller
     {
         $this->authorizeOwnership($request, $document);
 
-        $document->load('webhookLogs');
+        $document->load(['webhookLogs', 'auditLogs.user']);
 
         return view('documents.show', compact('document'));
     }
@@ -414,6 +431,7 @@ class DocumentController extends Controller
 
         try {
             \App\Jobs\SubmitCeisaDocumentJob::dispatch($document);
+            DocumentAuditLog::record($document, 'submitted', 'Dokumen dikirim ke antrean H2H CEISA.', [], $request->user(), $request);
         } catch (CeisaException $e) {
             return back()->with('error', 'Submit gagal: '.$e->getMessage());
         }
@@ -437,6 +455,7 @@ class DocumentController extends Controller
 
         try {
             \App\Jobs\SubmitCeisaDocumentJob::dispatch($document, isRevision: true);
+            DocumentAuditLog::record($document, 'revision_submitted', 'Nota Pembetulan / perbaikan dikirim ke antrean H2H CEISA.', [], $request->user(), $request);
         } catch (CeisaException $e) {
             return back()->with('error', 'Kirim pembetulan gagal: '.$e->getMessage());
         }
@@ -760,6 +779,83 @@ class DocumentController extends Controller
             return back()->with('error', 'Gagal mengunduh billing dari CEISA (HTTP '.$response->status().').');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengunduh billing: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Upload dokumen pelengkap (dokap), respon NPD, atau gambar barang ke CEISA.
+     */
+    public function uploadDokap(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        $credential = CeisaCredential::shared();
+        abort_unless($credential, 403, 'Kredensial CEISA belum diatur.');
+
+        if (empty($document->nomor_aju)) {
+            return back()->with('error', 'Dokumen belum memiliki Nomor Aju. Kirim dokumen terlebih dahulu.');
+        }
+
+        $uploadType = $request->input('upload_type', 'dokap');
+        $mimeRule = $uploadType === 'gambar' ? 'mimes:jpg,jpeg,png,webp' : 'mimes:pdf';
+
+        $validated = $request->validate([
+            'upload_type' => ['required', 'in:dokap,npd,gambar'],
+            'seri' => ['required', 'integer', 'min:1', 'max:9999'],
+            'keterangan' => ['nullable', 'string', 'max:255'],
+            'file' => ['required', 'file', 'max:10240', $mimeRule],
+        ]);
+
+        $service = CeisaService::forCredential($credential);
+        $npwp = $service->npwp15() ?: preg_replace('/\D/', '', (string) $document->partyNpwp());
+        $uploadedFile = $request->file('file');
+        $originalName = SafeUrl::sanitizeFilename($uploadedFile->getClientOriginalName());
+        $tempPath = $uploadedFile->getRealPath();
+
+        try {
+            $response = match ($validated['upload_type']) {
+                'npd' => $service->uploadDokapNpd($tempPath, array_filter([
+                    'nomorAju' => $document->nomor_aju,
+                    'seriDokumen' => (int) $validated['seri'],
+                    'npwp' => $npwp,
+                    'keterangan' => $validated['keterangan'] ?? null,
+                ], fn ($v) => $v !== null && $v !== '')),
+                'gambar' => $service->uploadGambar($tempPath, [
+                    'nomorAju' => $document->nomor_aju,
+                    'seriBarang' => (int) $validated['seri'],
+                    'npwp' => $npwp,
+                    'keterangan' => $validated['keterangan'] ?? 'Gambar barang',
+                ]),
+                default => $service->uploadDokap($tempPath, [
+                    'nomorAju' => $document->nomor_aju,
+                    'seriDokumen' => (int) $validated['seri'],
+                    'npwp' => $npwp,
+                ]),
+            };
+
+            $action = match ($validated['upload_type']) {
+                'npd' => 'npd_uploaded',
+                'gambar' => 'gambar_uploaded',
+                default => 'dokap_uploaded',
+            };
+
+            $label = match ($validated['upload_type']) {
+                'npd' => 'Dokumen respon NPD',
+                'gambar' => 'Gambar barang',
+                default => 'Dokumen pelengkap',
+            };
+
+            DocumentAuditLog::record($document, $action, "{$label} ({$originalName}) diunggah ke CEISA.", [
+                'upload_type' => $validated['upload_type'],
+                'seri' => (int) $validated['seri'],
+                'filename' => $originalName,
+                'keterangan' => $validated['keterangan'] ?? null,
+                'ceisa_status' => data_get($response, 'status'),
+            ], $request->user(), $request);
+
+            return back()->with('success', "{$label} berhasil diunggah ke CEISA.");
+        } catch (CeisaException $e) {
+            return back()->with('error', 'Upload ke CEISA gagal: '.$e->getMessage());
         }
     }
 

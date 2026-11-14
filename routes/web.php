@@ -48,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/dokumen/{document}/perbarui-status', [DocumentController::class, 'refreshStatus'])->name('documents.refresh-status');
     Route::post('/dokumen/{document}/duplikasi', [DocumentController::class, 'duplicate'])->name('documents.duplicate');
     Route::post('/dokumen/{document}/validasi-ai', [DocumentController::class, 'validateAi'])->name('documents.validate');
+    Route::post('/dokumen/{document}/upload-dokap', [DocumentController::class, 'uploadDokap'])->name('documents.upload-dokap');
     Route::get('/dokumen/{document}/download-respon', [DocumentController::class, 'downloadRespon'])->name('documents.download-respon');
     Route::get('/dokumen/{document}/cetak-formulir', [DocumentController::class, 'cetakFormulir'])->name('documents.cetak-formulir');
     Route::get('/dokumen/{document}/download-billing', [DocumentController::class, 'downloadBilling'])->name('documents.download-billing');

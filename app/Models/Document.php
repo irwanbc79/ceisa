@@ -71,6 +71,11 @@ class Document extends Model
         return $this->hasMany(WebhookLog::class);
     }
 
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(DocumentAuditLog::class)->latest('created_at')->latest('id');
+    }
+
     public function isArchived(): bool
     {
         return $this->source === self::SOURCE_ARSIP;
