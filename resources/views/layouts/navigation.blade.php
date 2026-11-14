@@ -1,40 +1,42 @@
 <nav x-data="{ open: false }" class="bg-panel/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 shadow-sm transition-all duration-300">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
+        <div class="flex items-center justify-between gap-4 h-16">
+            <div class="flex items-center gap-4 min-w-0">
                 <!-- Logo & Header Title -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2.5 group">
                         <span class="h-10 px-1.5 inline-flex items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-sm group-hover:border-gold-300/60 transition-colors">
                             <x-application-logo class="block h-7 w-auto" />
                         </span>
-                        <div class="hidden sm:block leading-tight">
+                        <div class="hidden sm:block leading-tight whitespace-nowrap">
                             <span class="block text-sm font-extrabold tracking-tight text-slate-900">PT. Mora Multi Berkah</span>
                             <span class="block text-[9px] font-mono font-semibold uppercase tracking-[0.2em] text-gold-500">CEISA 4.0 · H2H</span>
                         </div>
                     </a>
                 </div>
 
+                <div class="hidden xl:block h-6 w-px bg-slate-200/80 shrink-0" aria-hidden="true"></div>
+
                 <!-- Navigation Links -->
-                <div class="hidden space-x-7 xl:-my-px xl:ms-8 xl:flex">
+                <div class="hidden xl:flex xl:items-center xl:gap-1">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.index')">
-                        {{ __('Daftar Dokumen') }}
+                        {{ __('Dokumen') }}
                     </x-nav-link>
                     <x-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
-                        {{ __('Buat Dokumen') }}
+                        {{ __('Buat Baru') }}
                     </x-nav-link>
                     <x-nav-link :href="route('manifests.index')" :active="request()->routeIs('manifests.*')">
-                        {{ __('Monitoring Manifes') }}
+                        {{ __('Manifes') }}
                     </x-nav-link>
                     <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
                         {{ __('Notifikasi') }}
                     </x-nav-link>
                     <x-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
-                        {{ __('Pengaturan CEISA') }}
+                        {{ __('Pengaturan') }}
                     </x-nav-link>
                     @if (Auth::user()->isAdmin())
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
@@ -54,30 +56,29 @@
                     default => ['label' => 'CUSTOM', 'cls' => 'bg-indigo-50 text-indigo-300 border-indigo-200'],
                 };
             @endphp
-            <div class="hidden xl:flex xl:items-center xl:gap-2.5 xl:ms-5">
+            <div class="hidden xl:flex xl:items-center xl:gap-2 shrink-0">
                 <button type="button"
                         @click="$dispatch('open-command-palette')"
                         title="Cari cepat dokumen & menu (⌘K / Ctrl+K)"
-                        class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-slate-200/80 bg-slate-50/80 hover:bg-slate-100 text-xs text-slate-500 hover:text-slate-800 transition-colors">
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200/80 bg-slate-50/80 hover:bg-slate-100 text-xs text-slate-500 hover:text-slate-800 transition-colors shrink-0">
                     <svg class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 15.803m10.607.197a7.5 7.5 0 0 1-10.607 0" /></svg>
-                    <span class="hidden 2xl:inline font-medium">Cari...</span>
                     <kbd class="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-400 border border-slate-200">⌘K</kbd>
                 </button>
 
                 <a href="{{ route('settings.ceisa.edit') }}"
                    title="Environment Gateway CEISA Aktif"
-                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold tracking-wider {{ $navEnv['cls'] }}">
+                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-mono font-bold tracking-wider whitespace-nowrap shrink-0 {{ $navEnv['cls'] }}">
                     <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
                     {{ $navEnv['label'] }}
                 </a>
 
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center gap-2 px-3 py-1.5 border border-slate-200/60 text-sm leading-4 font-semibold rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100/80 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition ease-in-out duration-150 shadow-sm">
-                            <div class="h-6 w-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-inner">
+                        <button class="inline-flex items-center gap-2 px-3 py-1.5 border border-slate-200/60 text-sm leading-4 font-semibold rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100/80 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition ease-in-out duration-150 shadow-sm whitespace-nowrap">
+                            <div class="h-6 w-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px] uppercase shadow-inner shrink-0">
                                 {{ substr(Auth::user()->name, 0, 2) }}
                             </div>
-                            <div>{{ Auth::user()->name }}</div>
+                            <span class="whitespace-nowrap">{{ Auth::user()->name }}</span>
 
                             <div class="ms-0.5">
                                 <svg class="fill-current h-4 w-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
