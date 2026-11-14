@@ -1117,6 +1117,83 @@
                         </div>
                     @endif
 
+                    {{-- PKB Online (Jalur Merah) --}}
+                    @if($document->jalur === 'M' || $document->pkbSubmissions->isNotEmpty())
+                        <div class="bg-panel rounded-3xl p-6 shadow-sm border border-rose-200/80 space-y-4 transition-all duration-300 hover:shadow-md">
+                            <div class="flex items-center justify-between pb-2 border-b border-rose-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                    <h3 class="font-extrabold text-slate-800 text-xs uppercase tracking-wider">PKB Online (Jalur Merah)</h3>
+                                </div>
+                                <span class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 border border-rose-200">Periksa Fisik</span>
+                            </div>
+
+                            <p class="text-[11px] text-slate-500 leading-relaxed">
+                                Rekam kesiapan barang untuk pemeriksaan fisik Bea Cukai (tanggal periksa, lokasi/gudang TPS, dan PIC lapangan). Lampiran bukti siap (PDF, maks. 10 MB) akan diunggah ke CEISA bila Nomor Aju aktif.
+                            </p>
+
+                            <form method="POST" action="{{ route('documents.pkb.store', $document) }}" enctype="multipart/form-data" class="space-y-3">
+                                @csrf
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Tanggal Periksa</label>
+                                        <input type="date" name="tanggal_periksa" value="{{ old('tanggal_periksa', now()->format('Y-m-d')) }}" required
+                                               class="w-full rounded-xl border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 focus:border-rose-500 focus:ring-rose-500" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Kode Gudang / TPS</label>
+                                        <input type="text" name="kode_gudang" maxlength="64" value="{{ old('kode_gudang') }}" placeholder="Mis. JICT1 / KOJA" required
+                                               class="w-full rounded-xl border-slate-200 bg-slate-50 text-xs font-semibold text-slate-700 focus:border-rose-500 focus:ring-rose-500" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Alamat Lokasi Pemeriksaan</label>
+                                    <input type="text" name="alamat_lokasi" maxlength="500" value="{{ old('alamat_lokasi') }}" placeholder="Alamat lengkap gudang/lapangan penimbunan" required
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 text-xs text-slate-700 focus:border-rose-500 focus:ring-rose-500" />
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2.5">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama PIC</label>
+                                        <input type="text" name="nama_pic" maxlength="120" value="{{ old('nama_pic') }}" placeholder="Nama petugas lapangan" required
+                                               class="w-full rounded-xl border-slate-200 bg-slate-50 text-xs text-slate-700 focus:border-rose-500 focus:ring-rose-500" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">No. Telepon PIC</label>
+                                        <input type="text" name="telepon_pic" maxlength="32" value="{{ old('telepon_pic') }}" placeholder="0812..." required
+                                               class="w-full rounded-xl border-slate-200 bg-slate-50 text-xs text-slate-700 focus:border-rose-500 focus:ring-rose-500" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Bukti Barang Siap (PDF, Opsional)</label>
+                                    <input type="file" name="bukti_siap" accept=".pdf,application/pdf"
+                                           class="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100 cursor-pointer" />
+                                </div>
+
+                                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-bold shadow-sm transition-colors">
+                                    Simpan &amp; Laporkan PKB
+                                </button>
+                            </form>
+
+                            @if($document->pkbSubmissions->isNotEmpty())
+                                <div class="pt-3 border-t border-slate-100 space-y-2">
+                                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Riwayat PKB Tercatat</p>
+                                    @foreach($document->pkbSubmissions->take(5) as $pkb)
+                                        <div class="rounded-2xl bg-slate-50 border border-slate-100 px-3 py-2 text-[11px]">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-bold text-slate-700">Gudang {{ $pkb->kode_gudang }} · {{ $pkb->tanggal_periksa?->format('d/m/Y') }}</span>
+                                                <span class="font-mono text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">{{ $pkb->status }}</span>
+                                            </div>
+                                            <p class="text-slate-500 mt-0.5">PIC: {{ $pkb->nama_pic }} ({{ $pkb->telepon_pic }})</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                     {{-- Local Webhook Simulator Widget --}}
                     @if(config('app.env') === 'local')
                         <div class="bg-ink-950 text-white rounded-3xl p-6 shadow-lg border border-white/10 space-y-4 shadow-slate-900/10 relative overflow-hidden">

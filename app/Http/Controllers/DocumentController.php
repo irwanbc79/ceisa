@@ -10,6 +10,7 @@ use App\Models\CeisaCredential;
 use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Models\DocumentAuditLog;
+use App\Models\PkbSubmission;
 use App\Services\CeisaResponseExtractor;
 use App\Services\CeisaService;
 use App\Services\CeisaStatusMapper;
@@ -410,7 +411,7 @@ class DocumentController extends Controller
     {
         $this->authorizeOwnership($request, $document);
 
-        $document->load(['webhookLogs', 'auditLogs.user']);
+        $document->load(['webhookLogs', 'auditLogs.user', 'pkbSubmissions.user']);
 
         return view('documents.show', compact('document'));
     }
@@ -857,6 +858,77 @@ class DocumentController extends Controller
         } catch (CeisaException $e) {
             return back()->with('error', 'Upload ke CEISA gagal: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Rekam Pemberitahuan Kesiapan Barang (PKB) Online untuk dokumen Jalur Merah.
+     */
+    public function storePkb(Request $request, Document $document): RedirectResponse
+    {
+        $this->authorizeOwnership($request, $document);
+
+        $validated = $request->validate([
+            'tanggal_periksa' => ['required', 'date'],
+            'alamat_lokasi' => ['required', 'string', 'max:500'],
+            'kode_gudang' => ['required', 'string', 'max:64'],
+            'nama_pic' => ['required', 'string', 'max:120'],
+            'telepon_pic' => ['required', 'string', 'max:32'],
+            'catatan' => ['nullable', 'string', 'max:500'],
+            'bukti_siap' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+        ]);
+
+        $pkb = PkbSubmission::create([
+            'document_id' => $document->id,
+            'user_id' => $request->user()?->id,
+            'tanggal_periksa' => $validated['tanggal_periksa'],
+            'alamat_lokasi' => $validated['alamat_lokasi'],
+            'kode_gudang' => $validated['kode_gudang'],
+            'nama_pic' => $validated['nama_pic'],
+            'telepon_pic' => $validated['telepon_pic'],
+            'catatan' => $validated['catatan'] ?? null,
+            'status' => PkbSubmission::STATUS_RECORDED,
+        ]);
+
+        $uploadedMsg = '';
+        $credential = CeisaCredential::shared();
+        if ($request->hasFile('bukti_siap') && ! empty($document->nomor_aju) && $credential) {
+            $service = CeisaService::forCredential($credential);
+            $npwp = $service->npwp15() ?: preg_replace('/\D/', '', (string) $document->partyNpwp());
+            $tempPath = $request->file('bukti_siap')->getRealPath();
+
+            try {
+                $response = $service->uploadDokap($tempPath, [
+                    'nomorAju' => $document->nomor_aju,
+                    'seriDokumen' => 1,
+                    'npwp' => $npwp,
+                ]);
+                $pkb->update([
+                    'status' => PkbSubmission::STATUS_SUBMITTED,
+                    'ceisa_response' => $response,
+                ]);
+                $uploadedMsg = ' Bukti kesiapan barang juga berhasil diunggah ke CEISA.';
+            } catch (CeisaException $e) {
+                $pkb->update([
+                    'status' => PkbSubmission::STATUS_FAILED,
+                    'ceisa_response' => ['error' => $e->getMessage()],
+                ]);
+                DocumentAuditLog::record($document, 'pkb_recorded', 'PKB dicatat lokal, tetapi upload bukti ke CEISA gagal.', [
+                    'pkb_id' => $pkb->id,
+                    'kode_gudang' => $pkb->kode_gudang,
+                    'error' => $e->getMessage(),
+                ], $request->user(), $request);
+
+                return back()->with('error', 'PKB tersimpan lokal, namun upload bukti ke CEISA gagal: '.$e->getMessage());
+            }
+        }
+
+        DocumentAuditLog::record($document, 'pkb_recorded', "PKB Online dicatat (Gudang {$pkb->kode_gudang}, Tgl Periksa {$pkb->tanggal_periksa->format('Y-m-d')}).", [
+            'pkb_id' => $pkb->id,
+            'kode_gudang' => $pkb->kode_gudang,
+            'status' => $pkb->status,
+        ], $request->user(), $request);
+
+        return back()->with('success', 'Pemberitahuan Kesiapan Barang (PKB) berhasil dicatat.'.$uploadedMsg);
     }
 
     /**

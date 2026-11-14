@@ -104,6 +104,16 @@ return [
         'incoterm' => env('CEISA_REF_INCOTERM'),
         'cara_angkut' => env('CEISA_REF_CARA_ANGKUT'),
         'hs_code' => env('CEISA_REF_HS'),
+        'jenis_ekspor' => env('CEISA_REF_JENIS_EKSPOR'),
+        'kategori_ekspor' => env('CEISA_REF_KATEGORI_EKSPOR'),
+        'cara_dagang' => env('CEISA_REF_CARA_DAGANG'),
+        'cara_bayar' => env('CEISA_REF_CARA_BAYAR'),
+        'jenis_impor' => env('CEISA_REF_JENIS_IMPOR'),
+        'tutup_pu' => env('CEISA_REF_TUTUP_PU'),
+        'jenis_pengangkutan' => env('CEISA_REF_JENIS_PENGANGKUTAN'),
+        'kondisi_barang' => env('CEISA_REF_KONDISI_BARANG'),
+        'fasilitas' => env('CEISA_REF_FASILITAS'),
+        'jenis_dokumen' => env('CEISA_REF_JENIS_DOKUMEN'),
     ]),
 
     /*
