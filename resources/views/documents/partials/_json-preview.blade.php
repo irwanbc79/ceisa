@@ -8,7 +8,7 @@
 @endphp
 
 {{-- JSON Real-time Preview Panel (Sidebar) --}}
-<div class="lg:col-span-1 space-y-4 lg:sticky lg:top-6">
+<div class="lg:col-span-1 space-y-4 lg:sticky lg:top-6" x-show="showJson" x-cloak x-transition>
     <div class="bg-ink-950 text-slate-400 rounded-2xl shadow-xl overflow-hidden border border-white/10">
         {{-- Collapsible Header --}}
         <button type="button" @click="showJson = !showJson"

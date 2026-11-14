@@ -50,44 +50,61 @@
                 <div><span class="font-semibold">Belum lengkap:</span> <span x-text="formError"></span></div>
             </div>
 
-            {{-- Stepper Progress Bar --}}
-            <div class="mb-8 bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6">
-                <div class="relative flex items-center justify-between">
-                    {{-- Progress Line Background --}}
-                    <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-100 rounded"></div>
-                    {{-- Active Progress Line --}}
-                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-600 rounded transition-all duration-500"
-                         :style="`width: ${((step - 1) / (steps.length - 1)) * 100}%`"></div>
+            {{-- CEISA 4.0 Portal Header & Horizontal Tab Strip --}}
+            <div class="mb-6 bg-white border border-slate-200 shadow-sm rounded-xl overflow-hidden">
+                {{-- Top Document Title & Quick Actions (Bergaya Portal CEISA 4.0) --}}
+                <div class="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded-md text-xs font-extrabold tracking-wide bg-blue-600 text-white shadow-xs" x-text="doc_type"></span>
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-tight"
+                                x-text="doc_type === 'BC20' ? 'BC 2.0 – PEMBERITAHUAN IMPOR BARANG' : (doc_type === 'BC30' ? 'BC 3.0 – PEMBERITAHUAN EKSPOR BARANG' : (docTypes.find(d => d.code === doc_type)?.label || doc_type))">
+                            </h3>
+                            <p class="text-[11px] text-slate-500">Tata letak tab disesuaikan dengan alur perekaman Portal CEISA 4.0 (DJBC)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" @click="showJson = !showJson"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors"
+                                :class="showJson ? 'bg-slate-800 border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'">
+                            <span class="h-1.5 w-1.5 rounded-full" :class="showJson ? 'bg-emerald-400' : 'bg-slate-400'"></span>
+                            <span x-text="showJson ? 'Tutup JSON' : 'Lihat JSON'"></span>
+                        </button>
+                        <button type="button" @click="showDraftModal = true"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors">
+                            <svg class="h-3.5 w-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                            Preview Draft
+                        </button>
+                        <button type="button" @click="document.getElementById('submit_action').value='draft'; document.getElementById('ceisaDocForm').submit();"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition-colors">
+                            Simpan Draft
+                        </button>
+                    </div>
+                </div>
 
-                    {{-- Steps --}}
+                {{-- Horizontal CEISA 4.0 Tab Bar (Biru = Aktif, Hijau = Selesai, Merah = Belum Lengkap) --}}
+                <div class="px-3 bg-white flex items-center gap-1 overflow-x-auto scrollbar-none border-b border-slate-100">
                     <template x-for="(s, idx) in steps" :key="idx">
                         <button type="button" @click="goToStep(idx + 1)"
                                 :disabled="idx + 1 > step && !isStepValid(step)"
-                                class="relative z-10 flex flex-col items-center group focus:outline-none disabled:cursor-not-allowed">
-                            <div class="h-10 w-10 rounded-full flex items-center justify-center font-semibold text-sm border-2 transition-all duration-300"
-                                 :class="step === idx + 1 
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-slate-900/10 scale-110'
-                                    : (step > idx + 1 
-                                        ? 'bg-emerald-500 border-emerald-500 text-white' 
-                                        : 'bg-panel border-slate-200 text-slate-400 group-hover:border-slate-300')">
-                                <span x-show="step <= idx + 1" x-text="idx + 1"></span>
-                                <svg x-show="step > idx + 1" x-cloak class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                </svg>
-                            </div>
-                            <span class="text-xs font-semibold mt-2 transition-colors duration-300"
-                                  :class="step === idx + 1 ? 'text-indigo-300 font-bold' : (step > idx + 1 ? 'text-emerald-300' : 'text-slate-400')"
-                                  x-text="s.title"></span>
+                                class="relative px-3.5 py-3 text-xs whitespace-nowrap transition-all border-b-2 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                :class="step === idx + 1
+                                    ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/40'
+                                    : (step > idx + 1
+                                        ? 'border-transparent text-emerald-600 hover:text-emerald-700 hover:bg-slate-50 font-semibold'
+                                        : 'border-transparent text-rose-500 hover:text-rose-600 hover:bg-slate-50 font-medium')">
+                            <span class="text-[10px] font-mono opacity-75" x-text="(idx + 1) + '.'"></span>
+                            <span x-text="s.title"></span>
                         </button>
                     </template>
                 </div>
             </div>
 
-            {{-- Main Layout: Form & JSON Preview --}}
-            <div class="grid lg:grid-cols-3 gap-8 items-start">
+            {{-- Main Layout: Full-Width Form (or 2+1 when JSON Inspector toggled) --}}
+            <div class="grid lg:grid-cols-3 gap-6 items-start">
                 
                 {{-- Form Section --}}
-                <div class="lg:col-span-2 space-y-6">
+                <div :class="showJson ? 'lg:col-span-2' : 'lg:col-span-3'" class="space-y-6 transition-all duration-200">
                     <form method="POST" action="{{ isset($editDocument) ? route('documents.update', $editDocument) : route('documents.store') }}" id="ceisaDocForm" novalidate>
                         @csrf
                         @isset($editDocument)
