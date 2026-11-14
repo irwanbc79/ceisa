@@ -121,6 +121,33 @@ class DocumentValidator
             } else {
                 $this->checkReferenceEnum('satuan', $kodeSatuan, "barang #{$seri} satuan", $f);
             }
+
+            if ($document->doc_type === 'BC20') {
+                $negaraAsal = trim((string) (data_get($item, 'kode_negara_asal') ?? data_get($item, 'negara_asal') ?? ''));
+                if ($negaraAsal === '') {
+                    $f[] = ['level' => 'warning', 'field' => "barang #{$seri} negara asal", 'message' => '[CEISA 1028 / P-22/BC/2009] Negara asal barang wajib diisi pada PIB BC 2.0.'];
+                } else {
+                    $this->checkReferenceEnum('negara', $negaraAsal, "barang #{$seri} negara asal", $f);
+                }
+
+                $jenisKemasan = trim((string) (data_get($item, 'kode_jenis_kemasan') ?? data_get($item, 'jenis_kemasan') ?? ''));
+                if ($jenisKemasan === '') {
+                    $f[] = ['level' => 'warning', 'field' => "barang #{$seri} kemasan", 'message' => '[CEISA 1028] Kode jenis kemasan per barang wajib diisi pada PIB BC 2.0.'];
+                } else {
+                    $this->checkReferenceEnum('kemasan', $jenisKemasan, "barang #{$seri} kemasan", $f);
+                }
+            }
+        }
+
+        // Rekonsiliasi berat: Bruto (berat kotor) harus >= total Netto seluruh barang.
+        $totalNetto = collect($barang)->sum(fn ($item) => (float) data_get($item, 'netto', 0));
+        $bruto = (float) (data_get($payload, 'header.bruto') ?? data_get($payload, 'header.berat_kotor') ?? data_get($payload, 'bruto') ?? 0);
+        if ($bruto > 0 && $totalNetto > $bruto) {
+            $f[] = [
+                'level' => 'error',
+                'field' => 'bruto vs netto',
+                'message' => 'Total berat bersih/netto ('.number_format($totalNetto, 2).' kg) melebihi berat kotor/bruto ('.number_format($bruto, 2).' kg).',
+            ];
         }
 
         // Kelengkapan entitas utama.
@@ -145,7 +172,7 @@ class DocumentValidator
             }
         }
 
-        $f = array_merge($f, $this->checkHeaderCompliance($payload));
+        $f = array_merge($f, $this->checkHeaderCompliance($payload, $document->doc_type));
 
         // Validasi Manifes Kedatangan (BC 1.1) untuk dokumen impor
         if (in_array($document->doc_type, ['BC20', 'BC24', 'TPB'], true)) {
@@ -161,7 +188,7 @@ class DocumentValidator
      * @param  array<string, mixed>  $payload
      * @return array<int, array{level: string, field: ?string, message: string}>
      */
-    protected function checkHeaderCompliance(array $payload): array
+    protected function checkHeaderCompliance(array $payload, string $docType = ''): array
     {
         $findings = [];
 
@@ -177,11 +204,37 @@ class DocumentValidator
             $findings[] = ['level' => 'warning', 'field' => 'valuta', 'message' => '[CEISA 1028] Kode valuta transaksi wajib diisi.'];
         } else {
             $this->checkReferenceEnum('valuta', $valuta, 'valuta', $findings);
+            $hasNdpbmKey = data_get($payload, 'header.ndpbm') !== null || data_get($payload, 'ndpbm') !== null;
+            if ($valuta !== 'IDR' && $hasNdpbmKey) {
+                $ndpbm = (float) (data_get($payload, 'header.ndpbm') ?? data_get($payload, 'ndpbm') ?? 0);
+                if ($ndpbm <= 0) {
+                    $findings[] = ['level' => 'warning', 'field' => 'ndpbm', 'message' => '[PMK 144/PMK.04/2022] NDPBM (kurs bea cukai) harus lebih dari 0 untuk transaksi valuta asing.'];
+                }
+            }
         }
 
         $incoterm = trim((string) (data_get($payload, 'header.incoterm') ?? data_get($payload, 'incoterm') ?? ''));
         if ($incoterm !== '') {
             $this->checkReferenceEnum('incoterm', $incoterm, 'incoterm', $findings);
+        }
+
+        if ($docType === 'BC20') {
+            $jenisImpor = trim((string) (data_get($payload, 'header.kode_jenis_impor') ?? data_get($payload, 'jenis_impor') ?? ''));
+            if ($jenisImpor !== '') {
+                $this->checkReferenceEnum('jenis_impor', $jenisImpor, 'jenis_impor', $findings);
+            }
+        }
+
+        if ($docType === 'BC30') {
+            $jenisEkspor = trim((string) (data_get($payload, 'header.kode_jenis_ekspor') ?? data_get($payload, 'jenis_ekspor') ?? ''));
+            if ($jenisEkspor !== '') {
+                $this->checkReferenceEnum('jenis_ekspor', $jenisEkspor, 'jenis_ekspor', $findings);
+            }
+
+            $caraDagang = trim((string) (data_get($payload, 'header.kode_cara_dagang') ?? data_get($payload, 'cara_dagang') ?? ''));
+            if ($caraDagang !== '') {
+                $this->checkReferenceEnum('cara_dagang', $caraDagang, 'cara_dagang', $findings);
+            }
         }
 
         return $findings;
