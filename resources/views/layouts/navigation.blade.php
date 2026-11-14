@@ -3,10 +3,16 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
-                <!-- Logo -->
+                <!-- Logo & Header Title -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2.5 group">
+                        <span class="h-10 px-1.5 inline-flex items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-sm group-hover:border-gold-300/60 transition-colors">
+                            <x-application-logo class="block h-7 w-auto" />
+                        </span>
+                        <div class="hidden sm:block leading-tight">
+                            <span class="block text-sm font-extrabold tracking-tight text-slate-900">PT. Mora Multi Berkah</span>
+                            <span class="block text-[9px] font-mono font-semibold uppercase tracking-[0.2em] text-gold-500">CEISA 4.0 · H2H</span>
+                        </div>
                     </a>
                 </div>
 

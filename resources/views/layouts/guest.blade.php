@@ -29,13 +29,16 @@
 
             {{-- Top: brand --}}
             <div class="relative z-10">
-                <a href="/" class="inline-flex items-center gap-3 group">
-                    <span class="h-12 w-12 inline-flex items-center justify-center rounded-2xl bg-cream shadow-gold-glow ring-1 ring-gold-300/40 transition-transform duration-300 group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(201,165,92,0.25)]">
-                        <img src="{{ asset('images/m2b-logo.png') }}" alt="M2B" class="h-9 w-9 object-contain">
+                <a href="/" class="inline-flex items-center gap-3.5 group">
+                    <span class="h-12 px-2.5 inline-flex items-center justify-center rounded-2xl bg-white/95 shadow-gold-glow ring-1 ring-gold-300/40 transition-transform duration-300 group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(201,165,92,0.3)]">
+                        <picture>
+                            <source srcset="{{ asset('images/logo-m2b-320.webp') }}" type="image/webp">
+                            <img src="{{ asset('images/logo-m2b.png') }}" alt="PT. Mora Multi Berkah" class="h-9 w-auto object-contain">
+                        </picture>
                     </span>
                     <div class="leading-tight">
-                        <span class="block font-display text-2xl font-semibold tracking-tighter text-cream">M2B<span class="text-gold-400">·</span>Customs</span>
-                        <span class="block text-[10px] font-mono uppercase tracking-[0.32em] text-gold-300/85">Ceisa H2H · 4.0</span>
+                        <span class="block font-display text-xl xl:text-2xl font-semibold tracking-tight text-cream">PT. Mora Multi Berkah</span>
+                        <span class="block text-[10px] font-mono uppercase tracking-[0.26em] text-gold-300/90 mt-0.5">M2B Customs · CEISA H2H 4.0</span>
                     </div>
                 </a>
 
@@ -125,12 +128,15 @@
             <div class="absolute -bottom-24 left-8 h-64 w-64 rounded-full bg-sea-100/45 blur-3xl pointer-events-none" aria-hidden="true"></div>
             {{-- Mobile brand (hidden lg+) --}}
             <a href="/" class="lg:hidden inline-flex items-center gap-3 mb-10">
-                <span class="h-10 w-10 inline-flex items-center justify-center rounded-xl bg-ink-900">
-                    <img src="{{ asset('images/m2b-logo.png') }}" alt="M2B" class="h-8 w-8 object-contain">
+                <span class="h-11 px-2 inline-flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-sm">
+                    <picture>
+                        <source srcset="{{ asset('images/logo-m2b-320.webp') }}" type="image/webp">
+                        <img src="{{ asset('images/logo-m2b.png') }}" alt="PT. Mora Multi Berkah" class="h-8 w-auto object-contain">
+                    </picture>
                 </span>
                 <div class="leading-tight">
-                    <span class="font-display text-xl font-semibold tracking-tighter text-slate-800">M2B<span class="text-gold-500">·</span>Customs</span>
-                    <span class="block text-[9px] font-mono uppercase tracking-[0.25em] text-slate-500">CEISA 4.0 H2H</span>
+                    <span class="font-display text-lg font-semibold tracking-tight text-slate-800">PT. Mora Multi Berkah</span>
+                    <span class="block text-[9px] font-mono uppercase tracking-[0.22em] text-gold-500 mt-0.5">M2B Customs · CEISA 4.0 H2H</span>
                 </div>
             </a>
 
