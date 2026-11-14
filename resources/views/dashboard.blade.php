@@ -2,9 +2,17 @@
     <x-slot name="header">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h2 class="font-extrabold text-2xl text-slate-900 leading-tight tracking-tight">
-                    {{ __('Dashboard Utama') }}
-                </h2>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <h2 class="font-extrabold text-2xl text-slate-900 leading-tight tracking-tight">
+                        {{ __('Dashboard Utama') }}
+                    </h2>
+                    @if ($hasCredential)
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border {{ $tokenActive ? 'bg-emerald-50 text-emerald-300 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200' }}">
+                            <span class="h-1.5 w-1.5 rounded-full {{ $tokenActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400' }}"></span>
+                            {{ $tokenActive ? 'Token H2H Aktif' : 'Token Siap Refresh' }}
+                        </span>
+                    @endif
+                </div>
                 <p class="text-xs text-slate-500 mt-1 font-medium">Selamat datang kembali, <span class="text-indigo-300 font-semibold">{{ Auth::user()->name }}</span>. Kelola dan pantau dokumen kepabeanan Bea Cukai Anda di sini.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
@@ -58,14 +66,23 @@
             @endunless
 
             {{-- Statistik --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            @php
+                $totalDocs = max(1, (int) $stats['total']);
+                $acceptRate = $stats['total'] > 0 ? round(($stats['accepted'] / $totalDocs) * 100) : 0;
+                $pctAccepted = $stats['total'] > 0 ? round(($stats['accepted'] / $totalDocs) * 100, 1) : 0;
+                $pctSubmitted = $stats['total'] > 0 ? round(($stats['submitted'] / $totalDocs) * 100, 1) : 0;
+                $pctDraft = $stats['total'] > 0 ? round((($stats['draft'] ?? 0) / $totalDocs) * 100, 1) : 0;
+                $pctRejected = $stats['total'] > 0 ? round(($stats['rejected'] / $totalDocs) * 100, 1) : 0;
+            @endphp
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                 <!-- Total Dokumen -->
-                <div class="bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-indigo-600 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-slate-900/10 transition-all duration-300">
+                <a href="{{ route('documents.index') }}" class="block bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-indigo-600 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 animate-fade-in-up">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-indigo-50/40 rounded-full blur-xl group-hover:bg-indigo-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Dokumen</span>
                             <h3 class="text-3xl font-extrabold text-slate-800 mt-2 tracking-tight">{{ $stats['total'] }}</h3>
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">{{ $stats['draft'] ?? 0 }} masih draft</p>
                         </div>
                         <div class="p-3 bg-indigo-50 rounded-xl text-indigo-300 group-hover:scale-110 transition-transform duration-300">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -73,15 +90,16 @@
                             </svg>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Terkirim -->
-                <div class="bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-blue-500 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-slate-900/10 transition-all duration-300">
+                <a href="{{ route('documents.index', ['status' => 'submitted']) }}" class="block bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-blue-500 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 animate-fade-in-up">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-50/40 rounded-full blur-xl group-hover:bg-blue-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Terkirim</span>
                             <h3 class="text-3xl font-extrabold text-blue-300 mt-2 tracking-tight">{{ $stats['submitted'] }}</h3>
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">Menunggu respons DJBC</p>
                         </div>
                         <div class="p-3 bg-blue-50 rounded-xl text-blue-300 group-hover:scale-110 transition-transform duration-300">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -89,15 +107,16 @@
                             </svg>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Diterima -->
-                <div class="bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-slate-900/10 transition-all duration-300">
+                <a href="{{ route('documents.index', ['status' => 'accepted']) }}" class="block bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 animate-fade-in-up">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-emerald-50/40 rounded-full blur-xl group-hover:bg-emerald-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Diterima</span>
                             <h3 class="text-3xl font-extrabold text-emerald-300 mt-2 tracking-tight">{{ $stats['accepted'] }}</h3>
+                            <p class="text-[11px] text-emerald-300 font-semibold mt-1">{{ $acceptRate }}% SPPB / NPE</p>
                         </div>
                         <div class="p-3 bg-emerald-50 rounded-xl text-emerald-300 group-hover:scale-110 transition-transform duration-300">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -105,15 +124,16 @@
                             </svg>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Ditolak/Error -->
-                <div class="bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-rose-500 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:shadow-slate-900/10 transition-all duration-300">
+                <a href="{{ route('documents.index', ['status' => 'rejected']) }}" class="block bg-white/90 backdrop-blur-xl border border-slate-200 border-l-4 border-l-rose-500 shadow-card rounded-2xl p-5 relative overflow-hidden group hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 animate-fade-in-up">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-rose-50/40 rounded-full blur-xl group-hover:bg-rose-50/60 transition-colors duration-300"></div>
                     <div class="flex items-center justify-between relative z-10">
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ditolak / Error</span>
                             <h3 class="text-3xl font-extrabold text-rose-300 mt-2 tracking-tight">{{ $stats['rejected'] }}</h3>
+                            <p class="text-[11px] text-slate-400 font-medium mt-1">Perlu perbaikan data</p>
                         </div>
                         <div class="p-3 bg-rose-50 rounded-xl text-rose-300 group-hover:scale-110 transition-transform duration-300">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -121,8 +141,55 @@
                             </svg>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
+
+            {{-- Visualisasi Ringkas Status & Jalur Pemeriksaan --}}
+            @if ($stats['total'] > 0)
+                <div class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-5 mb-8">
+                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between text-xs mb-2">
+                                <span class="font-bold text-slate-700">Distribusi Status Dokumen</span>
+                                <span class="font-mono text-[11px] text-slate-400">{{ $stats['total'] }} total</span>
+                            </div>
+                            <div class="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden flex">
+                                @if ($pctAccepted > 0)
+                                    <div class="bg-emerald-500 h-full transition-all duration-500" style="width: {{ $pctAccepted }}%" title="Diterima: {{ $stats['accepted'] }} ({{ $pctAccepted }}%)"></div>
+                                @endif
+                                @if ($pctSubmitted > 0)
+                                    <div class="bg-blue-500 h-full transition-all duration-500" style="width: {{ $pctSubmitted }}%" title="Terkirim: {{ $stats['submitted'] }} ({{ $pctSubmitted }}%)"></div>
+                                @endif
+                                @if ($pctDraft > 0)
+                                    <div class="bg-slate-300 h-full transition-all duration-500" style="width: {{ $pctDraft }}%" title="Draft: {{ $stats['draft'] ?? 0 }} ({{ $pctDraft }}%)"></div>
+                                @endif
+                                @if ($pctRejected > 0)
+                                    <div class="bg-rose-500 h-full transition-all duration-500" style="width: {{ $pctRejected }}%" title="Ditolak/Error: {{ $stats['rejected'] }} ({{ $pctRejected }}%)"></div>
+                                @endif
+                            </div>
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5 text-[11px] font-medium text-slate-500">
+                                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Diterima ({{ $pctAccepted }}%)</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-blue-500"></span>Terkirim ({{ $pctSubmitted }}%)</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-slate-300"></span>Draft ({{ $pctDraft }}%)</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Ditolak/Error ({{ $pctRejected }}%)</span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 lg:border-l lg:border-slate-200 lg:pl-6 shrink-0">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mr-1">Jalur:</span>
+                            <a href="{{ route('documents.index', ['jalur' => 'H']) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-300 border border-emerald-200/80 hover:bg-emerald-100/70 transition-colors">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span> Hijau <span class="font-mono">{{ $stats['jalur_hijau'] ?? 0 }}</span>
+                            </a>
+                            <a href="{{ route('documents.index', ['jalur' => 'K']) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-300 border border-amber-200/80 hover:bg-amber-100/70 transition-colors">
+                                <span class="h-2 w-2 rounded-full bg-amber-500"></span> Kuning <span class="font-mono">{{ $stats['jalur_kuning'] ?? 0 }}</span>
+                            </a>
+                            <a href="{{ route('documents.index', ['jalur' => 'M']) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-300 border border-rose-200/80 hover:bg-rose-100/70 transition-colors">
+                                <span class="h-2 w-2 rounded-full bg-rose-500"></span> Merah <span class="font-mono">{{ $stats['jalur_merah'] ?? 0 }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             {{-- Tabel dokumen --}}
             <div class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl overflow-hidden mb-6">
@@ -151,6 +218,12 @@
                                         <div class="flex items-center gap-1.5">
                                             @if ($doc->nomor_aju)
                                                 <span>{{ $doc->nomor_aju }}</span>
+                                                <button type="button"
+                                                        onclick="window.copyCeisaText(@json($doc->nomor_aju), 'Nomor Aju tersalin')"
+                                                        title="Salin Nomor Aju"
+                                                        class="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors">
+                                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg>
+                                                </button>
                                             @else
                                                 <span class="text-slate-400">—</span>
                                             @endif

@@ -26,6 +26,7 @@ class NotificationController extends Controller
             })
             ->latest('received_at')
             ->latest('id')
+            ->limit(200)
             ->get();
 
         $grouped = [
