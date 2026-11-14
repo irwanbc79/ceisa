@@ -136,9 +136,21 @@ trait HandlesCeisaHttp
         $known = config("ceisa.error_codes.{$code}");
 
         if ($known !== null || ! $response->successful()) {
+            $detail = $data['message']
+                ?? $data['error_message']
+                ?? data_get($data, 'error.message')
+                ?? null;
+
+            $fieldHint = $data['field'] ?? data_get($data, 'error.field');
+            if ($known !== null && $detail) {
+                $fallback = "{$known} Detail CEISA: {$detail}".($fieldHint ? " (Field: {$fieldHint})" : '');
+
+                throw new CeisaException($fallback, $code, $data);
+            }
+
             throw CeisaException::fromCode(
                 $code,
-                fallback: $data['message'] ?? $data['error_message'] ?? null,
+                fallback: $detail,
                 context: $data,
             );
         }

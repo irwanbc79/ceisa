@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CeisaReference;
 use App\Models\Document;
 use App\Services\AI\AiException;
 use App\Services\AI\HybridAiClient;
@@ -113,15 +114,38 @@ class DocumentValidator
             if (mb_strlen($uraian) < 5) {
                 $f[] = ['level' => 'warning', 'field' => "barang #{$seri} uraian", 'message' => 'Uraian barang terlalu singkat/generik.'];
             }
+
+            $kodeSatuan = trim((string) data_get($item, 'kode_satuan', ''));
+            if ($kodeSatuan === '') {
+                $f[] = ['level' => 'warning', 'field' => "barang #{$seri} satuan", 'message' => '[CEISA 1028] Kode satuan barang wajib diisi.'];
+            } else {
+                $this->checkReferenceEnum('satuan', $kodeSatuan, "barang #{$seri} satuan", $f);
+            }
         }
 
         // Kelengkapan entitas utama.
         if (! $document->partyName()) {
             $f[] = ['level' => 'error', 'field' => 'entitas', 'message' => 'Nama pihak utama (eksportir/importir) belum terisi.'];
         }
-        if (! $document->partyNpwp()) {
+        $npwp = $document->partyNpwp();
+        if (! $npwp) {
             $f[] = ['level' => 'warning', 'field' => 'NPWP', 'message' => 'NPWP pihak utama belum terisi.'];
+        } else {
+            $npwpDigits = preg_replace('/\D/', '', $npwp);
+            if (! in_array(strlen($npwpDigits), [15, 16], true)) {
+                $f[] = ['level' => 'error', 'field' => 'NPWP', 'message' => '[CEISA 1023] Format NPWP harus 15 atau 16 digit angka (saat ini '.strlen($npwpDigits).' digit).'];
+            }
         }
+
+        $nitku = $document->partyNitku();
+        if ($nitku !== null && trim($nitku) !== '') {
+            $nitkuDigits = preg_replace('/\D/', '', $nitku);
+            if (strlen($nitkuDigits) !== 22) {
+                $f[] = ['level' => 'error', 'field' => 'NITKU', 'message' => '[CEISA 1023] Format NITKU resmi CEISA 4.0 wajib 22 digit angka (saat ini '.strlen($nitkuDigits).' digit).'];
+            }
+        }
+
+        $f = array_merge($f, $this->checkHeaderCompliance($payload));
 
         // Validasi Manifes Kedatangan (BC 1.1) untuk dokumen impor
         if (in_array($document->doc_type, ['BC20', 'BC24', 'TPB'], true)) {
@@ -129,6 +153,63 @@ class DocumentValidator
         }
 
         return $f;
+    }
+
+    /**
+     * Pre-check kelengkapan header & kode referensi resmi CEISA 4.0 (1008 / 1028).
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<int, array{level: string, field: ?string, message: string}>
+     */
+    protected function checkHeaderCompliance(array $payload): array
+    {
+        $findings = [];
+
+        $kantor = trim((string) (data_get($payload, 'header.kode_kantor') ?? data_get($payload, 'kode_kantor') ?? ''));
+        if ($kantor === '') {
+            $findings[] = ['level' => 'warning', 'field' => 'kode_kantor', 'message' => '[CEISA 1028] Kode kantor pabean pengawas/pendaftaran wajib diisi.'];
+        } else {
+            $this->checkReferenceEnum('kantor_pabean', $kantor, 'kode_kantor', $findings);
+        }
+
+        $valuta = trim((string) (data_get($payload, 'header.valuta') ?? data_get($payload, 'kode_valuta') ?? ''));
+        if ($valuta === '') {
+            $findings[] = ['level' => 'warning', 'field' => 'valuta', 'message' => '[CEISA 1028] Kode valuta transaksi wajib diisi.'];
+        } else {
+            $this->checkReferenceEnum('valuta', $valuta, 'valuta', $findings);
+        }
+
+        $incoterm = trim((string) (data_get($payload, 'header.incoterm') ?? data_get($payload, 'incoterm') ?? ''));
+        if ($incoterm !== '') {
+            $this->checkReferenceEnum('incoterm', $incoterm, 'incoterm', $findings);
+        }
+
+        return $findings;
+    }
+
+    /**
+     * Validasi nilai enumeration terhadap master tabel ceisa_references (CEISA Error 1008).
+     *
+     * @param  array<int, array{level: string, field: ?string, message: string}>  $findings
+     */
+    protected function checkReferenceEnum(string $type, string $code, string $field, array &$findings): void
+    {
+        if (! CeisaReference::query()->where('type', $type)->exists()) {
+            return;
+        }
+
+        $valid = CeisaReference::query()
+            ->where('type', $type)
+            ->where('code', $code)
+            ->exists();
+
+        if (! $valid) {
+            $findings[] = [
+                'level' => 'error',
+                'field' => $field,
+                'message' => "[CEISA 1008] Nilai '{$code}' tidak ditemukan di master referensi '{$type}'.",
+            ];
+        }
     }
 
     /**
