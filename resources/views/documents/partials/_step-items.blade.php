@@ -14,7 +14,7 @@
 
 {{-- Step 4: Items (Dynamic Grid + CEISA 4.0 Inline Pager) --}}
 <div x-show="step === 8" x-cloak
-     x-data="{ activeItemIdx: 0, pagerMode: false }"
+     x-data="{ activeItemIdx: 0, pagerMode: false, showBulkImport: false, bulkText: '', bulkReplace: false, bulkMsg: '' }"
      class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6 transition-all duration-300">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
@@ -39,10 +39,61 @@
                     </div>
                 </template>
             </div>
+            <button type="button" @click="showBulkImport = !showBulkImport; bulkMsg = '';"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg transition-colors cursor-pointer">
+                Import Excel / CSV
+            </button>
             <button type="button" @click="addItem(); activeItemIdx = formData.barang.length - 1;"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-slate-900/10 cursor-pointer">
                 + Tambah Barang
             </button>
+        </div>
+    </div>
+
+    {{-- Panel Import Massal dari Excel / CSV --}}
+    <div x-show="showBulkImport" x-cloak x-transition
+         class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <h4 class="text-xs font-extrabold text-emerald-900 uppercase tracking-wide">Import Massal Pos Barang (Paste dari Excel / Upload CSV)</h4>
+                <p class="text-[11px] text-slate-600 mt-0.5">Format kolom per baris: <span class="font-mono font-semibold">HS Code | Uraian | Jumlah | Satuan | Netto (KGM) | Nilai FOB/CIF | Negara Asal (opsional)</span></p>
+            </div>
+            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 hover:bg-slate-50 cursor-pointer">
+                Pilih File .CSV
+                <input type="file" accept=".csv,.txt" class="hidden" @change="
+                    const f = $event.target.files[0];
+                    if (f) {
+                        const r = new FileReader();
+                        r.onload = (e) => { bulkText = e.target.result; };
+                        r.readAsText(f);
+                    }
+                ">
+            </label>
+        </div>
+        <textarea x-model="bulkText" rows="4"
+                  placeholder="Contoh (copy-paste langsung dari Excel atau CSV):&#10;6109100000	Kaos Katun Premium	500	PCE	120	12500	ID&#10;6203429000	Celana Panjang Katun	200	PCE	90	6400	ID"
+                  class="w-full rounded-lg border-slate-200 font-mono text-xs focus:border-emerald-500 focus:ring-emerald-500"></textarea>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                <input type="checkbox" x-model="bulkReplace" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                Timpa daftar barang yang sudah ada
+            </label>
+            <div class="flex items-center gap-2">
+                <span x-show="bulkMsg" x-text="bulkMsg" class="text-xs font-bold text-emerald-700"></span>
+                <button type="button" @click="showBulkImport = false" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer">Tutup</button>
+                <button type="button" @click="
+                    const n = importBulkItems(bulkText, bulkReplace);
+                    if (n > 0) {
+                        bulkMsg = n + ' pos barang berhasil diimpor.';
+                        bulkText = '';
+                        activeItemIdx = 0;
+                    } else {
+                        bulkMsg = 'Tidak ada baris valid yang ditemukan.';
+                    }
+                " class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-lg shadow-xs cursor-pointer">
+                    Proses Import
+                </button>
+            </div>
         </div>
     </div>
 

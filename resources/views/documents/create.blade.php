@@ -633,6 +633,56 @@
                     this.formData.barang.splice(idx, 1);
                 },
 
+                importBulkItems(rawText, replaceExisting = false) {
+                    const lines = String(rawText || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                    if (!lines.length) return 0;
+
+                    const parsed = [];
+                    for (const line of lines) {
+                        const sep = line.includes('\t') ? '\t' : (line.includes(';') ? ';' : ',');
+                        const cols = line.split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+                        if (cols.length < 2) continue;
+                        if (/^(hs|kode_?hs|pos\s*tarif)/i.test(cols[0])) continue;
+
+                        const nilai = cols[5] !== undefined ? cols[5].replace(/[^0-9.\-]/g, '') : '';
+                        parsed.push({
+                            hs_code: (cols[0] || '').replace(/[^0-9]/g, ''),
+                            uraian: cols[1] || '',
+                            merk: 'TANPA MEREK',
+                            tipe: '',
+                            ukuran: '',
+                            negara_asal: (cols[6] || (this.doc_type === 'BC30' ? 'ID' : '')).toUpperCase(),
+                            daerah_asal: '',
+                            jumlah_satuan: cols[2] || '',
+                            kode_satuan: (cols[3] || 'PCE').toUpperCase(),
+                            jumlah_kemasan: '',
+                            kode_kemasan: '',
+                            merk_kemasan: 'TANPA MEREK',
+                            netto: cols[4] || '',
+                            volume: '',
+                            nilai_fob: this.doc_type === 'BC30' ? nilai : '',
+                            nilai_cif: (this.doc_type === 'BC20' || this.doc_type === 'BC24') ? nilai : '',
+                            nilai_barang: (this.doc_type === 'TPB' || this.doc_type === 'RUSH') ? nilai : '',
+                            tarif_bm: '',
+                            tarif_ppn: '',
+                            tarif_pph: '',
+                        });
+                    }
+
+                    if (!parsed.length) return 0;
+
+                    const hasOnlyBlankFirst = this.formData.barang.length === 1
+                        && !this.formData.barang[0].hs_code
+                        && !this.formData.barang[0].uraian;
+
+                    if (replaceExisting || hasOnlyBlankFirst) {
+                        this.formData.barang = parsed;
+                    } else {
+                        this.formData.barang.push(...parsed);
+                    }
+                    return parsed.length;
+                },
+
                 addDocument() {
                     this.formData.dokumen.push({ kode_dokumen: '380', nomor_dokumen: '', tanggal_dokumen: '' });
                 },
