@@ -56,7 +56,7 @@
             </div>
             <div>
                 <x-input-label for="bank_devisa" value="Bank Devisa (Opsional)" />
-                <input type="text" id="bank_devisa" :name="doc_type === 'BC30' ? 'bank_devisa' : ''" x-model="formData.bank_devisa" class="mt-1 block w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm shadow-sm" />
+                <x-searchable-select id="bank_devisa" ::name="doc_type === 'BC30' ? 'bank_devisa' : ''" model="formData.bank_devisa" options="references.banks" placeholder="-- Pilih Bank Devisa --" />
             </div>
             <div class="sm:col-span-2 lg:col-span-3">
                 <x-input-label for="cara_pembayaran_bc30" value="Cara Pembayaran (Opsional)" />

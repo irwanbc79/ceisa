@@ -71,6 +71,17 @@ class CeisaReference extends Model
             'jenisPengangkutan' => 'jenis_pengangkutan',
             'jenisImpor' => 'jenis_impor',
             'tutupPu' => 'tutup_pu',
+            'documentTypes' => 'dokumen',
+            'containerSizes' => 'ukuran_kontainer',
+            'containerTypes' => 'tipe_kontainer',
+            'containerStatuses' => 'jenis_kontainer',
+            'banks' => 'bank',
+            'daerahAsal' => 'daerah_asal',
+            'fasilitas' => 'fasilitas',
+            'ijin' => 'ijin',
+            'jenisTransaksi' => 'jenis_transaksi',
+            'jenisVd' => 'jenis_vd',
+            'kondisiBarang' => 'kondisi_barang',
         ];
 
         $out = [];

@@ -115,7 +115,7 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase">Daerah Asal (Opsional)</label>
-                                <input type="text" :name="`barang[${index}][daerah_asal]`" x-model="item.daerah_asal" placeholder="mis. Jawa Barat" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
+                                <x-searchable-select ::name="'barang[' + index + '][daerah_asal]'" model="item.daerah_asal" options="references.daerahAsal" placeholder="-- Pilih Daerah Asal --" />
                             </div>
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-500 uppercase">Volume (m³, Opsional)</label>

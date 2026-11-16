@@ -259,8 +259,9 @@
                 ],
 
                 // Referensi diambil dari tabel ceisa_references (server-side; dapat disinkron dari API CEISA).
-                references: Object.assign(@json($references ?? new \stdClass()), {
-                    documentTypes: [
+                references: ((refs) => ({
+                    ...refs,
+                    documentTypes: (refs.documentTypes && refs.documentTypes.length) ? refs.documentTypes : [
                         { code: '380', label: '380 - Invoice' },
                         { code: '217', label: '217 - Packing List' },
                         { code: '705', label: '705 - Bill of Lading (B/L)' },
@@ -268,24 +269,24 @@
                         { code: '812', label: '812 - Certificate of Origin (COO)' },
                         { code: '999', label: '999 - Dokumen Lainnya' }
                     ],
-                    containerSizes: [
+                    containerSizes: (refs.containerSizes && refs.containerSizes.length) ? refs.containerSizes : [
                         { code: '20', label: '20 Feet' },
                         { code: '40', label: '40 Feet' },
                         { code: '45', label: '45 Feet' }
                     ],
-                    containerTypes: [
+                    containerTypes: (refs.containerTypes && refs.containerTypes.length) ? refs.containerTypes : [
                         { code: '4', label: 'Dry Cargo / GP' },
                         { code: '8', label: 'Reefer' },
                         { code: '7', label: 'Open Top' },
                         { code: '9', label: 'Flat Rack' },
                         { code: '55', label: 'Tank' }
                     ],
-                    containerStatuses: [
+                    containerStatuses: (refs.containerStatuses && refs.containerStatuses.length) ? refs.containerStatuses : [
                         { code: 'FCL', label: 'FCL - Full Container Load' },
                         { code: 'LCL', label: 'LCL - Less Container Load' },
                         { code: 'EMPTY', label: 'EMPTY - Empty' }
-                    ]
-                }),
+                    ],
+                }))(@json($references ?? new \stdClass())),
                 
                 // Form Fields Data Model
                 formData: {
