@@ -1,45 +1,45 @@
 <nav x-data="{ open: false }" class="bg-panel/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 shadow-sm transition-all duration-300">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between gap-4 h-16">
-            <div class="flex items-center gap-4 min-w-0">
+        <div class="flex items-center justify-between gap-3 h-16">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
                 <!-- Logo & Header Title -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2.5 group">
-                        <span class="h-10 px-1.5 inline-flex items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-sm group-hover:border-gold-300/60 transition-colors">
-                            <x-application-logo class="block h-7 w-auto" />
+                    <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-2 group">
+                        <span class="h-9 px-1.5 inline-flex items-center justify-center rounded-xl bg-white border border-slate-200/80 shadow-xs group-hover:border-indigo-300 transition-colors">
+                            <x-application-logo class="block h-6 w-auto" />
                         </span>
-                        <div class="hidden sm:block leading-tight whitespace-nowrap">
+                        <div class="hidden 2xl:block leading-tight whitespace-nowrap">
                             <span class="block text-sm font-extrabold tracking-tight text-slate-900">PT. Mora Multi Berkah</span>
-                            <span class="block text-[9px] font-mono font-semibold uppercase tracking-[0.2em] text-gold-500">CEISA 4.0 · H2H</span>
+                            <span class="block text-[9px] font-mono font-semibold uppercase tracking-[0.2em] text-amber-600">CEISA 4.0 · H2H</span>
                         </div>
                     </a>
                 </div>
 
-                <div class="hidden xl:block h-6 w-px bg-slate-200/80 shrink-0" aria-hidden="true"></div>
+                <div class="hidden xl:block h-5 w-px bg-slate-200/80 shrink-0" aria-hidden="true"></div>
 
                 <!-- Navigation Links -->
-                <div class="hidden xl:flex xl:items-center xl:gap-1">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                <div class="hidden xl:flex xl:items-center xl:gap-0.5 min-w-0 overflow-x-auto scrollbar-none">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="whitespace-nowrap">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.index')">
+                    <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.index')" class="whitespace-nowrap">
                         {{ __('Dokumen') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')">
+                    <x-nav-link :href="route('documents.create')" :active="request()->routeIs('documents.create')" class="whitespace-nowrap">
                         {{ __('Buat Baru') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('manifests.index')" :active="request()->routeIs('manifests.*')">
+                    <x-nav-link :href="route('manifests.index')" :active="request()->routeIs('manifests.*')" class="whitespace-nowrap">
                         {{ __('Manifes') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')">
+                    <x-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.index')" class="whitespace-nowrap">
                         {{ __('Notifikasi') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')">
+                    <x-nav-link :href="route('settings.ceisa.edit')" :active="request()->routeIs('settings.ceisa.*')" class="whitespace-nowrap">
                         {{ __('Pengaturan') }}
                     </x-nav-link>
                     @if (Auth::user()->isAdmin())
-                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="whitespace-nowrap">
                             {{ __('Pengguna') }}
                         </x-nav-link>
                     @endif
@@ -50,10 +50,10 @@
             @php
                 $navCredential = \App\Models\CeisaCredential::shared();
                 $navEnv = match (true) {
-                    ! $navCredential => ['label' => 'CEISA BELUM DIATUR', 'cls' => 'bg-amber-50 text-amber-300 border-amber-200'],
-                    str_contains((string) $navCredential->base_url, 'apisdev-gw') => ['label' => 'SANDBOX', 'cls' => 'bg-amber-50 text-amber-300 border-amber-200'],
-                    str_contains((string) $navCredential->base_url, 'apis-gw') => ['label' => 'PROD', 'cls' => 'bg-emerald-50 text-emerald-300 border-emerald-200'],
-                    default => ['label' => 'CUSTOM', 'cls' => 'bg-indigo-50 text-indigo-300 border-indigo-200'],
+                    ! $navCredential => ['label' => 'CEISA BELUM DIATUR', 'cls' => 'bg-amber-50 text-amber-700 border-amber-200'],
+                    str_contains((string) $navCredential->base_url, 'apisdev-gw') => ['label' => 'SANDBOX', 'cls' => 'bg-amber-50 text-amber-700 border-amber-200'],
+                    str_contains((string) $navCredential->base_url, 'apis-gw') => ['label' => 'PROD', 'cls' => 'bg-emerald-50 text-emerald-700 border-emerald-200'],
+                    default => ['label' => 'CUSTOM', 'cls' => 'bg-indigo-50 text-indigo-700 border-indigo-200'],
                 };
             @endphp
             <div class="hidden xl:flex xl:items-center xl:gap-2 shrink-0">

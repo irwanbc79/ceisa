@@ -19,14 +19,12 @@
     }
 
     body {
-        background-color: #F4F7FB;
+        background-color: #F5F7FA;
         background-image:
-            radial-gradient(ellipse 70% 44% at 8% -12%, rgba(36, 95, 146, 0.11), transparent 64%),
-            radial-gradient(ellipse 56% 42% at 95% 106%, rgba(15, 127, 119, 0.09), transparent 62%),
-            radial-gradient(rgba(13, 32, 52, 0.045) 1px, transparent 1px);
-        background-size: 100% 100%, 100% 100%, 26px 26px;
+            radial-gradient(ellipse 80% 45% at 10% -10%, rgba(24, 144, 255, 0.06), transparent 60%),
+            radial-gradient(ellipse 60% 40% at 92% 105%, rgba(15, 127, 119, 0.05), transparent 60%);
         background-attachment: fixed;
-        color: theme('colors.slate.700');
+        color: theme('colors.slate.800');
     }
 
     /* Signature: jalur manifes — navy ke teal dengan segel emas di tengah. */

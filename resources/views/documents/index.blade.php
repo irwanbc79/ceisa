@@ -34,17 +34,17 @@
                 <!-- Diterima -->
                 <div class="bg-panel border border-slate-200/60 border-l-4 border-l-emerald-500 shadow-sm shadow-slate-900/10 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Diterima</div>
-                    <div class="text-2xl font-extrabold text-emerald-300 mt-1 tracking-tight">{{ $rekap['accepted'] }}</div>
+                    <div class="text-2xl font-extrabold text-emerald-600 mt-1 tracking-tight">{{ $rekap['accepted'] }}</div>
                 </div>
                 <!-- Ditolak/Error -->
                 <div class="bg-panel border border-slate-200/60 border-l-4 border-l-rose-500 shadow-sm shadow-slate-900/10 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Ditolak / Error</div>
-                    <div class="text-2xl font-extrabold text-rose-300 mt-1 tracking-tight">{{ $rekap['rejected'] }}</div>
+                    <div class="text-2xl font-extrabold text-rose-600 mt-1 tracking-tight">{{ $rekap['rejected'] }}</div>
                 </div>
                 <!-- Jalur Merah -->
                 <div class="bg-panel border border-slate-200/60 border-l-4 border-l-red-600 shadow-sm shadow-slate-900/10 rounded-2xl p-4 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Jalur Merah</div>
-                    <div class="text-2xl font-extrabold text-red-300 mt-1 tracking-tight">{{ $rekap['merah'] }}</div>
+                    <div class="text-2xl font-extrabold text-red-600 mt-1 tracking-tight">{{ $rekap['merah'] }}</div>
                 </div>
             </div>
 
@@ -56,12 +56,12 @@
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider hidden sm:inline">Tampilan</span>
                     {{-- Toggle NPWP 16 / NITKU (client-side) --}}
                     <div class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5 text-[11px] font-extrabold">
-                        <button type="button" @click="idMode='npwp'" :class="idMode==='npwp' ? 'bg-panel text-indigo-300 shadow-sm' : 'text-slate-400 hover:text-slate-600'" class="px-3 py-1.5 rounded-lg transition cursor-pointer">NPWP 16</button>
-                        <button type="button" @click="idMode='nitku'" :class="idMode==='nitku' ? 'bg-panel text-indigo-300 shadow-sm' : 'text-slate-400 hover:text-slate-600'" class="px-3 py-1.5 rounded-lg transition cursor-pointer">NITKU</button>
+                        <button type="button" @click="idMode='npwp'" :class="idMode==='npwp' ? 'bg-panel text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 rounded-lg transition cursor-pointer">NPWP 16</button>
+                        <button type="button" @click="idMode='nitku'" :class="idMode==='nitku' ? 'bg-panel text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 rounded-lg transition cursor-pointer">NITKU</button>
                     </div>
                     {{-- Toggle BUMN Ekspor (server filter) --}}
                     <a href="{{ request()->fullUrlWithQuery(['bumn' => $bumnOn ? null : 1, 'page' => null]) }}"
-                       class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-extrabold transition {{ $bumnOn ? 'bg-amber-50 border-amber-200 text-amber-300' : 'bg-panel border-slate-200 text-slate-500 hover:bg-slate-50' }}">
+                       class="inline-flex items-center gap-2 px-3 py-2 rounded-xl border text-[11px] font-extrabold transition {{ $bumnOn ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-panel border-slate-200 text-slate-600 hover:bg-slate-50' }}">
                         <span class="h-3.5 w-7 rounded-full relative transition {{ $bumnOn ? 'bg-amber-500' : 'bg-slate-300' }}">
                             <span class="absolute top-0.5 h-2.5 w-2.5 rounded-full bg-panel transition-all {{ $bumnOn ? 'left-3.5' : 'left-0.5' }}"></span>
                         </span>
