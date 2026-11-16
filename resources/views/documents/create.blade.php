@@ -82,17 +82,18 @@
                     </div>
                 </div>
 
-                {{-- Horizontal CEISA 4.0 Tab Bar (Biru = Aktif, Hijau = Selesai, Merah = Belum Lengkap) --}}
+                {{-- Horizontal CEISA 4.0 Tab Bar (Biru = Aktif, Hijau = Lengkap, Merah = Belum Lengkap) --}}
                 <div class="px-3 bg-white flex items-center gap-1 overflow-x-auto scrollbar-none border-b border-slate-100">
                     <template x-for="(s, idx) in steps" :key="idx">
-                        <button type="button" @click="goToStep(idx + 1)"
-                                :disabled="idx + 1 > step && !isStepValid(step)"
-                                class="relative px-3.5 py-3 text-xs whitespace-nowrap transition-all border-b-2 focus:outline-none disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1.5"
+                        <button type="button" @click="step = idx + 1; formError = '';"
+                                class="relative px-3.5 py-3 text-xs whitespace-nowrap transition-all border-b-2 focus:outline-none flex items-center gap-1.5 cursor-pointer"
                                 :class="step === idx + 1
                                     ? 'border-blue-600 text-blue-600 font-bold bg-blue-50/40'
-                                    : (step > idx + 1
+                                    : (isStepValid(idx + 1)
                                         ? 'border-transparent text-emerald-600 hover:text-emerald-700 hover:bg-slate-50 font-semibold'
                                         : 'border-transparent text-rose-500 hover:text-rose-600 hover:bg-slate-50 font-medium')">
+                            <span class="h-1.5 w-1.5 rounded-full shrink-0"
+                                  :class="step === idx + 1 ? 'bg-blue-600' : (isStepValid(idx + 1) ? 'bg-emerald-500' : 'bg-rose-500')"></span>
                             <span class="text-[10px] font-mono opacity-75" x-text="(idx + 1) + '.'"></span>
                             <span x-text="s.title"></span>
                         </button>

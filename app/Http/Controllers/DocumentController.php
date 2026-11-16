@@ -49,7 +49,9 @@ class DocumentController extends Controller
             'merah' => (int) $agg->merah,
         ];
 
-        $perPage = 20;
+        $perPage = in_array((int) $request->input('per_page', 20), [10, 20, 50, 100], true)
+            ? (int) $request->input('per_page', 20)
+            : 20;
         $page = max(1, (int) $request->input('page', 1));
         $documents = $query->latest()->forPage($page, $perPage)->get();
         $documents = new LengthAwarePaginator(
@@ -64,6 +66,7 @@ class DocumentController extends Controller
             'documents' => $documents,
             'filters' => $filters,
             'rekap' => $rekap,
+            'perPage' => $perPage,
             'docTypes' => config('ceisa.doc_types'),
         ]);
     }
@@ -119,6 +122,9 @@ class DocumentController extends Controller
             'from' => $request->input('from'),
             'to' => $request->input('to'),
             'bumn' => $request->boolean('bumn'),
+            'respon' => trim((string) $request->input('respon')),
+            'perusahaan' => trim((string) $request->input('perusahaan')),
+            'kantor' => trim((string) $request->input('kantor')),
         ];
 
         // Dokumen milik PERUSAHAAN: seluruh staf melihat semua dokumen
@@ -136,7 +142,19 @@ class DocumentController extends Controller
             ->when($filters['source'], fn ($q, $v) => $q->where('source', $v))
             ->when($filters['from'], fn ($q, $v) => $q->whereDate('created_at', '>=', $v))
             ->when($filters['to'], fn ($q, $v) => $q->whereDate('created_at', '<=', $v))
-            ->when($filters['bumn'], fn ($q) => $q->where('payload->bumn', true));
+            ->when($filters['bumn'], fn ($q) => $q->where('payload->bumn', true))
+            ->when($filters['respon'] !== '', function ($query) use ($filters) {
+                $term = '%'.$filters['respon'].'%';
+                $query->where('ceisa_response', 'like', $term);
+            })
+            ->when($filters['perusahaan'] !== '', function ($query) use ($filters) {
+                $term = '%'.$filters['perusahaan'].'%';
+                $query->where('payload', 'like', $term);
+            })
+            ->when($filters['kantor'] !== '', function ($query) use ($filters) {
+                $term = '%'.$filters['kantor'].'%';
+                $query->where('payload', 'like', $term);
+            });
 
         return [$query, $filters];
     }
@@ -703,6 +721,23 @@ class DocumentController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengunduh: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Preview & cetak PDF formulir resmi CEISA 4.0 (BC 3.0 / BC 2.0 / BC 2.4) dari data dokumen lokal.
+     */
+    public function previewCetak(Request $request, Document $document): View
+    {
+        $this->authorizeOwnership($request, $document);
+
+        $payload = is_array($document->payload) ? $document->payload : [];
+        $payload['doc_type'] = $payload['doc_type'] ?? $document->doc_type;
+        $payload['nomor_aju'] = $payload['nomor_aju'] ?? $document->nomor_aju;
+
+        return view('documents.preview-cetak', [
+            'document' => $document,
+            'payload' => $payload,
+        ]);
     }
 
     /**

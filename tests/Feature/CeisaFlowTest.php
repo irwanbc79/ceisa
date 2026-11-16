@@ -2176,4 +2176,71 @@ class CeisaFlowTest extends TestCase
             'nomor_daftar' => '003574',
         ]);
     }
+
+    public function test_daftar_dokumen_inline_column_filters_and_per_page(): void
+    {
+        $user = $this->authedUser();
+
+        $user->documents()->create([
+            'doc_type' => 'BC30',
+            'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000030MOT83720261116000001',
+            'payload' => ['nama_eksportir' => 'PT MORA MULTI BERKAH', 'kantor_ekspor' => '020700'],
+            'ceisa_response' => ['dataRespon' => [['keterangan' => 'NPE', 'nomorRespon' => '001/KBC/2026']]],
+            'status' => Document::STATUS_ACCEPTED,
+        ]);
+
+        $user->documents()->create([
+            'doc_type' => 'BC20',
+            'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000020MOT83720261116000002',
+            'payload' => ['nama_importir' => 'PT LAINNYA', 'kode_kantor' => '040300'],
+            'ceisa_response' => ['dataRespon' => [['keterangan' => 'SPPB', 'nomorRespon' => '002/KBC/2026']]],
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('documents.index', [
+                'perusahaan' => 'MORA MULTI',
+                'kantor' => '020700',
+                'respon' => 'NPE',
+                'per_page' => 10,
+            ]))
+            ->assertOk()
+            ->assertSee('000030MOT83720261116000001')
+            ->assertDontSee('000020MOT83720261116000002');
+    }
+
+    public function test_preview_cetak_renders_official_ceisa_form_for_bc30_and_bc20(): void
+    {
+        $user = $this->authedUser();
+
+        $bc30 = $user->documents()->create([
+            'doc_type' => 'BC30',
+            'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000030MOT83720261116000011',
+            'payload' => $this->bc30Payload(),
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $bc20 = $user->documents()->create([
+            'doc_type' => 'BC20',
+            'source' => Document::SOURCE_H2H,
+            'nomor_aju' => '000020MOT83720261116000012',
+            'payload' => $this->bc20Payload(),
+            'status' => Document::STATUS_DRAFT,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('documents.preview-cetak', $bc30))
+            ->assertOk()
+            ->assertSee('PEMBERITAHUAN EKSPOR BARANG')
+            ->assertSee('000030MOT83720261116000011');
+
+        $this->actingAs($user)
+            ->get(route('documents.preview-cetak', $bc20))
+            ->assertOk()
+            ->assertSee('PEMBERITAHUAN IMPOR BARANG')
+            ->assertSee('000020MOT83720261116000012');
+    }
 }

@@ -12,22 +12,44 @@
  */
 @endphp
 
-{{-- Step 4: Items (Dynamic Grid) --}}
-<div x-show="step === 8" x-cloak class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6 transition-all duration-300">
-    <div class="flex items-center justify-between mb-6">
+{{-- Step 4: Items (Dynamic Grid + CEISA 4.0 Inline Pager) --}}
+<div x-show="step === 8" x-cloak
+     x-data="{ activeItemIdx: 0, pagerMode: false }"
+     class="bg-white/90 backdrop-blur-xl border border-slate-200 shadow-card rounded-2xl p-6 transition-all duration-300">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
             <h3 class="text-lg font-bold text-slate-800">Detail Pos Barang</h3>
             <p class="text-xs text-slate-500 mt-0.5">Input pos-pos komoditas barang ekspor / impor secara terperinci</p>
         </div>
-        <button type="button" @click="addItem()"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-slate-900/10">
-            + Tambah Barang
-        </button>
+        <div class="flex flex-wrap items-center gap-2">
+            {{-- Inline Pager ala Portal CEISA 4.0 (< > 1/N) --}}
+            <div class="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5 text-xs">
+                <button type="button" @click="pagerMode = !pagerMode; activeItemIdx = Math.min(activeItemIdx, Math.max(0, formData.barang.length - 1));"
+                        class="px-2.5 py-1 rounded-md font-semibold transition cursor-pointer"
+                        :class="pagerMode ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'"
+                        x-text="pagerMode ? 'Mode Pager (1/' + formData.barang.length + ')' : 'Tampilkan Semua (' + formData.barang.length + ')'">
+                </button>
+                <template x-if="pagerMode">
+                    <div class="inline-flex items-center border-l border-slate-200 pl-1 ml-1 gap-0.5">
+                        <button type="button" @click="activeItemIdx = Math.max(0, activeItemIdx - 1)" :disabled="activeItemIdx === 0"
+                                class="px-2 py-1 rounded hover:bg-white disabled:opacity-40 font-bold cursor-pointer">&lt;</button>
+                        <span class="px-1.5 font-mono text-[11px] font-bold text-slate-700" x-text="(activeItemIdx + 1) + '/' + formData.barang.length"></span>
+                        <button type="button" @click="activeItemIdx = Math.min(formData.barang.length - 1, activeItemIdx + 1)" :disabled="activeItemIdx >= formData.barang.length - 1"
+                                class="px-2 py-1 rounded hover:bg-white disabled:opacity-40 font-bold cursor-pointer">&gt;</button>
+                    </div>
+                </template>
+            </div>
+            <button type="button" @click="addItem(); activeItemIdx = formData.barang.length - 1;"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-md shadow-slate-900/10 cursor-pointer">
+                + Tambah Barang
+            </button>
+        </div>
     </div>
 
     <div class="space-y-4">
         <template x-for="(item, index) in formData.barang" :key="index">
-            <div class="border border-slate-100 rounded-xl p-4 bg-slate-50/50 hover:border-slate-300 transition-all relative group">
+            <div x-show="!pagerMode || activeItemIdx === index"
+                 class="border border-slate-100 rounded-xl p-4 bg-slate-50/50 hover:border-slate-300 transition-all relative group">
                 <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
                     <span class="text-xs font-extrabold text-indigo-300 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-wider">Barang #<span x-text="index + 1"></span></span>
                     <div class="flex items-center gap-3">
@@ -68,7 +90,15 @@
                     <template x-if="doc_type === 'BC30'">
                         <div class="sm:col-span-3 grid sm:grid-cols-3 gap-3 border-t border-dashed border-slate-200 pt-3 mt-1">
                             <div>
-                                <label class="block text-[11px] font-bold text-slate-500 uppercase">Merk (Opsional)</label>
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-[11px] font-bold text-slate-500 uppercase">Merk (Opsional)</label>
+                                    <label class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 cursor-pointer">
+                                        <input type="checkbox" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                               :checked="item.merk === 'TANPA MEREK'"
+                                               @change="item.merk = $event.target.checked ? 'TANPA MEREK' : ''">
+                                        Tanpa Merek
+                                    </label>
+                                </div>
                                 <input type="text" :name="`barang[${index}][merk]`" x-model="item.merk" class="mt-1 block w-full rounded-lg border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-xs shadow-sm" />
                             </div>
                             <div>
